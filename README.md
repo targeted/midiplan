@@ -1,4 +1,4 @@
-Description:
+### Description:
 
 MIDIplan is an MCU-based MIDI sequencer that converts General MIDI 
 sequence into device-specific on the fly.
@@ -17,7 +17,7 @@ not support percussion at all, then you have to to pair it with a dedicated
 percussion module to play drums. But can also be used to combine dedicated
 synths of various kinds.
 
-Currently supported devices:
+### Currently supported devices:
 
 1. Yamaha EMT-1
 2. Yamaha EMR-1 (drum)
@@ -28,6 +28,6 @@ Currently supported devices:
 7. Kawai XS-1
 8. Zoom RT-234 (drum + bass)
 
-Demo recordings (unless copyright strikes): 
+### Demo recordings: 
 
 https://youtube.com/@MIDIplan
