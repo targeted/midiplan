@@ -23,6 +23,9 @@ The firmware currently runs on EK-TM4C123GXL development board containing
 Texas Instruments TM4C123GH6PM MCU. To build it you would need Keil uVision 
 ARM and TivaWare SDK.
 
+The application is built on top of a task scheduler, which you can find
+in the sister repository at https://github.com/targeted/evar
+
 Then you would have one General MIDI-in and 4 MIDI-outs, configurable at build
 time to connect to any of the supported devices.
 
