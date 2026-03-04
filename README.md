@@ -14,8 +14,17 @@ share of notes.
 Or you could plug several different devices and route some instruments here
 and some instruments there. This proves particularly useful when a module does
 not support percussion at all, then you have to to pair it with a dedicated
-percussion module to play drums. But can also be used to combine dedicated
+percussion module to play drums. And can also be used to combine dedicated
 synths of various kinds.
+
+### Technical description
+
+The firmware currently runs on EK-TM4C123GXL development board containing
+Texas Instruments TM4C123GH6PM MCU. To build it you would need Keil uVision 
+ARM and TivaWare SDK.
+
+Then you would have one General MIDI-in and 4 MIDI-outs, configurable at build
+time to connect to any of the supported devices.
 
 ### Currently supported devices:
 
