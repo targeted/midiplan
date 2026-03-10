@@ -18,7 +18,7 @@ typedef enum {
 #define MIDI_NOTE_RANGE (MIDI_HIGHEST_NOTE - MIDI_LOWEST_NOTE + 1)
 
 #define MAX_CONTROLLER_VALUES (128)
-#define MAX_NOTE_ENTRIES (128)
+#define MAX_NOTE_ENTRIES (64)
 
 #define MIN_REPLACEABLE_NOTE_AGE (7) // in eights of the program's average duration
 
