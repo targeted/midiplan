@@ -1,12 +1,12 @@
 /*
  * MIDIplan
  * Copyright (C) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *    
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *    
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -130,7 +130,7 @@ void output_uart_task__receive(evar_task_info_t* p_task_info) {
                 return evar_task__keep_running(); // since we did not remove the message from the queue, this will result in __receive call immediately
             }
 
-            // at this point system exclusive messages are represented as sequences 
+            // at this point system exclusive messages are represented as sequences    
             // of separate messages, one per byte, the following two if's reconstruct
             // them in their MIDI format
 
