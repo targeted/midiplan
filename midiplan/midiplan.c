@@ -74,6 +74,10 @@ static void broadcast_message(
     }
 }
 
+typedef struct {
+    uint8_t roland_checksum; // running value of a Roland-style checksum
+} custom_sequence_context_t;
+
 /*
  * This internal utility reads the next byte from a custom sequence in a device configuration.
  * If the MSB parity of the next byte matches the expected (status vs. data), it is returned
@@ -84,6 +88,7 @@ static void broadcast_message(
 static uint8_t read_augmented_byte(
     const uint8_t** p_sequence,
     const uint8_t** p_parameters,
+    custom_sequence_context_t* p_custom_sequence_context,
     uint8_t expected_msb
 ) {
 
@@ -100,7 +105,7 @@ static uint8_t read_augmented_byte(
 
         // because the most significant bit is fixed, that leaves us with 7 bits:
         // x6543210
-        //  ^       "mode" switch, when 0:
+        //  ^       when 0:
         //   ^^        0 to 3, index into the parameters array to pick the parameter byte (value range 0-127)
         //     ^       0 = use the parameter as a literal value
         //             1 = use the parameter as an index to look up into the following inline table with 128 elements
@@ -109,15 +114,18 @@ static uint8_t read_augmented_byte(
         //       ^^    when the previous bit is 0 (4-bit values), number of bits to shift value left, 0 to 3
         //             when the previous bit is 1 (8-bit values), reserved
         //  ^       when 1:
-        //             reserved
+        //   ^^^^^^    000000 = reset the Roland-style checksum to 0, marking the first byte of a checksummed part of the sequence
+        //             000001 = paste the current value of the Roland-checksum
+        //             others = reserved
 
         uint8_t parameter_mode  = (next_byte & 0b01000000) >> 6;
-        uint8_t parameter_index = (next_byte & 0b00110000) >> 4;
-        uint8_t parameter_type  = (next_byte & 0b00001000) >> 3;
-        uint8_t parameter_size  = (next_byte & 0b00000100) >> 2;
-        uint8_t parameter_shift = (next_byte & 0b00000011);
 
-        if (parameter_mode == 0) {
+        if (parameter_mode == 0) { // parameter-derived value
+
+            uint8_t parameter_index = (next_byte & 0b00110000) >> 4;
+            uint8_t parameter_type  = (next_byte & 0b00001000) >> 3;
+            uint8_t parameter_size  = (next_byte & 0b00000100) >> 2;
+            uint8_t parameter_shift = (next_byte & 0b00000011);
 
             // pick the parameter byte by index
 
@@ -146,36 +154,53 @@ static uint8_t read_augmented_byte(
                 }
             }
 
-            evar_assert((parameter_value & 0x80) == 0); // augmentation can't alter the high bit of the value
             augmented_byte |= parameter_value;
 
         }
-        else { // reserved
+        else { // assorted operations
 
+            switch (next_byte & 0b00111111) {
+                case 0b000000: // reset the Roland-style checksum
+                    p_custom_sequence_context->roland_checksum = 0;
+                    break;
+                case 0b000001: // paste the value of the Roland-style checksum
+                    augmented_byte |= (0x80 - (p_custom_sequence_context->roland_checksum & 0x7F)) & 0x7F;
+                    break;
+                default: // reserved
+                    break;
+            }
         }
 
         next_byte = *sequence++;
     }
 
+    uint8_t actual_byte = augmented_byte | next_byte;
+
+    // update running value of the Roland-style checksum
+
+    p_custom_sequence_context->roland_checksum += actual_byte;
+
     *p_sequence = sequence;
 
-    return augmented_byte | next_byte;
+    return actual_byte;
 }
 
 static status_byte_t read_augmented_status_byte(
     const uint8_t** p_sequence,
-    const uint8_t** p_parameters
+    const uint8_t** p_parameters,
+    custom_sequence_context_t* p_custom_sequence_context
 ) {
-    status_byte_t result = read_augmented_byte(p_sequence, p_parameters, 0x80);
+    status_byte_t result = read_augmented_byte(p_sequence, p_parameters, p_custom_sequence_context, 0x80);
     evar_assert(VALID_STATUS_BYTE(result));
     return result;
 }
 
 static data_byte_t read_augmented_data_byte(
     const uint8_t** p_sequence,
-    const uint8_t** p_parameters
+    const uint8_t** p_parameters,
+    custom_sequence_context_t* p_custom_sequence_context
 ) {
-    data_byte_t result = read_augmented_byte(p_sequence, p_parameters, 0x00);
+    data_byte_t result = read_augmented_byte(p_sequence, p_parameters, p_custom_sequence_context, 0x00);
     evar_assert(VALID_DATA_BYTE(result));
     return result;
 }
@@ -183,16 +208,20 @@ static data_byte_t read_augmented_data_byte(
 /*
  * Constructs and sends sequence of parameterized MIDI messages.
  */
-static void send_sequence(
+static void send_custom_sequence(
     void*           p_context,
     midi_out_port_t out_port,
     const uint8_t*  sequence,
     const uint8_t   parameters[4]
 ) {
 
+    custom_sequence_context_t custom_sequence_context = {
+        .roland_checksum = 0x00
+    };
+
     while (*sequence != INVALID_STATUS_BYTE) {
 
-        status_byte_t status_byte = read_augmented_status_byte(&sequence, &parameters);
+        status_byte_t status_byte = read_augmented_status_byte(&sequence, &parameters, &custom_sequence_context);
 
         midi_message_t midi_message = {
             .status_byte = status_byte,
@@ -205,7 +234,7 @@ static void send_sequence(
             p_callbacks->send_message(p_context, out_port, midi_message);
 
             while (*sequence != MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END) {
-                midi_message.data_byte_1 = read_augmented_data_byte(&sequence, &parameters);
+                midi_message.data_byte_1 = read_augmented_data_byte(&sequence, &parameters, &custom_sequence_context);
                 p_callbacks->send_message(p_context, out_port, midi_message);
             }
 
@@ -220,11 +249,11 @@ static void send_sequence(
 
             switch (get_expected_data_bytes(status_byte)) {
                 case 2:
-                    midi_message.data_byte_1 = read_augmented_data_byte(&sequence, &parameters);
-                    midi_message.data_byte_2 = read_augmented_data_byte(&sequence, &parameters);
+                    midi_message.data_byte_1 = read_augmented_data_byte(&sequence, &parameters, &custom_sequence_context);
+                    midi_message.data_byte_2 = read_augmented_data_byte(&sequence, &parameters, &custom_sequence_context);
                     break;
                 case 1:
-                    midi_message.data_byte_1 = read_augmented_data_byte(&sequence, &parameters);
+                    midi_message.data_byte_1 = read_augmented_data_byte(&sequence, &parameters, &custom_sequence_context);
                     break;
                 case 0:
                     break;
@@ -258,13 +287,13 @@ static void send_initialization_sequence(
     }
 
     const uint8_t parameters[4] = {
-        p_device->basic_channel - 1,
+        p_device->basic_channel,
         0x00,
         0x00,
         0x00
     };
 
-    send_sequence(
+    send_custom_sequence(
         p_context,
         out_port,
         p_device->custom_sequences + sequence_offset,
@@ -322,7 +351,7 @@ static void send_program_change_sequence(
         0x00
     };
 
-    send_sequence(
+    send_custom_sequence(
         p_context,
         out_port,
         p_device->custom_sequences + sequence_offset,
@@ -369,14 +398,14 @@ static void send_note_on_sequence(
         evar_assert(p_device->custom_sequences[sequence_offset - 1] == INVALID_STATUS_BYTE); // buffer integrity check
     }
 
-    const uint8_t parameters[8] = {
+    const uint8_t parameters[4] = {
         out_channel,
         out_note,
         out_velocity,
         0x00
     };
 
-    send_sequence(
+    send_custom_sequence(
         p_context,
         out_port,
         p_device->custom_sequences + sequence_offset,
@@ -430,7 +459,7 @@ static void send_note_off_sequence(
         0x00
     };
 
-    send_sequence(
+    send_custom_sequence(
         p_context,
         out_port,
         p_device->custom_sequences + sequence_offset,
@@ -2342,7 +2371,7 @@ static void handle_special(
 #endif
     }
     else if (status_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END) {
-#ifdef SYSTEM_EXCLUSIVE_PASSTHROUGH    
+#ifdef SYSTEM_EXCLUSIVE_PASSTHROUGH
         broadcast_message(p_context, midi_message);
 #endif
     }

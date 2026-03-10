@@ -3,17 +3,17 @@
  * https://github.com/targeted/evar
  *
  * Copyright (c) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -49,9 +49,9 @@ void evar_device__initialize(void) {
     while (!SysCtlPeripheralReady(SYSCTL_PERIPH_WDOG0)) {}
     WatchdogUnlock(WATCHDOG0_BASE);
     WatchdogResetDisable(WATCHDOG0_BASE);
-        
+
     // Enable all peripheral modules that we are going to be using.
-        
+
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
     while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA)) {}
 
@@ -75,10 +75,10 @@ void evar_device__initialize(void) {
     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
 
     // Configure UART 0 to be the serial link.
-        
+
     SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
     while (!SysCtlPeripheralReady(SYSCTL_PERIPH_UART0)) {}
-    
+
     GPIOPinConfigure(GPIO_PA0_U0RX);
     GPIOPinConfigure(GPIO_PA1_U0TX);
     GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
@@ -92,10 +92,10 @@ void evar_device__initialize(void) {
 
     HWREG(GPIO_PORTD_BASE + GPIO_O_LOCK) = GPIO_LOCK_KEY;
     HWREG(GPIO_PORTD_BASE + GPIO_O_CR) |= GPIO_PIN_7;
-    HWREG(GPIO_PORTD_BASE + GPIO_O_LOCK) = 0;    
+    HWREG(GPIO_PORTD_BASE + GPIO_O_LOCK) = 0;
 
     // Configure timer.
-        
+
     hardware_timer_ticks = 0;
 
     SysTickPeriodSet(SysCtlClockGet() / EVAR_TIMER_FREQUENCY);

@@ -1,12 +1,12 @@
 /*
  * MIDIplan
  * Copyright (C) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -23,7 +23,7 @@ EVAR_ASSERT(INVALID_CV_INDEX >= MAX_CONTROLLER_VALUES, invalid_cv_index);
 EVAR_ASSERT(!VALID_CV_INDEX(INVALID_CV_INDEX), valid_cv_index);
 
 /*
- * Every tracked controller value will be stored in such structure. It is also 
+ * Every tracked controller value will be stored in such structure. It is also
  * an element in a channel's linked list, with "next" pointing to its successor.
  */
 typedef struct {
@@ -95,8 +95,8 @@ void initialize_controller_values(void) {
  * if necessary. The oldest controller value may be discarded, but this call never fails.
  */
 controller_value_t* get_controller_value(
-    midi_channel_t in_channel, 
-    program_t in_program, 
+    midi_channel_t in_channel,
+    program_t in_program,
     control_t control
 ) {
 
@@ -115,7 +115,7 @@ controller_value_t* get_controller_value(
 
     // there was no matching element, we will need to allocate one at the current
     // next_cv_index, possibly evicting and reusing the value that is currently there
-    
+
     channel_t evicted_channel = CV_CHANNEL(next_cv_index);
     if (VALID_CHANNEL(evicted_channel)) {
 
@@ -123,16 +123,16 @@ controller_value_t* get_controller_value(
 
         cv_index_t evicted_head = cv_heads[evicted_channel];
         evar_assert(evicted_head == next_cv_index);
-        
+
         // advance the evicted head by one, and if it was the only element, reset its tail as well
-        
+
         if (!VALID_CV_INDEX(cv_heads[evicted_channel] = CV_NEXT(evicted_head))) {
             cv_tails[evicted_channel] = INVALID_CV_INDEX;
         }
     }
 
     // initialize the newly allocated value, possibly overwriting what was evicted
-    
+
     CV_CHANNEL(next_cv_index) = in_channel;
     CV_PROGRAM(next_cv_index) = in_program;
     CV_CONTROL(next_cv_index) = control;
@@ -142,7 +142,7 @@ controller_value_t* get_controller_value(
     CV_NEXT(next_cv_index) = INVALID_CV_INDEX; // this will become the last element on its channel's list
 
     // put the newly allocated value at the end of its channel's list
-    
+
     cv_index_t channel_tail = cv_tails[in_channel];
     if (VALID_CV_INDEX(channel_tail)) {
         CV_NEXT(channel_tail) = next_cv_index;
@@ -152,13 +152,13 @@ controller_value_t* get_controller_value(
     }
 
     cv_tails[in_channel] = next_cv_index;
-    
+
     // advance the next element index
-    
+
     if (++next_cv_index == MAX_CONTROLLER_VALUES) {
-        next_cv_index = 0;    
+        next_cv_index = 0;
     }
-    
+
     // return the newly allocated value
 
     return &CV_VALUE(cv_tails[in_channel]);
@@ -172,13 +172,13 @@ void delete_controller_values(
 ) {
 
     cv_index_t scan = cv_heads[in_channel];
-    
+
     while (VALID_CV_INDEX(scan)) {
         cv_index_t next = CV_NEXT(scan);
         clear_controller_value(scan);
         scan = next;
     }
-    
+
     cv_heads[in_channel] = INVALID_CV_INDEX;
     cv_tails[in_channel] = INVALID_CV_INDEX;
 }
@@ -193,7 +193,7 @@ void enumerate_controller_values(
         void* p_callback_context,
         midi_channel_t in_channel,
         program_t in_program,
-        control_t control, 
+        control_t control,
         controller_value_t* p_controller_value
     )
 ) {

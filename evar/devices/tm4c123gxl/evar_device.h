@@ -72,7 +72,7 @@ void evar_device__halt(void);
  * The type of variable to store the state of interrupts.
  * Can be a single 0/1 byte, or a 32-bit mask for example.
  */
-typedef bool evar_interrupts_enabled_t; 
+typedef bool evar_interrupts_enabled_t;
 
 /*
  * Store the current state of interrupts into a variable, then disable the interrupts (if they were enabled).
@@ -135,7 +135,7 @@ typedef bool evar_interrupts_enabled_t;
     evar_device__builtin_g_led_on(); \
     evar_device__builtin_b_led_on(); \
 }
-    
+
 #define evar_device__builtin_led_off() { \
     evar_device__builtin_r_led_off(); \
     evar_device__builtin_g_led_off(); \

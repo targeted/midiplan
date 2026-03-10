@@ -1,12 +1,12 @@
 /*
  * MIDIplan
  * Copyright (C) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -110,11 +110,11 @@ void reset_device_state(midiplan_device_state_t* p_device_state) {
 
     evar_assert(p_device_state->melodic_programs_playing == 0);
     evar_assert(p_device_state->melodic_notes_playing == 0);
-    
+
     for (uint8_t i = 0; i < 128 + 1; ++i) {
         evar_assert(p_device_state->melodic_notes_per_program[i] == 0);
     }
-    
+
     evar_assert(p_device_state->percussion_notes_playing == 0);
 
     for (midi_channel_t out_channel = MIDI_CHANNEL_1; out_channel < MIDI_CHANNEL_COUNT; ++out_channel) {
