@@ -1,12 +1,12 @@
 /*
  * MIDIplan
  * Copyright (C) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -18,7 +18,7 @@
 
 const midiplan_device_t zoom_rt234 = {
 
-    .basic_channel = 1,
+    .basic_channel = MIDI_CHANNEL_1,
 
     .max_melodic_notes     = 32,
     .max_percussion_notes  = 32,
@@ -27,10 +27,10 @@ const midiplan_device_t zoom_rt234 = {
     .monotimbral_channels  = 0,
     .max_notes_per_channel = 0,
 
-    .key_pressure     = 0,   
-    .channel_pressure = 0,   
-    .pitch_bend       = 1,   
-    
+    .key_pressure     = 0,
+    .channel_pressure = 0,
+    .pitch_bend       = 1,
+
     .melodic_programs = {
         /* 0x00   0  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = INVALID_PROGRAM,                    .flags = ZOOM_RT234_RANGE_INVALID  },
         /* 0x01   1  GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO */ {  .program = INVALID_PROGRAM,                    .flags = ZOOM_RT234_RANGE_INVALID  },
@@ -64,14 +64,14 @@ const midiplan_device_t zoom_rt234 = {
         /* 0x1D  29  GM_PROGRAM_OVERDRIVEN_GUITAR     */ {  .program = INVALID_PROGRAM,                    .flags = ZOOM_RT234_RANGE_INVALID  },
         /* 0x1E  30  GM_PROGRAM_DISTORTION_GUITAR     */ {  .program = INVALID_PROGRAM,                    .flags = ZOOM_RT234_RANGE_INVALID  },
         /* 0x1F  31  GM_PROGRAM_GUITAR_HARMONICS      */ {  .program = INVALID_PROGRAM,                    .flags = ZOOM_RT234_RANGE_INVALID  },
-        /* 0x20  32  GM_PROGRAM_ACOUSTIC_BASS         */ {  .program = ZOOM_RT234_PROGRAM_ACOUSTIC_BASS,   .flags = ZOOM_RT234_RANGE_DEFAULT  }, 
-        /* 0x21  33  GM_PROGRAM_ELECTRIC_BASS_FINGER  */ {  .program = ZOOM_RT234_PROGRAM_DIGI_BASS,       .flags = ZOOM_RT234_RANGE_DEFAULT  }, 
-        /* 0x22  34  GM_PROGRAM_ELECTRIC_BASS_PICK    */ {  .program = ZOOM_RT234_PROGRAM_DIGITAL_PICK,    .flags = ZOOM_RT234_RANGE_DEFAULT  }, 
-        /* 0x23  35  GM_PROGRAM_FRETLESS_BASS         */ {  .program = ZOOM_RT234_PROGRAM_NO_FRETS,        .flags = ZOOM_RT234_RANGE_DEFAULT  }, 
-        /* 0x24  36  GM_PROGRAM_SLAP_BASS_1           */ {  .program = ZOOM_RT234_PROGRAM_FUNC_BASS,       .flags = ZOOM_RT234_RANGE_DEFAULT  }, 
-        /* 0x25  37  GM_PROGRAM_SLAP_BASS_2           */ {  .program = ZOOM_RT234_PROGRAM_DIGI_SLAP_BASS,  .flags = ZOOM_RT234_RANGE_DEFAULT  }, 
-        /* 0x26  38  GM_PROGRAM_SYNTH_BASS_1          */ {  .program = ZOOM_RT234_PROGRAM_SYNTH_BASS,      .flags = ZOOM_RT234_RANGE_DEFAULT  }, 
-        /* 0x27  39  GM_PROGRAM_SYNTH_BASS_2          */ {  .program = ZOOM_RT234_PROGRAM_TECHNO_BASS,     .flags = ZOOM_RT234_RANGE_DEFAULT  }, 
+        /* 0x20  32  GM_PROGRAM_ACOUSTIC_BASS         */ {  .program = ZOOM_RT234_PROGRAM_ACOUSTIC_BASS,   .flags = ZOOM_RT234_RANGE_DEFAULT  },
+        /* 0x21  33  GM_PROGRAM_ELECTRIC_BASS_FINGER  */ {  .program = ZOOM_RT234_PROGRAM_DIGI_BASS,       .flags = ZOOM_RT234_RANGE_DEFAULT  },
+        /* 0x22  34  GM_PROGRAM_ELECTRIC_BASS_PICK    */ {  .program = ZOOM_RT234_PROGRAM_DIGITAL_PICK,    .flags = ZOOM_RT234_RANGE_DEFAULT  },
+        /* 0x23  35  GM_PROGRAM_FRETLESS_BASS         */ {  .program = ZOOM_RT234_PROGRAM_NO_FRETS,        .flags = ZOOM_RT234_RANGE_DEFAULT  },
+        /* 0x24  36  GM_PROGRAM_SLAP_BASS_1           */ {  .program = ZOOM_RT234_PROGRAM_FUNC_BASS,       .flags = ZOOM_RT234_RANGE_DEFAULT  },
+        /* 0x25  37  GM_PROGRAM_SLAP_BASS_2           */ {  .program = ZOOM_RT234_PROGRAM_DIGI_SLAP_BASS,  .flags = ZOOM_RT234_RANGE_DEFAULT  },
+        /* 0x26  38  GM_PROGRAM_SYNTH_BASS_1          */ {  .program = ZOOM_RT234_PROGRAM_SYNTH_BASS,      .flags = ZOOM_RT234_RANGE_DEFAULT  },
+        /* 0x27  39  GM_PROGRAM_SYNTH_BASS_2          */ {  .program = ZOOM_RT234_PROGRAM_TECHNO_BASS,     .flags = ZOOM_RT234_RANGE_DEFAULT  },
         /* 0x28  40  GM_PROGRAM_VIOLIN                */ {  .program = INVALID_PROGRAM,                    .flags = ZOOM_RT234_RANGE_INVALID  },
         /* 0x29  41  GM_PROGRAM_VIOLA                 */ {  .program = INVALID_PROGRAM,                    .flags = ZOOM_RT234_RANGE_INVALID  },
         /* 0x2A  42  GM_PROGRAM_CELLO                 */ {  .program = INVALID_PROGRAM,                    .flags = ZOOM_RT234_RANGE_INVALID  },
@@ -178,9 +178,9 @@ const midiplan_device_t zoom_rt234 = {
         /* 0x0C                          */ {  .lowest_note = INVALID_NOTE,            .middle_c = INVALID_NOTE,         .highest_note = INVALID_NOTE             },
         /* 0x0D                          */ {  .lowest_note = INVALID_NOTE,            .middle_c = INVALID_NOTE,         .highest_note = INVALID_NOTE             },
         /* 0x0E                          */ {  .lowest_note = INVALID_NOTE,            .middle_c = INVALID_NOTE,         .highest_note = INVALID_NOTE             },
-        /* 0x0F ZOOM_RT234_RANGE_DEFAULT */ {  .lowest_note = ZOOM_RT234_LOWEST_NOTE,  .middle_c = ZOOM_RT234_MIDDLE_C,  .highest_note = ZOOM_RT234_HIGHEST_NOTE  } 
-    },                                                             
-    
+        /* 0x0F ZOOM_RT234_RANGE_DEFAULT */ {  .lowest_note = ZOOM_RT234_LOWEST_NOTE,  .middle_c = ZOOM_RT234_MIDDLE_C,  .highest_note = ZOOM_RT234_HIGHEST_NOTE  }
+    },
+
     .percussion_notes = {
         /* 0x00   0  GM_PERCUSSION_UNDEFINED_00       */ {  .program = INVALID_PROGRAM,     .note = INVALID_NOTE                      },
         /* 0x01   1  GM_PERCUSSION_UNDEFINED_01       */ {  .program = INVALID_PROGRAM,     .note = INVALID_NOTE                      },
@@ -309,7 +309,7 @@ const midiplan_device_t zoom_rt234 = {
         /* 0x7C 124  GM_PERCUSSION_UNDEFINED_7C       */ {  .program = INVALID_PROGRAM,     .note = INVALID_NOTE                      },
         /* 0x7D 125  GM_PERCUSSION_UNDEFINED_7D       */ {  .program = INVALID_PROGRAM,     .note = INVALID_NOTE                      },
         /* 0x7E 126  GM_PERCUSSION_UNDEFINED_7E       */ {  .program = INVALID_PROGRAM,     .note = INVALID_NOTE                      },
-        /* 0x7F 127  GM_PERCUSSION_UNDEFINED_7F       */ {  .program = INVALID_PROGRAM,     .note = INVALID_NOTE                      } 
+        /* 0x7F 127  GM_PERCUSSION_UNDEFINED_7F       */ {  .program = INVALID_PROGRAM,     .note = INVALID_NOTE                      }
     },
 
     /* the following is expressed in device's terms */
@@ -320,9 +320,9 @@ const midiplan_device_t zoom_rt234 = {
         0b00000011000000000000000000000000, //  31/1Fh -  16/10h
         0b00000000000000000000000000000000, //  47/2Fh -  32/20h
         0b00000000000011000000000000000000, //  63/3Fh -  48/30h
-        0b00000000000000000000000000000000, //  79/4Fh -  64/40h 
-        0b00000000000000000000000000000000, //  95/5Fh -  80/50h 
-        0b00000000000000000000000000000000, // 111/6Fh -  96/60h 
+        0b00000000000000000000000000000000, //  79/4Fh -  64/40h
+        0b00000000000000000000000000000000, //  95/5Fh -  80/50h
+        0b00000000000000000000000000000000, // 111/6Fh -  96/60h
         0b00000000000000000000000000000000  // 127/7Fh - 112/70h
     },
 
@@ -332,11 +332,11 @@ const midiplan_device_t zoom_rt234 = {
         0b0000000000000000, // 10
         0b0000000100000000  // 11
     },
-    
+
     .percussion_channels_bitmap = 0b0000001000000000,
-    
+
     .controllers_bitmap = {
-        
+
       //(1 << (MIDI_CONTROL_BANK_SELECT                  & 0x1F)) |  /* 0x00   0 */
       //(1 << (MIDI_CONTROL_MODULATION_WHEEL_OR_LEVER    & 0x1F)) |  /* 0x01   1 */
       //(1 << (MIDI_CONTROL_BREATH_CONTROLLER            & 0x1F)) |  /* 0x02   2 */
@@ -369,9 +369,9 @@ const midiplan_device_t zoom_rt234 = {
       //(1 << (MIDI_CONTROL_UNDEFINED_1D                 & 0x1F)) |  /* 0x1D  29 */
       //(1 << (MIDI_CONTROL_UNDEFINED_1E                 & 0x1F)) |  /* 0x1E  30 */
       //(1 << (MIDI_CONTROL_UNDEFINED_1F                 & 0x1F)) |  /* 0x1F  31 */
-                                                                 
+
         0, //---------------------------------------------------------------------
-                                                                   
+
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_00               & 0x1F)) |  /* 0x20  32 */
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_01               & 0x1F)) |  /* 0x21  33 */
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_02               & 0x1F)) |  /* 0x22  34 */
@@ -404,9 +404,9 @@ const midiplan_device_t zoom_rt234 = {
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_1D               & 0x1F)) |  /* 0x3D  61 */
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_1E               & 0x1F)) |  /* 0x3E  62 */
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_1F               & 0x1F)) |  /* 0x3F  63 */
-                                                                 
+
         0, //---------------------------------------------------------------------
-                                                                 
+
       //(1 << (MIDI_CONTROL_SUSTAIN                      & 0x1F)) |  /* 0x40  64 */
       //(1 << (MIDI_CONTROL_PORTAMENTO_ON_OFF            & 0x1F)) |  /* 0x41  65 */
       //(1 << (MIDI_CONTROL_SOSTENUTO                    & 0x1F)) |  /* 0x42  66 */
@@ -439,9 +439,9 @@ const midiplan_device_t zoom_rt234 = {
       //(1 << (MIDI_CONTROL_CHORUS_SEND_LEVEL            & 0x1F)) |  /* 0x5D  93 */
       //(1 << (MIDI_CONTROL_EFFECTS_DEPTH_4              & 0x1F)) |  /* 0x5E  94 */
       //(1 << (MIDI_CONTROL_EFFECTS_DEPTH_5              & 0x1F)) |  /* 0x5F  95 */
-                                                                 
+
         0, //---------------------------------------------------------------------
-                                                                 
+
       //(1 << (MIDI_CONTROL_DATA_INCREMENT               & 0x1F)) |  /* 0x60  96 */
       //(1 << (MIDI_CONTROL_DATA_DECREMENT               & 0x1F)) |  /* 0x61  97 */
       //(1 << (MIDI_CONTROL_NON_REGISTERED_PARAMETER_LSB & 0x1F)) |  /* 0x62  98 */
@@ -474,16 +474,16 @@ const midiplan_device_t zoom_rt234 = {
       //(1 << (MIDI_CHANNEL_MODE_OMNI_ON                 & 0x1F)) |  /* 0x7D 125 */
       //(1 << (MIDI_CHANNEL_MODE_MONO_ON                 & 0x1F)) |  /* 0x7E 126 */
       //(1 << (MIDI_CHANNEL_MODE_POLY_ON                 & 0x1F)) |  /* 0x7F 127 */
-    
+
         0, //---------------------------------------------------------------------
 
     },
-    
+
     .initialization_sequence_offset = INVALID_SEQUENCE_OFFSET,
     .program_change_sequence_offset = INVALID_SEQUENCE_OFFSET,
     .note_on_sequence_offset        = INVALID_SEQUENCE_OFFSET,
     .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
 
     .custom_sequences = {}
-    
+
 };

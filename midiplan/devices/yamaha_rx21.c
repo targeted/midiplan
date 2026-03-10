@@ -1,12 +1,12 @@
 /*
  * MIDIplan
  * Copyright (C) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -17,8 +17,8 @@
 
 const midiplan_device_t yamaha_rx21 = {
 
-    .basic_channel = 1,
-    
+    .basic_channel = MIDI_CHANNEL_1,
+
     .max_melodic_notes     = 0,
     .max_percussion_notes  = 9,
     .max_melodic_programs  = 0,
@@ -177,9 +177,9 @@ const midiplan_device_t yamaha_rx21 = {
         /* 0x0C                           */ {  .lowest_note = INVALID_NOTE,  .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE  },
         /* 0x0D                           */ {  .lowest_note = INVALID_NOTE,  .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE  },
         /* 0x0E                           */ {  .lowest_note = INVALID_NOTE,  .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE  },
-        /* 0x0F                           */ {  .lowest_note = INVALID_NOTE,  .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE  } 
-    },                                                             
-    
+        /* 0x0F                           */ {  .lowest_note = INVALID_NOTE,  .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE  }
+    },
+
     .percussion_notes = {
         /* 0x00   0  GM_PERCUSSION_UNDEFINED_00       */ {  .program = INVALID_PROGRAM,                          .note = INVALID_NOTE                             },
         /* 0x01   1  GM_PERCUSSION_UNDEFINED_01       */ {  .program = INVALID_PROGRAM,                          .note = INVALID_NOTE                             },
@@ -308,7 +308,7 @@ const midiplan_device_t yamaha_rx21 = {
         /* 0x7C 124  GM_PERCUSSION_UNDEFINED_7C       */ {  .program = INVALID_PROGRAM,                          .note = INVALID_NOTE                             },
         /* 0x7D 125  GM_PERCUSSION_UNDEFINED_7D       */ {  .program = INVALID_PROGRAM,                          .note = INVALID_NOTE                             },
         /* 0x7E 126  GM_PERCUSSION_UNDEFINED_7E       */ {  .program = INVALID_PROGRAM,                          .note = INVALID_NOTE                             },
-        /* 0x7F 127  GM_PERCUSSION_UNDEFINED_7F       */ {  .program = INVALID_PROGRAM,                          .note = INVALID_NOTE                             } 
+        /* 0x7F 127  GM_PERCUSSION_UNDEFINED_7F       */ {  .program = INVALID_PROGRAM,                          .note = INVALID_NOTE                             }
     },
 
     /* the following is expressed in device's terms */
@@ -319,23 +319,23 @@ const midiplan_device_t yamaha_rx21 = {
         0b00000000000000000000000000000000, //  31/1Fh -  16/10h
         0b00001100000000000000000000000000, //  47/2Fh -  32/20h
         0b00000011110011000011111100110011, //  63/3Fh -  48/30h
-        0b00000000000000000000000000000000, //  79/4Fh -  64/40h 
-        0b00000000000000000000000000000000, //  95/5Fh -  80/50h 
-        0b00000000000000000000000000000000, // 111/6Fh -  96/60h 
+        0b00000000000000000000000000000000, //  79/4Fh -  64/40h
+        0b00000000000000000000000000000000, //  95/5Fh -  80/50h
+        0b00000000000000000000000000000000, // 111/6Fh -  96/60h
         0b00000000000000000000000000000000  // 127/7Fh - 112/70h
     },
-    
+
     .melodic_channels_bitmaps = {
         0b0000000000000000, // 00
         0b0000000000000000, // 01
         0b0000000000000000, // 10
         0b0000000000000001  // 11
     },
-    
+
     .percussion_channels_bitmap = 0b0000000000000000,
-    
+
     .controllers_bitmap = {
-        
+
       //(1 << (MIDI_CONTROL_BANK_SELECT                  & 0x1F)) |  /* 0x00   0 */
       //(1 << (MIDI_CONTROL_MODULATION_WHEEL_OR_LEVER    & 0x1F)) |  /* 0x01   1 */
       //(1 << (MIDI_CONTROL_BREATH_CONTROLLER            & 0x1F)) |  /* 0x02   2 */
@@ -368,9 +368,9 @@ const midiplan_device_t yamaha_rx21 = {
       //(1 << (MIDI_CONTROL_UNDEFINED_1D                 & 0x1F)) |  /* 0x1D  29 */
       //(1 << (MIDI_CONTROL_UNDEFINED_1E                 & 0x1F)) |  /* 0x1E  30 */
       //(1 << (MIDI_CONTROL_UNDEFINED_1F                 & 0x1F)) |  /* 0x1F  31 */
-                                                                 
+
         0, //---------------------------------------------------------------------
-                                                                 
+
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_00               & 0x1F)) |  /* 0x20  32 */
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_01               & 0x1F)) |  /* 0x21  33 */
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_02               & 0x1F)) |  /* 0x22  34 */
@@ -403,9 +403,9 @@ const midiplan_device_t yamaha_rx21 = {
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_1D               & 0x1F)) |  /* 0x3D  61 */
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_1E               & 0x1F)) |  /* 0x3E  62 */
       //(1 << (MIDI_CONTROL_LSB_FOR_MSB_1F               & 0x1F)) |  /* 0x3F  63 */
-                                                                 
+
         0, //---------------------------------------------------------------------
-                                                                 
+
       //(1 << (MIDI_CONTROL_SUSTAIN                      & 0x1F)) |  /* 0x40  64 */
       //(1 << (MIDI_CONTROL_PORTAMENTO_ON_OFF            & 0x1F)) |  /* 0x41  65 */
       //(1 << (MIDI_CONTROL_SOSTENUTO                    & 0x1F)) |  /* 0x42  66 */
@@ -438,9 +438,9 @@ const midiplan_device_t yamaha_rx21 = {
       //(1 << (MIDI_CONTROL_CHORUS_SEND_LEVEL            & 0x1F)) |  /* 0x5D  93 */
       //(1 << (MIDI_CONTROL_EFFECTS_DEPTH_4              & 0x1F)) |  /* 0x5E  94 */
       //(1 << (MIDI_CONTROL_EFFECTS_DEPTH_5              & 0x1F)) |  /* 0x5F  95 */
-                                                                 
+
         0, //---------------------------------------------------------------------
-                                                                 
+
       //(1 << (MIDI_CONTROL_DATA_INCREMENT               & 0x1F)) |  /* 0x60  96 */
       //(1 << (MIDI_CONTROL_DATA_DECREMENT               & 0x1F)) |  /* 0x61  97 */
       //(1 << (MIDI_CONTROL_NON_REGISTERED_PARAMETER_LSB & 0x1F)) |  /* 0x62  98 */
@@ -473,16 +473,16 @@ const midiplan_device_t yamaha_rx21 = {
       //(1 << (MIDI_CHANNEL_MODE_OMNI_ON                 & 0x1F)) |  /* 0x7D 125 */
       //(1 << (MIDI_CHANNEL_MODE_MONO_ON                 & 0x1F)) |  /* 0x7E 126 */
       //(1 << (MIDI_CHANNEL_MODE_POLY_ON                 & 0x1F)) |  /* 0x7F 127 */
-    
+
         0, //---------------------------------------------------------------------
-    
+
     },
-  
+
     .initialization_sequence_offset = INVALID_SEQUENCE_OFFSET,
     .program_change_sequence_offset = INVALID_SEQUENCE_OFFSET,
     .note_on_sequence_offset        = INVALID_SEQUENCE_OFFSET,
     .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
-    
+
     .custom_sequences = {}
 
 };

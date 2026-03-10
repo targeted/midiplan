@@ -1,12 +1,12 @@
 /*
  * MIDIplan
  * Copyright (C) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -17,7 +17,7 @@
 
 const midiplan_device_t yamaha_emr1 = {
 
-    .basic_channel = 1,
+    .basic_channel = MIDI_CHANNEL_1,
 
     .max_melodic_notes     = 0,
     .max_percussion_notes  = 16,
@@ -484,5 +484,5 @@ const midiplan_device_t yamaha_emr1 = {
     .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
 
     .custom_sequences = {}
-    
+
 };

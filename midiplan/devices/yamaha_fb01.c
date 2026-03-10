@@ -1,12 +1,12 @@
 /*
  * MIDIplan
  * Copyright (C) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -14,10 +14,11 @@
  */
 
 #include "yamaha_fb01.h"
+#include "gm_device.h"
 
 const midiplan_device_t yamaha_fb01 = {
 
-    .basic_channel = 1,
+    .basic_channel = MIDI_CHANNEL_1,
 
     .max_melodic_notes     = 8,
     .max_percussion_notes  = 0,
@@ -31,134 +32,134 @@ const midiplan_device_t yamaha_fb01 = {
     .pitch_bend       = 1,
 
     .melodic_programs = {
-        /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = YAMAHA_FB01_PROGRAM_ACOUSTIC_GRAND_PIANO,   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x01   2  GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO */ {  .program = YAMAHA_FB01_PROGRAM_BRIGHT_ACOUSTIC_PIANO,  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x02   3  GM_PROGRAM_ELECTRIC_GRAND_PIANO  */ {  .program = YAMAHA_FB01_PROGRAM_ELECTRIC_GRAND_PIANO,   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x03   4  GM_PROGRAM_HONKY_TONK_PIANO      */ {  .program = YAMAHA_FB01_PROGRAM_HONKY_TONK_PIANO,       .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x04   5  GM_PROGRAM_ELECTRIC_PIANO_1      */ {  .program = YAMAHA_FB01_PROGRAM_ELECTRIC_PIANO_1,       .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_4DB    },
-        /* 0x05   6  GM_PROGRAM_ELECTRIC_PIANO_2      */ {  .program = YAMAHA_FB01_PROGRAM_ELECTRIC_PIANO_2,       .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_4DB    },
-        /* 0x06   7  GM_PROGRAM_HARPSICHORD           */ {  .program = YAMAHA_FB01_PROGRAM_HARPSICHORD,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x07   8  GM_PROGRAM_CLAVI                 */ {  .program = YAMAHA_FB01_PROGRAM_CLAVI,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x08   9  GM_PROGRAM_CELESTA               */ {  .program = YAMAHA_FB01_PROGRAM_CELESTA,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x09  10  GM_PROGRAM_GLOCKENSPIEL          */ {  .program = YAMAHA_FB01_PROGRAM_GLOCKENSPIEL,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x0A  11  GM_PROGRAM_MUSIC_BOX             */ {  .program = YAMAHA_FB01_PROGRAM_MUSIC_BOX,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x0B  12  GM_PROGRAM_VIBRAPHONE            */ {  .program = YAMAHA_FB01_PROGRAM_VIBRAPHONE,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x0C  13  GM_PROGRAM_MARIMBA               */ {  .program = YAMAHA_FB01_PROGRAM_MARIMBA,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x0D  14  GM_PROGRAM_XYLOPHONE             */ {  .program = YAMAHA_FB01_PROGRAM_XYLOPHONE,              .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_6DB    },
-        /* 0x0E  15  GM_PROGRAM_TUBULAR_BELLS         */ {  .program = YAMAHA_FB01_PROGRAM_TUBULAR_BELLS,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x0F  16  GM_PROGRAM_DULCIMER              */ {  .program = YAMAHA_FB01_PROGRAM_DULCIMER,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x10  17  GM_PROGRAM_DRAWBAR_ORGAN         */ {  .program = YAMAHA_FB01_PROGRAM_DRAWBAR_ORGAN,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x11  18  GM_PROGRAM_PERCUSSIVE_ORGAN      */ {  .program = YAMAHA_FB01_PROGRAM_PERCUSSIVE_ORGAN,       .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x12  19  GM_PROGRAM_ROCK_ORGAN            */ {  .program = YAMAHA_FB01_PROGRAM_ROCK_ORGAN,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x13  20  GM_PROGRAM_CHURCH_ORGAN          */ {  .program = YAMAHA_FB01_PROGRAM_CHURCH_ORGAN,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x14  21  GM_PROGRAM_REED_ORGAN            */ {  .program = YAMAHA_FB01_PROGRAM_REED_ORGAN,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x15  22  GM_PROGRAM_ACCORDION             */ {  .program = YAMAHA_FB01_PROGRAM_ACCORDION,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x16  23  GM_PROGRAM_HARMONICA             */ {  .program = YAMAHA_FB01_PROGRAM_HARMONICA,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x17  24  GM_PROGRAM_TANGO_ACCORDION       */ {  .program = YAMAHA_FB01_PROGRAM_TANGO_ACCORDION,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x18  25  GM_PROGRAM_ACOUSTIC_GUITAR_NYLON */ {  .program = YAMAHA_FB01_PROGRAM_ACOUSTIC_GUITAR_NYLON,  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x19  26  GM_PROGRAM_ACOUSTIC_GUITAR_STEEL */ {  .program = YAMAHA_FB01_PROGRAM_ACOUSTIC_GUITAR_STEEL,  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x1A  27  GM_PROGRAM_ELECTRIC_GUITAR_JAZZ  */ {  .program = YAMAHA_FB01_PROGRAM_ELECTRIC_GUITAR_JAZZ,   .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_4DB    },
-        /* 0x1B  28  GM_PROGRAM_ELECTRIC_GUITAR_CLEAN */ {  .program = YAMAHA_FB01_PROGRAM_ELECTRIC_GUITAR_CLEAN,  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x1C  29  GM_PROGRAM_ELECTRIC_GUITAR_MUTED */ {  .program = YAMAHA_FB01_PROGRAM_ELECTRIC_GUITAR_MUTED,  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x1D  30  GM_PROGRAM_OVERDRIVEN_GUITAR     */ {  .program = YAMAHA_FB01_PROGRAM_OVERDRIVEN_GUITAR,      .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x1E  31  GM_PROGRAM_DISTORTION_GUITAR     */ {  .program = YAMAHA_FB01_PROGRAM_DISTORTION_GUITAR,      .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x1F  32  GM_PROGRAM_GUITAR_HARMONICS      */ {  .program = YAMAHA_FB01_PROGRAM_GUITAR_HARMONICS,       .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x20  33  GM_PROGRAM_ACOUSTIC_BASS         */ {  .program = YAMAHA_FB01_PROGRAM_ACOUSTIC_BASS,          .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x21  34  GM_PROGRAM_ELECTRIC_BASS_FINGER  */ {  .program = YAMAHA_FB01_PROGRAM_ELECTRIC_BASS_FINGER,   .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x22  35  GM_PROGRAM_ELECTRIC_BASS_PICK    */ {  .program = YAMAHA_FB01_PROGRAM_ELECTRIC_BASS_PICK,     .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x23  36  GM_PROGRAM_FRETLESS_BASS         */ {  .program = YAMAHA_FB01_PROGRAM_FRETLESS_BASS,          .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x24  37  GM_PROGRAM_SLAP_BASS_1           */ {  .program = YAMAHA_FB01_PROGRAM_SLAP_BASS_1,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x25  38  GM_PROGRAM_SLAP_BASS_2           */ {  .program = YAMAHA_FB01_PROGRAM_SLAP_BASS_2,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x26  39  GM_PROGRAM_SYNTH_BASS_1          */ {  .program = YAMAHA_FB01_PROGRAM_SYNTH_BASS_1,           .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x27  40  GM_PROGRAM_SYNTH_BASS_2          */ {  .program = YAMAHA_FB01_PROGRAM_SYNTH_BASS_2,           .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x28  41  GM_PROGRAM_VIOLIN                */ {  .program = YAMAHA_FB01_PROGRAM_VIOLIN,                 .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x29  42  GM_PROGRAM_VIOLA                 */ {  .program = YAMAHA_FB01_PROGRAM_VIOLA,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x2A  43  GM_PROGRAM_CELLO                 */ {  .program = YAMAHA_FB01_PROGRAM_CELLO,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x2B  44  GM_PROGRAM_CONTRABASS            */ {  .program = YAMAHA_FB01_PROGRAM_CONTRABASS,             .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER   | VOLUME_UP_4DB    },
-        /* 0x2C  45  GM_PROGRAM_TREMOLO_STRINGS       */ {  .program = YAMAHA_FB01_PROGRAM_TREMOLO_STRINGS,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x2D  46  GM_PROGRAM_PIZZICATO_STRINGS     */ {  .program = YAMAHA_FB01_PROGRAM_PIZZICATO_STRINGS,      .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x2E  47  GM_PROGRAM_ORCHESTRAL_HARP       */ {  .program = YAMAHA_FB01_PROGRAM_ORCHESTRAL_HARP,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x2F  48  GM_PROGRAM_TIMPANI               */ {  .program = YAMAHA_FB01_PROGRAM_TIMPANI,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x30  49  GM_PROGRAM_STRING_ENSEMBLE_1     */ {  .program = YAMAHA_FB01_PROGRAM_STRING_ENSEMBLE_1,      .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_2DB    },
-        /* 0x31  50  GM_PROGRAM_STRING_ENSEMBLE_2     */ {  .program = YAMAHA_FB01_PROGRAM_STRING_ENSEMBLE_2,      .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x32  51  GM_PROGRAM_SYNTHSTRINGS_1        */ {  .program = YAMAHA_FB01_PROGRAM_SYNTHSTRINGS_1,         .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_2DB    },
-        /* 0x33  52  GM_PROGRAM_SYNTHSTRINGS_2        */ {  .program = YAMAHA_FB01_PROGRAM_SYNTHSTRINGS_2,         .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x34  53  GM_PROGRAM_CHOIR_AAHS            */ {  .program = YAMAHA_FB01_PROGRAM_CHOIR_AAHS,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x35  54  GM_PROGRAM_VOICE_OOHS            */ {  .program = YAMAHA_FB01_PROGRAM_VOICE_OOHS,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x36  55  GM_PROGRAM_SYNTH_VOICE           */ {  .program = YAMAHA_FB01_PROGRAM_SYNTH_VOICE,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x37  56  GM_PROGRAM_ORCHESTRA_HIT         */ {  .program = YAMAHA_FB01_PROGRAM_ORCHESTRA_HIT,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x38  57  GM_PROGRAM_TRUMPET               */ {  .program = YAMAHA_FB01_PROGRAM_TRUMPET,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x39  58  GM_PROGRAM_TROMBONE              */ {  .program = YAMAHA_FB01_PROGRAM_TROMBONE,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x3A  59  GM_PROGRAM_TUBA                  */ {  .program = YAMAHA_FB01_PROGRAM_TUBA,                   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x3B  60  GM_PROGRAM_MUTED_TRUMPET         */ {  .program = YAMAHA_FB01_PROGRAM_MUTED_TRUMPET,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x3C  61  GM_PROGRAM_FRENCH_HORN           */ {  .program = YAMAHA_FB01_PROGRAM_FRENCH_HORN,            .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x3D  62  GM_PROGRAM_BRASS_SECTION         */ {  .program = YAMAHA_FB01_PROGRAM_BRASS_SECTION,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x3E  63  GM_PROGRAM_SYNTHBRASS_1          */ {  .program = YAMAHA_FB01_PROGRAM_SYNTHBRASS_1,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x3F  64  GM_PROGRAM_SYNTHBRASS_2          */ {  .program = YAMAHA_FB01_PROGRAM_SYNTHBRASS_2,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x40  65  GM_PROGRAM_SOPRANO_SAX           */ {  .program = YAMAHA_FB01_PROGRAM_SOPRANO_SAX,            .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x41  66  GM_PROGRAM_ALTO_SAX              */ {  .program = YAMAHA_FB01_PROGRAM_ALTO_SAX,               .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x42  67  GM_PROGRAM_TENOR_SAX             */ {  .program = YAMAHA_FB01_PROGRAM_TENOR_SAX,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x43  68  GM_PROGRAM_BARITONE_SAX          */ {  .program = YAMAHA_FB01_PROGRAM_BARITONE_SAX,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x44  69  GM_PROGRAM_OBOE                  */ {  .program = YAMAHA_FB01_PROGRAM_OBOE,                   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x45  70  GM_PROGRAM_ENGLISH_HORN          */ {  .program = YAMAHA_FB01_PROGRAM_HORN,                   .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x46  71  GM_PROGRAM_BASSOON               */ {  .program = YAMAHA_FB01_PROGRAM_BASSOON,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x47  72  GM_PROGRAM_CLARINET              */ {  .program = YAMAHA_FB01_PROGRAM_CLARINET,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x48  73  GM_PROGRAM_PICCOLO               */ {  .program = YAMAHA_FB01_PROGRAM_PICCOLO,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x49  74  GM_PROGRAM_FLUTE                 */ {  .program = YAMAHA_FB01_PROGRAM_FLUTE,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x4A  75  GM_PROGRAM_RECORDER              */ {  .program = YAMAHA_FB01_PROGRAM_RECORDER,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x4B  76  GM_PROGRAM_PAN_FLUTE             */ {  .program = YAMAHA_FB01_PROGRAM_PAN_FLUTE,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x4C  77  GM_PROGRAM_BLOWN_BOTTLE          */ {  .program = YAMAHA_FB01_PROGRAM_BLOWN_BOTTLE,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x4D  78  GM_PROGRAM_SHAKUHACHI            */ {  .program = YAMAHA_FB01_PROGRAM_SHAKUHACHI,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x4E  79  GM_PROGRAM_WHISTLE               */ {  .program = YAMAHA_FB01_PROGRAM_WHISTLE,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x4F  80  GM_PROGRAM_OCARINA               */ {  .program = YAMAHA_FB01_PROGRAM_OCARINA,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x50  81  GM_PROGRAM_LEAD_1_SQUARE         */ {  .program = YAMAHA_FB01_PROGRAM_LEAD_1_SQUARE,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x51  82  GM_PROGRAM_LEAD_2_SAWTOOTH       */ {  .program = YAMAHA_FB01_PROGRAM_LEAD_2_SAWTOOTH,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x52  83  GM_PROGRAM_LEAD_3_CALLIOPE       */ {  .program = YAMAHA_FB01_PROGRAM_LEAD_3_CALLIOPE,        .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_4DB    },
-        /* 0x53  84  GM_PROGRAM_LEAD_4_CHIFF          */ {  .program = YAMAHA_FB01_PROGRAM_LEAD_4_CHIFF,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x54  85  GM_PROGRAM_LEAD_5_CHARANG        */ {  .program = YAMAHA_FB01_PROGRAM_LEAD_5_CHARANG,         .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x55  86  GM_PROGRAM_LEAD_6_VOICE          */ {  .program = YAMAHA_FB01_PROGRAM_LEAD_6_VOICE,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x56  87  GM_PROGRAM_LEAD_7_FIFTHS         */ {  .program = YAMAHA_FB01_PROGRAM_LEAD_7_FIFTHS,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x57  88  GM_PROGRAM_LEAD_8_BASS_LEAD      */ {  .program = YAMAHA_FB01_PROGRAM_LEAD_8_BASS_LEAD,       .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x58  89  GM_PROGRAM_PAD_1_NEW_AGE         */ {  .program = YAMAHA_FB01_PROGRAM_PAD_1_NEW_AGE,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x59  90  GM_PROGRAM_PAD_2_WARM            */ {  .program = YAMAHA_FB01_PROGRAM_PAD_2_WARM,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x5A  91  GM_PROGRAM_PAD_3_POLYSYNTH       */ {  .program = YAMAHA_FB01_PROGRAM_PAD_3_POLYSYNTH,        .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_DOWN_2DB  },
-        /* 0x5B  92  GM_PROGRAM_PAD_4_CHOIR           */ {  .program = YAMAHA_FB01_PROGRAM_PAD_4_CHOIR,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x5C  93  GM_PROGRAM_PAD_5_BOWED           */ {  .program = YAMAHA_FB01_PROGRAM_PAD_5_BOWED,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x5D  94  GM_PROGRAM_PAD_6_METALLIC        */ {  .program = YAMAHA_FB01_PROGRAM_PAD_6_METALLIC,         .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x5E  95  GM_PROGRAM_PAD_7_HALO            */ {  .program = YAMAHA_FB01_PROGRAM_PAD_7_HALO,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x5F  96  GM_PROGRAM_PAD_8_SWEEP           */ {  .program = YAMAHA_FB01_PROGRAM_PAD_8_SWEEP,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x60  97  GM_PROGRAM_FX_1_RAIN             */ {  .program = YAMAHA_FB01_PROGRAM_FX_1_RAIN,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x61  98  GM_PROGRAM_FX_2_SOUNDTRACK       */ {  .program = YAMAHA_FB01_PROGRAM_FX_2_SOUNDTRACK,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x62  99  GM_PROGRAM_FX_3_CRYSTAL          */ {  .program = YAMAHA_FB01_PROGRAM_FX_3_CRYSTAL,           .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x63 100  GM_PROGRAM_FX_4_ATMOSPHERE       */ {  .program = YAMAHA_FB01_PROGRAM_FX_4_ATMOSPHERE,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x64 101  GM_PROGRAM_FX_5_BRIGHTNESS       */ {  .program = YAMAHA_FB01_PROGRAM_FX_5_BRIGHTNESS,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x65 102  GM_PROGRAM_FX_6_GOBLINS          */ {  .program = YAMAHA_FB01_PROGRAM_FX_6_GOBLINS,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x66 103  GM_PROGRAM_FX_7_ECHOES           */ {  .program = YAMAHA_FB01_PROGRAM_FX_7_ECHOES,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x67 104  GM_PROGRAM_FX_8_SCI_FI           */ {  .program = YAMAHA_FB01_PROGRAM_FX_8_SCI_FI,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x68 105  GM_PROGRAM_SITAR                 */ {  .program = YAMAHA_FB01_PROGRAM_SITAR,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x69 106  GM_PROGRAM_BANJO                 */ {  .program = YAMAHA_FB01_PROGRAM_BANJO,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x6A 107  GM_PROGRAM_SHAMISEN              */ {  .program = YAMAHA_FB01_PROGRAM_SHAMISEN,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x6B 108  GM_PROGRAM_KOTO                  */ {  .program = YAMAHA_FB01_PROGRAM_KOTO,                   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x6C 109  GM_PROGRAM_KALIMBA               */ {  .program = YAMAHA_FB01_PROGRAM_KALIMBA,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x6D 110  GM_PROGRAM_BAG_PIPE              */ {  .program = YAMAHA_FB01_PROGRAM_BAG_PIPE,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x6E 111  GM_PROGRAM_FIDDLE                */ {  .program = YAMAHA_FB01_PROGRAM_FIDDLE,                 .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x6F 112  GM_PROGRAM_SHANAI                */ {  .program = YAMAHA_FB01_PROGRAM_SHANAI,                 .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x70 113  GM_PROGRAM_TINKLE_BELL           */ {  .program = YAMAHA_FB01_PROGRAM_TINKLE_BELL,            .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x71 114  GM_PROGRAM_AGOGO                 */ {  .program = YAMAHA_FB01_PROGRAM_AGOGO,                  .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x72 115  GM_PROGRAM_STEEL_DRUMS           */ {  .program = YAMAHA_FB01_PROGRAM_STEEL_DRUMS,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x73 116  GM_PROGRAM_WOODBLOCK             */ {  .program = YAMAHA_FB01_PROGRAM_WOODBLOCK,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x74 117  GM_PROGRAM_TAIKO_DRUM            */ {  .program = YAMAHA_FB01_PROGRAM_TAIKO_DRUM,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x75 118  GM_PROGRAM_MELODIC_TOM           */ {  .program = YAMAHA_FB01_PROGRAM_MELODIC_TOM,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x76 119  GM_PROGRAM_SYNTH_DRUM            */ {  .program = YAMAHA_FB01_PROGRAM_SYNTH_DRUM,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x77 120  GM_PROGRAM_REVERSE_CYMBAL        */ {  .program = YAMAHA_FB01_PROGRAM_REVERSE_CYMBAL,         .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x78 121  GM_PROGRAM_GUITAR_FRET_NOISE     */ {  .program = YAMAHA_FB01_PROGRAM_GUITAR_FRET_NOISE,      .flags = YAMAHA_FB01_RANGE_OCTAVE_LOWER    | VOLUME_DOWN_4DB  },
-        /* 0x79 122  GM_PROGRAM_BREATH_NOISE          */ {  .program = YAMAHA_FB01_PROGRAM_BREATH_NOISE,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x7A 123  GM_PROGRAM_SEASHORE              */ {  .program = YAMAHA_FB01_PROGRAM_SEASHORE,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x7B 124  GM_PROGRAM_BIRD_TWEET            */ {  .program = YAMAHA_FB01_PROGRAM_BIRD_TWEET,             .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
-        /* 0x7C 125  GM_PROGRAM_TELEPHONE_RING        */ {  .program = YAMAHA_FB01_PROGRAM_TELEPHONE_RING,         .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x7D 126  GM_PROGRAM_HELICOPTER            */ {  .program = YAMAHA_FB01_PROGRAM_HELICOPTER,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x7E 127  GM_PROGRAM_APPLAUSE              */ {  .program = YAMAHA_FB01_PROGRAM_APPLAUSE,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
-        /* 0x7F 128  GM_PROGRAM_GUNSHOT               */ {  .program = YAMAHA_FB01_PROGRAM_GUNSHOT,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            }
+        /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = GM_PROGRAM_ACOUSTIC_GRAND_PIANO,   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x01   2  GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO */ {  .program = GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO,  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x02   3  GM_PROGRAM_ELECTRIC_GRAND_PIANO  */ {  .program = GM_PROGRAM_ELECTRIC_GRAND_PIANO,   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x03   4  GM_PROGRAM_HONKY_TONK_PIANO      */ {  .program = GM_PROGRAM_HONKY_TONK_PIANO,       .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x04   5  GM_PROGRAM_ELECTRIC_PIANO_1      */ {  .program = GM_PROGRAM_ELECTRIC_PIANO_1,       .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_4DB    },
+        /* 0x05   6  GM_PROGRAM_ELECTRIC_PIANO_2      */ {  .program = GM_PROGRAM_ELECTRIC_PIANO_2,       .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_4DB    },
+        /* 0x06   7  GM_PROGRAM_HARPSICHORD           */ {  .program = GM_PROGRAM_HARPSICHORD,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x07   8  GM_PROGRAM_CLAVI                 */ {  .program = GM_PROGRAM_CLAVI,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x08   9  GM_PROGRAM_CELESTA               */ {  .program = GM_PROGRAM_CELESTA,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x09  10  GM_PROGRAM_GLOCKENSPIEL          */ {  .program = GM_PROGRAM_GLOCKENSPIEL,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x0A  11  GM_PROGRAM_MUSIC_BOX             */ {  .program = GM_PROGRAM_MUSIC_BOX,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x0B  12  GM_PROGRAM_VIBRAPHONE            */ {  .program = GM_PROGRAM_VIBRAPHONE,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x0C  13  GM_PROGRAM_MARIMBA               */ {  .program = GM_PROGRAM_MARIMBA,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x0D  14  GM_PROGRAM_XYLOPHONE             */ {  .program = GM_PROGRAM_XYLOPHONE,              .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_6DB    },
+        /* 0x0E  15  GM_PROGRAM_TUBULAR_BELLS         */ {  .program = GM_PROGRAM_TUBULAR_BELLS,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x0F  16  GM_PROGRAM_DULCIMER              */ {  .program = GM_PROGRAM_DULCIMER,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x10  17  GM_PROGRAM_DRAWBAR_ORGAN         */ {  .program = GM_PROGRAM_DRAWBAR_ORGAN,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x11  18  GM_PROGRAM_PERCUSSIVE_ORGAN      */ {  .program = GM_PROGRAM_PERCUSSIVE_ORGAN,       .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x12  19  GM_PROGRAM_ROCK_ORGAN            */ {  .program = GM_PROGRAM_ROCK_ORGAN,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x13  20  GM_PROGRAM_CHURCH_ORGAN          */ {  .program = GM_PROGRAM_CHURCH_ORGAN,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x14  21  GM_PROGRAM_REED_ORGAN            */ {  .program = GM_PROGRAM_REED_ORGAN,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x15  22  GM_PROGRAM_ACCORDION             */ {  .program = GM_PROGRAM_ACCORDION,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x16  23  GM_PROGRAM_HARMONICA             */ {  .program = GM_PROGRAM_HARMONICA,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x17  24  GM_PROGRAM_TANGO_ACCORDION       */ {  .program = GM_PROGRAM_TANGO_ACCORDION,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x18  25  GM_PROGRAM_ACOUSTIC_GUITAR_NYLON */ {  .program = GM_PROGRAM_ACOUSTIC_GUITAR_NYLON,  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x19  26  GM_PROGRAM_ACOUSTIC_GUITAR_STEEL */ {  .program = GM_PROGRAM_ACOUSTIC_GUITAR_STEEL,  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x1A  27  GM_PROGRAM_ELECTRIC_GUITAR_JAZZ  */ {  .program = GM_PROGRAM_ELECTRIC_GUITAR_JAZZ,   .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_4DB    },
+        /* 0x1B  28  GM_PROGRAM_ELECTRIC_GUITAR_CLEAN */ {  .program = GM_PROGRAM_ELECTRIC_GUITAR_CLEAN,  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x1C  29  GM_PROGRAM_ELECTRIC_GUITAR_MUTED */ {  .program = GM_PROGRAM_ELECTRIC_GUITAR_MUTED,  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x1D  30  GM_PROGRAM_OVERDRIVEN_GUITAR     */ {  .program = GM_PROGRAM_OVERDRIVEN_GUITAR,      .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x1E  31  GM_PROGRAM_DISTORTION_GUITAR     */ {  .program = GM_PROGRAM_DISTORTION_GUITAR,      .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x1F  32  GM_PROGRAM_GUITAR_HARMONICS      */ {  .program = GM_PROGRAM_GUITAR_HARMONICS,       .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x20  33  GM_PROGRAM_ACOUSTIC_BASS         */ {  .program = GM_PROGRAM_ACOUSTIC_BASS,          .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x21  34  GM_PROGRAM_ELECTRIC_BASS_FINGER  */ {  .program = GM_PROGRAM_ELECTRIC_BASS_FINGER,   .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x22  35  GM_PROGRAM_ELECTRIC_BASS_PICK    */ {  .program = GM_PROGRAM_ELECTRIC_BASS_PICK,     .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x23  36  GM_PROGRAM_FRETLESS_BASS         */ {  .program = GM_PROGRAM_FRETLESS_BASS,          .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x24  37  GM_PROGRAM_SLAP_BASS_1           */ {  .program = GM_PROGRAM_SLAP_BASS_1,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x25  38  GM_PROGRAM_SLAP_BASS_2           */ {  .program = GM_PROGRAM_SLAP_BASS_2,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x26  39  GM_PROGRAM_SYNTH_BASS_1          */ {  .program = GM_PROGRAM_SYNTH_BASS_1,           .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x27  40  GM_PROGRAM_SYNTH_BASS_2          */ {  .program = GM_PROGRAM_SYNTH_BASS_2,           .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x28  41  GM_PROGRAM_VIOLIN                */ {  .program = GM_PROGRAM_VIOLIN,                 .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x29  42  GM_PROGRAM_VIOLA                 */ {  .program = GM_PROGRAM_VIOLA,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x2A  43  GM_PROGRAM_CELLO                 */ {  .program = GM_PROGRAM_CELLO,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x2B  44  GM_PROGRAM_CONTRABASS            */ {  .program = GM_PROGRAM_CONTRABASS,             .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER   | VOLUME_UP_4DB    },
+        /* 0x2C  45  GM_PROGRAM_TREMOLO_STRINGS       */ {  .program = GM_PROGRAM_TREMOLO_STRINGS,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x2D  46  GM_PROGRAM_PIZZICATO_STRINGS     */ {  .program = GM_PROGRAM_PIZZICATO_STRINGS,      .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x2E  47  GM_PROGRAM_ORCHESTRAL_HARP       */ {  .program = GM_PROGRAM_ORCHESTRAL_HARP,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x2F  48  GM_PROGRAM_TIMPANI               */ {  .program = GM_PROGRAM_TIMPANI,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x30  49  GM_PROGRAM_STRING_ENSEMBLE_1     */ {  .program = GM_PROGRAM_STRING_ENSEMBLE_1,      .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_2DB    },
+        /* 0x31  50  GM_PROGRAM_STRING_ENSEMBLE_2     */ {  .program = GM_PROGRAM_STRING_ENSEMBLE_2,      .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x32  51  GM_PROGRAM_SYNTHSTRINGS_1        */ {  .program = GM_PROGRAM_SYNTHSTRINGS_1,         .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_2DB    },
+        /* 0x33  52  GM_PROGRAM_SYNTHSTRINGS_2        */ {  .program = GM_PROGRAM_SYNTHSTRINGS_2,         .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x34  53  GM_PROGRAM_CHOIR_AAHS            */ {  .program = GM_PROGRAM_CHOIR_AAHS,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x35  54  GM_PROGRAM_VOICE_OOHS            */ {  .program = GM_PROGRAM_VOICE_OOHS,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x36  55  GM_PROGRAM_SYNTH_VOICE           */ {  .program = GM_PROGRAM_SYNTH_VOICE,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x37  56  GM_PROGRAM_ORCHESTRA_HIT         */ {  .program = GM_PROGRAM_ORCHESTRA_HIT,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x38  57  GM_PROGRAM_TRUMPET               */ {  .program = GM_PROGRAM_TRUMPET,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x39  58  GM_PROGRAM_TROMBONE              */ {  .program = GM_PROGRAM_TROMBONE,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x3A  59  GM_PROGRAM_TUBA                  */ {  .program = GM_PROGRAM_TUBA,                   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x3B  60  GM_PROGRAM_MUTED_TRUMPET         */ {  .program = GM_PROGRAM_MUTED_TRUMPET,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x3C  61  GM_PROGRAM_FRENCH_HORN           */ {  .program = GM_PROGRAM_FRENCH_HORN,            .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x3D  62  GM_PROGRAM_BRASS_SECTION         */ {  .program = GM_PROGRAM_BRASS_SECTION,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x3E  63  GM_PROGRAM_SYNTHBRASS_1          */ {  .program = GM_PROGRAM_SYNTHBRASS_1,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x3F  64  GM_PROGRAM_SYNTHBRASS_2          */ {  .program = GM_PROGRAM_SYNTHBRASS_2,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x40  65  GM_PROGRAM_SOPRANO_SAX           */ {  .program = GM_PROGRAM_SOPRANO_SAX,            .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x41  66  GM_PROGRAM_ALTO_SAX              */ {  .program = GM_PROGRAM_ALTO_SAX,               .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x42  67  GM_PROGRAM_TENOR_SAX             */ {  .program = GM_PROGRAM_TENOR_SAX,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x43  68  GM_PROGRAM_BARITONE_SAX          */ {  .program = GM_PROGRAM_BARITONE_SAX,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x44  69  GM_PROGRAM_OBOE                  */ {  .program = GM_PROGRAM_OBOE,                   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x45  70  GM_PROGRAM_ENGLISH_HORN          */ {  .program = GM_PROGRAM_ENGLISH_HORN,           .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x46  71  GM_PROGRAM_BASSOON               */ {  .program = GM_PROGRAM_BASSOON,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x47  72  GM_PROGRAM_CLARINET              */ {  .program = GM_PROGRAM_CLARINET,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x48  73  GM_PROGRAM_PICCOLO               */ {  .program = GM_PROGRAM_PICCOLO,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x49  74  GM_PROGRAM_FLUTE                 */ {  .program = GM_PROGRAM_FLUTE,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x4A  75  GM_PROGRAM_RECORDER              */ {  .program = GM_PROGRAM_RECORDER,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x4B  76  GM_PROGRAM_PAN_FLUTE             */ {  .program = GM_PROGRAM_PAN_FLUTE,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x4C  77  GM_PROGRAM_BLOWN_BOTTLE          */ {  .program = GM_PROGRAM_BLOWN_BOTTLE,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x4D  78  GM_PROGRAM_SHAKUHACHI            */ {  .program = GM_PROGRAM_SHAKUHACHI,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x4E  79  GM_PROGRAM_WHISTLE               */ {  .program = GM_PROGRAM_WHISTLE,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x4F  80  GM_PROGRAM_OCARINA               */ {  .program = GM_PROGRAM_OCARINA,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x50  81  GM_PROGRAM_LEAD_1_SQUARE         */ {  .program = GM_PROGRAM_LEAD_1_SQUARE,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x51  82  GM_PROGRAM_LEAD_2_SAWTOOTH       */ {  .program = GM_PROGRAM_LEAD_2_SAWTOOTH,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x52  83  GM_PROGRAM_LEAD_3_CALLIOPE       */ {  .program = GM_PROGRAM_LEAD_3_CALLIOPE,        .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_UP_4DB    },
+        /* 0x53  84  GM_PROGRAM_LEAD_4_CHIFF          */ {  .program = GM_PROGRAM_LEAD_4_CHIFF,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x54  85  GM_PROGRAM_LEAD_5_CHARANG        */ {  .program = GM_PROGRAM_LEAD_5_CHARANG,         .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x55  86  GM_PROGRAM_LEAD_6_VOICE          */ {  .program = GM_PROGRAM_LEAD_6_VOICE,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x56  87  GM_PROGRAM_LEAD_7_FIFTHS         */ {  .program = GM_PROGRAM_LEAD_7_FIFTHS,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x57  88  GM_PROGRAM_LEAD_8_BASS_LEAD      */ {  .program = GM_PROGRAM_LEAD_8_BASS_LEAD,       .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x58  89  GM_PROGRAM_PAD_1_NEW_AGE         */ {  .program = GM_PROGRAM_PAD_1_NEW_AGE,          .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x59  90  GM_PROGRAM_PAD_2_WARM            */ {  .program = GM_PROGRAM_PAD_2_WARM,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x5A  91  GM_PROGRAM_PAD_3_POLYSYNTH       */ {  .program = GM_PROGRAM_PAD_3_POLYSYNTH,        .flags = YAMAHA_FB01_RANGE_DEFAULT         | VOLUME_DOWN_2DB  },
+        /* 0x5B  92  GM_PROGRAM_PAD_4_CHOIR           */ {  .program = GM_PROGRAM_PAD_4_CHOIR,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x5C  93  GM_PROGRAM_PAD_5_BOWED           */ {  .program = GM_PROGRAM_PAD_5_BOWED,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x5D  94  GM_PROGRAM_PAD_6_METALLIC        */ {  .program = GM_PROGRAM_PAD_6_METALLIC,         .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x5E  95  GM_PROGRAM_PAD_7_HALO            */ {  .program = GM_PROGRAM_PAD_7_HALO,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x5F  96  GM_PROGRAM_PAD_8_SWEEP           */ {  .program = GM_PROGRAM_PAD_8_SWEEP,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x60  97  GM_PROGRAM_FX_1_RAIN             */ {  .program = GM_PROGRAM_FX_1_RAIN,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x61  98  GM_PROGRAM_FX_2_SOUNDTRACK       */ {  .program = GM_PROGRAM_FX_2_SOUNDTRACK,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x62  99  GM_PROGRAM_FX_3_CRYSTAL          */ {  .program = GM_PROGRAM_FX_3_CRYSTAL,           .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x63 100  GM_PROGRAM_FX_4_ATMOSPHERE       */ {  .program = GM_PROGRAM_FX_4_ATMOSPHERE,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x64 101  GM_PROGRAM_FX_5_BRIGHTNESS       */ {  .program = GM_PROGRAM_FX_5_BRIGHTNESS,        .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x65 102  GM_PROGRAM_FX_6_GOBLINS          */ {  .program = GM_PROGRAM_FX_6_GOBLINS,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x66 103  GM_PROGRAM_FX_7_ECHOES           */ {  .program = GM_PROGRAM_FX_7_ECHOES,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x67 104  GM_PROGRAM_FX_8_SCI_FI           */ {  .program = GM_PROGRAM_FX_8_SCI_FI,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x68 105  GM_PROGRAM_SITAR                 */ {  .program = GM_PROGRAM_SITAR,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x69 106  GM_PROGRAM_BANJO                 */ {  .program = GM_PROGRAM_BANJO,                  .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x6A 107  GM_PROGRAM_SHAMISEN              */ {  .program = GM_PROGRAM_SHAMISEN,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x6B 108  GM_PROGRAM_KOTO                  */ {  .program = GM_PROGRAM_KOTO,                   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x6C 109  GM_PROGRAM_KALIMBA               */ {  .program = GM_PROGRAM_KALIMBA,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x6D 110  GM_PROGRAM_BAG_PIPE              */ {  .program = GM_PROGRAM_BAG_PIPE,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x6E 111  GM_PROGRAM_FIDDLE                */ {  .program = GM_PROGRAM_FIDDLE,                 .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x6F 112  GM_PROGRAM_SHANAI                */ {  .program = GM_PROGRAM_SHANAI,                 .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x70 113  GM_PROGRAM_TINKLE_BELL           */ {  .program = GM_PROGRAM_TINKLE_BELL,            .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x71 114  GM_PROGRAM_AGOGO                 */ {  .program = GM_PROGRAM_AGOGO,                  .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x72 115  GM_PROGRAM_STEEL_DRUMS           */ {  .program = GM_PROGRAM_STEEL_DRUMS,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x73 116  GM_PROGRAM_WOODBLOCK             */ {  .program = GM_PROGRAM_WOODBLOCK,              .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x74 117  GM_PROGRAM_TAIKO_DRUM            */ {  .program = GM_PROGRAM_TAIKO_DRUM,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x75 118  GM_PROGRAM_MELODIC_TOM           */ {  .program = GM_PROGRAM_MELODIC_TOM,            .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x76 119  GM_PROGRAM_SYNTH_DRUM            */ {  .program = GM_PROGRAM_SYNTH_DRUM,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x77 120  GM_PROGRAM_REVERSE_CYMBAL        */ {  .program = GM_PROGRAM_REVERSE_CYMBAL,         .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x78 121  GM_PROGRAM_GUITAR_FRET_NOISE     */ {  .program = GM_PROGRAM_GUITAR_FRET_NOISE,      .flags = YAMAHA_FB01_RANGE_OCTAVE_LOWER    | VOLUME_DOWN_4DB  },
+        /* 0x79 122  GM_PROGRAM_BREATH_NOISE          */ {  .program = GM_PROGRAM_BREATH_NOISE,           .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x7A 123  GM_PROGRAM_SEASHORE              */ {  .program = GM_PROGRAM_SEASHORE,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x7B 124  GM_PROGRAM_BIRD_TWEET            */ {  .program = GM_PROGRAM_BIRD_TWEET,             .flags = YAMAHA_FB01_RANGE_OCTAVE_HIGHER                      },
+        /* 0x7C 125  GM_PROGRAM_TELEPHONE_RING        */ {  .program = GM_PROGRAM_TELEPHONE_RING,         .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x7D 126  GM_PROGRAM_HELICOPTER            */ {  .program = GM_PROGRAM_HELICOPTER,             .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x7E 127  GM_PROGRAM_APPLAUSE              */ {  .program = GM_PROGRAM_APPLAUSE,               .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
+        /* 0x7F 128  GM_PROGRAM_GUNSHOT               */ {  .program = GM_PROGRAM_GUNSHOT,                .flags = YAMAHA_FB01_RANGE_DEFAULT                            }
     },
 
     .melodic_note_ranges = {
@@ -485,7 +486,7 @@ const midiplan_device_t yamaha_fb01 = {
 
     .custom_sequences = {
 
-        /* initialization, p[0] = system channel */
+        /* initialization, p[0] = basic channel */
 
         /* switch instruments 1-8 to MIDI channels 1-8 */
 
@@ -685,8 +686,8 @@ const midiplan_device_t yamaha_fb01 = {
         /*      */ 0x01, /* value: 1 */
         /*      */ 0xF7,
 
-        /* 00D8 */ MIDI_MESSAGE_DELAY, 
-        /*      */ 0x00, 
+        /* 00D8 */ MIDI_MESSAGE_DELAY,
+        /*      */ 0x00,
         /*      */ 0x64, /* 100 ms */
 
         /* 00DB */ INVALID_STATUS_BYTE,
@@ -733,9 +734,9 @@ const midiplan_device_t yamaha_fb01 = {
         /*      */ /* over */ 0x00,
 
         /* delay */
-        
-        /* 016A */ MIDI_MESSAGE_DELAY, 
-        /*      */ 0x00, 
+
+        /* 016A */ MIDI_MESSAGE_DELAY,
+        /*      */ 0x00,
         /*      */ 0x14, /* 20 ms */
 
         /* 016D */ INVALID_STATUS_BYTE,
@@ -743,3 +744,136 @@ const midiplan_device_t yamaha_fb01 = {
     }
 
 };
+
+/*
+The above lookup tables are script-generated from the following mapping:
+
+GM_PROGRAM_ACOUSTIC_GRAND_PIANO   YAMAHA_FB01_BANK4_GRAND
+GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO  YAMAHA_FB01_BANK4_UPPIANO
+GM_PROGRAM_ELECTRIC_GRAND_PIANO   YAMAHA_FB01_BANK3_EGRAND
+GM_PROGRAM_HONKY_TONK_PIANO       YAMAHA_FB01_BANK4_HONKEY2
+GM_PROGRAM_ELECTRIC_PIANO_1       YAMAHA_FB01_BANK4_EPIANO1
+GM_PROGRAM_ELECTRIC_PIANO_2       YAMAHA_FB01_BANK4_EPIANO2
+GM_PROGRAM_HARPSICHORD            YAMAHA_FB01_BANK3_HARPSIC
+GM_PROGRAM_CLAVI                  YAMAHA_FB01_BANK4_CLAV4
+GM_PROGRAM_CELESTA                YAMAHA_FB01_BANK4_CELESTE
+GM_PROGRAM_GLOCKENSPIEL           YAMAHA_FB01_BANK3_GLOCKEN
+GM_PROGRAM_MUSIC_BOX              YAMAHA_FB01_BANK6_VIBE2
+GM_PROGRAM_VIBRAPHONE             YAMAHA_FB01_BANK3_VIBES
+GM_PROGRAM_MARIMBA                YAMAHA_FB01_BANK3_MARIMBA
+GM_PROGRAM_XYLOPHONE              YAMAHA_FB01_BANK3_XYLOPHN
+GM_PROGRAM_TUBULAR_BELLS          YAMAHA_FB01_BANK6_TUBEBE1
+GM_PROGRAM_DULCIMER               YAMAHA_FB01_BANK7_SFTKOTO
+GM_PROGRAM_DRAWBAR_ORGAN          YAMAHA_FB01_BANK7_EORGAN6
+GM_PROGRAM_PERCUSSIVE_ORGAN       YAMAHA_FB01_BANK7_CORGAN2
+GM_PROGRAM_ROCK_ORGAN             YAMAHA_FB01_BANK7_EORGAN4
+GM_PROGRAM_CHURCH_ORGAN           YAMAHA_FB01_BANK7_EORGAN8
+GM_PROGRAM_REED_ORGAN             YAMAHA_FB01_BANK7_EORGAN5
+GM_PROGRAM_ACCORDION              YAMAHA_FB01_BANK4_SQUEEZE
+GM_PROGRAM_HARMONICA              YAMAHA_FB01_BANK3_HARMONI
+GM_PROGRAM_TANGO_ACCORDION        YAMAHA_FB01_BANK5_HARMON4
+GM_PROGRAM_ACOUSTIC_GUITAR_NYLON  YAMAHA_FB01_BANK7_GUITAR
+GM_PROGRAM_ACOUSTIC_GUITAR_STEEL  YAMAHA_FB01_BANK7_FOLK_GT
+GM_PROGRAM_ELECTRIC_GUITAR_JAZZ   YAMAHA_FB01_BANK3_JAZZ_GT
+GM_PROGRAM_ELECTRIC_GUITAR_CLEAN  YAMAHA_FB01_BANK7_BRITEGT
+GM_PROGRAM_ELECTRIC_GUITAR_MUTED  YAMAHA_FB01_BANK7_PLUCKGT
+GM_PROGRAM_OVERDRIVEN_GUITAR      YAMAHA_FB01_BANK7_FUZZ_GT
+GM_PROGRAM_DISTORTION_GUITAR      YAMAHA_FB01_BANK3_HEAVY
+GM_PROGRAM_GUITAR_HARMONICS       YAMAHA_FB01_BANK7_HARP2
+GM_PROGRAM_ACOUSTIC_BASS          YAMAHA_FB01_BANK3_WODBASS
+GM_PROGRAM_ELECTRIC_BASS_FINGER   YAMAHA_FB01_BANK3_EBASS
+GM_PROGRAM_ELECTRIC_BASS_PICK     YAMAHA_FB01_BANK3_EBASS2
+GM_PROGRAM_FRETLESS_BASS          YAMAHA_FB01_BANK6_FRETLES
+GM_PROGRAM_SLAP_BASS_1            YAMAHA_FB01_BANK6_PLUKBAS
+GM_PROGRAM_SLAP_BASS_2            YAMAHA_FB01_BANK6_SOLBASS
+GM_PROGRAM_SYNTH_BASS_1           YAMAHA_FB01_BANK6_SYNBAS1
+GM_PROGRAM_SYNTH_BASS_2           YAMAHA_FB01_BANK6_SYNBAS7
+GM_PROGRAM_VIOLIN                 YAMAHA_FB01_BANK5_SOLOVIO
+GM_PROGRAM_VIOLA                  YAMAHA_FB01_BANK5_STRING4
+GM_PROGRAM_CELLO                  YAMAHA_FB01_BANK5_CELLO1
+GM_PROGRAM_CONTRABASS             YAMAHA_FB01_BANK6_UPRTBAS
+GM_PROGRAM_TREMOLO_STRINGS        YAMAHA_FB01_BANK6_SYNBELL
+GM_PROGRAM_PIZZICATO_STRINGS      YAMAHA_FB01_BANK5_PIZZIC2
+GM_PROGRAM_ORCHESTRAL_HARP        YAMAHA_FB01_BANK3_HARP
+GM_PROGRAM_TIMPANI                YAMAHA_FB01_BANK3_TIMPANI
+GM_PROGRAM_STRING_ENSEMBLE_1      YAMAHA_FB01_BANK5_RICHST3
+GM_PROGRAM_STRING_ENSEMBLE_2      YAMAHA_FB01_BANK5_RICHST1
+GM_PROGRAM_SYNTHSTRINGS_1         YAMAHA_FB01_BANK5_RICHST4
+GM_PROGRAM_SYNTHSTRINGS_2         YAMAHA_FB01_BANK5_RICHST2
+GM_PROGRAM_CHOIR_AAHS             YAMAHA_FB01_BANK3_VOICES
+GM_PROGRAM_VOICE_OOHS             YAMAHA_FB01_BANK7_M_VOICE
+GM_PROGRAM_SYNTH_VOICE            YAMAHA_FB01_BANK7_SYNVOIC
+GM_PROGRAM_ORCHESTRA_HIT          YAMAHA_FB01_BANK6_SYNTIMP
+GM_PROGRAM_TRUMPET                YAMAHA_FB01_BANK3_TRUMPET
+GM_PROGRAM_TROMBONE               YAMAHA_FB01_BANK5_TROMBON
+GM_PROGRAM_TUBA                   YAMAHA_FB01_BANK3_HORN_LO
+GM_PROGRAM_MUTED_TRUMPET          YAMAHA_FB01_BANK5_FLUGELH
+GM_PROGRAM_FRENCH_HORN            YAMAHA_FB01_BANK3_HORN_LO
+GM_PROGRAM_BRASS_SECTION          YAMAHA_FB01_BANK5_HARDBR3
+GM_PROGRAM_SYNTHBRASS_1           YAMAHA_FB01_BANK5_BRASS3
+GM_PROGRAM_SYNTHBRASS_2           YAMAHA_FB01_BANK5_HARDBR4
+GM_PROGRAM_SOPRANO_SAX            YAMAHA_FB01_BANK5_SAX_1
+GM_PROGRAM_ALTO_SAX               YAMAHA_FB01_BANK5_SAX_2
+GM_PROGRAM_TENOR_SAX              YAMAHA_FB01_BANK5_SAX_1
+GM_PROGRAM_BARITONE_SAX           YAMAHA_FB01_BANK5_SAX_2
+GM_PROGRAM_OBOE                   YAMAHA_FB01_BANK3_OBOE
+GM_PROGRAM_ENGLISH_HORN           YAMAHA_FB01_BANK3_HORN
+GM_PROGRAM_BASSOON                YAMAHA_FB01_BANK5_BASSOON
+GM_PROGRAM_CLARINET               YAMAHA_FB01_BANK3_CLARINE
+GM_PROGRAM_PICCOLO                YAMAHA_FB01_BANK3_PICOLO
+GM_PROGRAM_FLUTE                  YAMAHA_FB01_BANK3_FLUTE
+GM_PROGRAM_RECORDER               YAMAHA_FB01_BANK5_SLOWFLT
+GM_PROGRAM_PAN_FLUTE              YAMAHA_FB01_BANK5_PAN_FLT
+GM_PROGRAM_BLOWN_BOTTLE           YAMAHA_FB01_BANK6_SCHMOOH
+GM_PROGRAM_SHAKUHACHI             YAMAHA_FB01_BANK5_FLUTE3
+GM_PROGRAM_WHISTLE                YAMAHA_FB01_BANK3_WHISTLE
+GM_PROGRAM_OCARINA                YAMAHA_FB01_BANK7_HUFFSYN
+GM_PROGRAM_LEAD_1_SQUARE          YAMAHA_FB01_BANK6_SYNCLAR
+GM_PROGRAM_LEAD_2_SAWTOOTH        YAMAHA_FB01_BANK7_ZITHER2
+GM_PROGRAM_LEAD_3_CALLIOPE        YAMAHA_FB01_BANK4_CIRCUST
+GM_PROGRAM_LEAD_4_CHIFF           YAMAHA_FB01_BANK6_HUFFTAK
+GM_PROGRAM_LEAD_5_CHARANG         YAMAHA_FB01_BANK6_SYNBAS6
+GM_PROGRAM_LEAD_6_VOICE           YAMAHA_FB01_BANK3_SMADSYN
+GM_PROGRAM_LEAD_7_FIFTHS          YAMAHA_FB01_BANK6_HOLLOW
+GM_PROGRAM_LEAD_8_BASS_LEAD       YAMAHA_FB01_BANK6_SOHEAVY
+GM_PROGRAM_PAD_1_NEW_AGE          YAMAHA_FB01_BANK6_CHEEKY
+GM_PROGRAM_PAD_2_WARM             YAMAHA_FB01_BANK7_FANTASY
+GM_PROGRAM_PAD_3_POLYSYNTH        YAMAHA_FB01_BANK6_SYNHARM
+GM_PROGRAM_PAD_4_CHOIR            YAMAHA_FB01_BANK6_SYNLEAD
+GM_PROGRAM_PAD_5_BOWED            YAMAHA_FB01_BANK5_CELLO2
+GM_PROGRAM_PAD_6_METALLIC         YAMAHA_FB01_BANK3_METAL
+GM_PROGRAM_PAD_7_HALO             YAMAHA_FB01_BANK5_ORCHEST
+GM_PROGRAM_PAD_8_SWEEP            YAMAHA_FB01_BANK6_FNKSYN2
+GM_PROGRAM_FX_1_RAIN              YAMAHA_FB01_BANK7_WATER
+GM_PROGRAM_FX_2_SOUNDTRACK        YAMAHA_FB01_BANK4_SYNCLV3
+GM_PROGRAM_FX_3_CRYSTAL           YAMAHA_FB01_BANK7_SPCHIME
+GM_PROGRAM_FX_4_ATMOSPHERE        YAMAHA_FB01_BANK7_SFTPIPE
+GM_PROGRAM_FX_5_BRIGHTNESS        YAMAHA_FB01_BANK7_SITAR2
+GM_PROGRAM_FX_6_GOBLINS           YAMAHA_FB01_BANK7_GHOSTIE
+GM_PROGRAM_FX_7_ECHOES            YAMAHA_FB01_BANK3_MARS_TO
+GM_PROGRAM_FX_8_SCI_FI            YAMAHA_FB01_BANK7_SPACE_1
+GM_PROGRAM_SITAR                  YAMAHA_FB01_BANK7_SITAR1
+GM_PROGRAM_BANJO                  YAMAHA_FB01_BANK7_BANJO
+GM_PROGRAM_SHAMISEN               YAMAHA_FB01_BANK7_HITKOTO
+GM_PROGRAM_KOTO                   YAMAHA_FB01_BANK3_KOTO
+GM_PROGRAM_KALIMBA                YAMAHA_FB01_BANK7_SFTHARP
+GM_PROGRAM_BAG_PIPE               YAMAHA_FB01_BANK7_MIDPIPE
+GM_PROGRAM_FIDDLE                 YAMAHA_FB01_BANK5_SOLOVIO
+GM_PROGRAM_SHANAI                 YAMAHA_FB01_BANK5_OBOE2
+GM_PROGRAM_TINKLE_BELL            YAMAHA_FB01_BANK6_TUBEBE2
+GM_PROGRAM_AGOGO                  YAMAHA_FB01_BANK3_STEELDR
+GM_PROGRAM_STEEL_DRUMS            YAMAHA_FB01_BANK6_STEELDR
+GM_PROGRAM_WOODBLOCK              YAMAHA_FB01_BANK6_HEIFER
+GM_PROGRAM_TAIKO_DRUM             YAMAHA_FB01_BANK6_HANDDR
+GM_PROGRAM_MELODIC_TOM            YAMAHA_FB01_BANK3_TOM_TOM
+GM_PROGRAM_SYNTH_DRUM             YAMAHA_FB01_BANK6_ELECTDR
+GM_PROGRAM_REVERSE_CYMBAL         YAMAHA_FB01_BANK7_WATER
+GM_PROGRAM_GUITAR_FRET_NOISE      YAMAHA_FB01_BANK5_STRING2
+GM_PROGRAM_BREATH_NOISE           YAMAHA_FB01_BANK7_WAVE
+GM_PROGRAM_SEASHORE               YAMAHA_FB01_BANK7_WAVE
+GM_PROGRAM_BIRD_TWEET             YAMAHA_FB01_BANK3_ZINGPIP
+GM_PROGRAM_TELEPHONE_RING         YAMAHA_FB01_BANK7_ALARM
+GM_PROGRAM_HELICOPTER             YAMAHA_FB01_BANK7_HELICOP
+GM_PROGRAM_APPLAUSE               YAMAHA_FB01_BANK7_WAVE
+GM_PROGRAM_GUNSHOT                YAMAHA_FB01_BANK7_SMASH
+*/
