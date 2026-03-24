@@ -40,6 +40,7 @@ time to connect to any of the supported devices.
 7. Kawai XS-1
 8. Zoom RT-234 (drum + bass)
 9. Roland GR-09
+10. Korg PSS60
 
 ### Demo recordings: 
 
