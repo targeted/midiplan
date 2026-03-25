@@ -1,8 +1,10 @@
 #ifndef MIDIPLAN_TASKS_COMMON_H
 #define MIDIPLAN_TASKS_COMMON_H
 
-#include <evar.h>
-#include <midiplan/midiplan.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <midiplan/midi.h>
+#include <midiplan/config.h>
 
 #define CRASH_CREATE_TASK_FAILED        (0x0100)
 #define CRASH_RECEIVE_MESSAGE_FAILED    (0x0200)

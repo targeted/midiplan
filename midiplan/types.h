@@ -1,7 +1,7 @@
 #ifndef MIDIPLAN_TYPES_H
 #define MIDIPLAN_TYPES_H
 
-#include <stddef.h>
+#include <stdbool.h>
 #include <midiplan/midi.h>
 #include <midiplan/config.h>
 

@@ -25,10 +25,10 @@ extern input_channel_t input_channels[MIDI_CHANNEL_COUNT];
  * This structure contains the running state of an output MIDI channel.
  */
 typedef struct {
-    program_t              out_program;             // currently active device-specific program
-    channel_t              associated_in_channel;   // the input channel to which this output channel has been last associated
-    midi_channels_bitmap_t associated_in_channels;  // cumulative bitmap of input channels, to which this output channel has ever been associated
-    note_entry_lookup_t    note_entry_lookup;       // for each active output note references the corresponding note entry
+    program_t              out_program;            // currently active device-specific program
+    channel_t              associated_in_channel;  // the input channel to which this output channel has been last associated
+    midi_channels_bitmap_t associated_in_channels; // cumulative bitmap of input channels, to which this output channel has *ever* been associated (bits don't go back to 0)
+    note_entry_lookup_t    note_entry_lookup;      // for each active output note references the corresponding note entry
 } output_channel_t;
 
 extern output_channel_t output_channels[MIDI_OUT_PORT_COUNT][MIDI_CHANNEL_COUNT];
@@ -39,7 +39,7 @@ extern output_channel_t output_channels[MIDI_OUT_PORT_COUNT][MIDI_CHANNEL_COUNT]
 void initialize_channels(void);
 
 /*
- * Clears the associations between the input and output channels, 
+ * Clears the associations between the input and output channels,
  * this is done at startup and every time when every input note
  * has been turned off via "all notes off" command.
  */

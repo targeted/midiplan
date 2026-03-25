@@ -1,8 +1,6 @@
 #ifndef MIDIPLAN_CONFIG_H
 #define MIDIPLAN_CONFIG_H
 
-#include <evar_preproc.h>
-
 typedef enum {
     MIDI_OUT_PORT_1     = 0,
     MIDI_OUT_PORT_2     = 1,

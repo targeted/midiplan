@@ -1,14 +1,16 @@
 #ifndef MIDIPLAN_NOTE_ENTRIES_H
 #define MIDIPLAN_NOTE_ENTRIES_H
 
-#include <stdbool.h>
 #include <evar.h>
 #include <midiplan/types.h>
 #include <midiplan/config.h>
 
 typedef uint8_t note_entry_id_t;
 EVAR_ASSERT(sizeof(note_entry_id_t) <= sizeof(uint8_t), sizeof_note_entry_id_t); // because uint8_t is used to iterate through note entries
-#define INVALID_NOTE_ENTRY_ID ((note_entry_id_t)-1)
+
+#define INVALID_NOTE_ENTRY_ID (0xFF)
+EVAR_ASSERT(MAX_NOTE_ENTRIES <= INVALID_NOTE_ENTRY_ID, max_note_entries);
+
 #define VALID_NOTE_ENTRY_ID(NOTE_ENTRY_ID) ((NOTE_ENTRY_ID) < (MAX_NOTE_ENTRIES))
 EVAR_ASSERT(INVALID_NOTE_ENTRY_ID >= MAX_NOTE_ENTRIES, invalid_note_entry_id_1);
 EVAR_ASSERT(!VALID_NOTE_ENTRY_ID(INVALID_NOTE_ENTRY_ID), invalid_note_entry_id_2);

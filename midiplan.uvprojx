@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>rvmdk PART_TM4C123GH6PM</Define>
               <Undefine></Undefine>
-              <IncludePath>C:\ti\TivaWare_C_Series-2.2.0.295;..\evar\include;.\evar\devices\tm4c123gxl;.</IncludePath>
+              <IncludePath>C:\ti\TivaWare_C_Series-2.2.0.295;..\evar\devices\tm4c123gxl;..\evar\include;.\tasks;.</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -422,7 +422,7 @@
             <File>
               <FileName>evar_device.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\evar\devices\tm4c123gxl\evar_device.c</FilePath>
+              <FilePath>..\evar\devices\tm4c123gxl\evar_device.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -448,6 +448,31 @@
               <FileName>midi_router_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\tasks\midi_router_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>common.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tasks\common.h</FilePath>
+            </File>
+            <File>
+              <FileName>input_uart_task.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tasks\input_uart_task.h</FilePath>
+            </File>
+            <File>
+              <FileName>main_task.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tasks\main_task.h</FilePath>
+            </File>
+            <File>
+              <FileName>midi_router_task.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tasks\midi_router_task.h</FilePath>
+            </File>
+            <File>
+              <FileName>output_uart_task.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tasks\output_uart_task.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -553,6 +578,11 @@
               <FileName>roland_gr09.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\midiplan\devices\roland_gr09.c</FilePath>
+            </File>
+            <File>
+              <FileName>korg_pss60.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\midiplan\devices\korg_pss60.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -1,7 +1,6 @@
 #ifndef MIDIPLAN_DEVICE_H
 #define MIDIPLAN_DEVICE_H
 
-#include <stdbool.h>
 #include <midiplan/types.h>
 #include <midiplan/config.h>
 #include <midiplan/note_entries.h>
@@ -19,9 +18,9 @@ typedef struct {
     uint8_t max_percussion_notes;  // how many notes can be playing on percussion program at the same time, if 0 then percussion notes are accounted as melodic
     uint8_t max_melodic_programs;  // how many melodic programs can be playing at the same time, including percussion program if max_percussion_notes = 0
     uint8_t max_notes_per_program; // how many notes can be played at the same time for any given melodic program, including percussion if max_percussion_notes = 0
-    
+
     /* the following affect the channel association process */
-    
+
     uint8_t monotimbral_channels;  // 0 or 1, 1 if there can't be more than one program playing over one channel concurrently, 0 if many programs can play over one channel concurrently
     uint8_t max_notes_per_channel; // how many notes can be played on one channel at the same time (on one program or different programs), 0 if there is no restriction
 
@@ -84,11 +83,11 @@ typedef struct {
     uint16_t program_change_sequence_offset;
     uint16_t note_on_sequence_offset;
     uint16_t note_off_sequence_offset;
-    
+
 #define INVALID_SEQUENCE_OFFSET (0xFFFF)
-    
+
     /* variable-sized buffer containing device-specific sequences of parameterized messages */
-    
+
     uint8_t custom_sequences[];
 
 } midiplan_device_t;
@@ -133,7 +132,7 @@ extern data_byte_t velocity_curves[6][127];
 #define VELOCITY_SILENCE   (0x7) // the note is not played at all
 
 /*
- * These versions are to be used in device flags configuration, 
+ * These versions are to be used in device flags configuration,
  * putting the bits in place.
  */
 #define VOLUME_DEFAULT     ((VELOCITY_DEFAULT)  << 4)
@@ -168,16 +167,16 @@ uint8_t device_bonding_hash(midi_channel_t channel, program_t program);
  */
 typedef struct {
 
-    uint8_t melodic_programs_playing;              // how many different *output* programs are currently playing
+    uint8_t melodic_programs_playing;              // how many different *output* programs are currently playing on all channels
+    uint8_t melodic_notes_per_program[128 + 1];    // how many notes are playing on that *output* program (128 melodic plus 1 for percussion *when it uses a melodic timbre*)
     uint8_t melodic_notes_playing;                 // how many notes are currently playing on all *output* melodic programs together (sum of melodic_notes_per_program)
-    uint8_t melodic_notes_per_program[128 + 1];    // number of notes playing on that *output* program (128 melodic +1 for percussion)
-    uint8_t percussion_notes_playing;              // how many notes are currently playing on the percussion program
+    uint8_t percussion_notes_playing;              // how many notes are currently playing on the percussion program *when it uses a percussion timbre*
 
     struct {
-        uint8_t         notes_playing;             // how many notes (on any program) are playing on this channel, including percussion
+        uint8_t notes_playing;                     // how many notes (on any program) are playing on this channel, including percussion
         note_entry_id_t last_note_entry_id;        // the last note initiated on this channel (erased when that note is turned off)
-    } channels[MIDI_CHANNEL_COUNT]; 
-    
+    } channels[MIDI_CHANNEL_COUNT];
+
     bool initialization_pending;                   // true if the device's initialization sequence is pending to be transmitted
 
 } midiplan_device_state_t;

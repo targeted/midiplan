@@ -17,8 +17,10 @@
 #include <midiplan/controller_values.h>
 
 typedef uint8_t cv_index_t;
-#define INVALID_CV_INDEX ((cv_index_t)-1)
-EVAR_ASSERT(INVALID_CV_INDEX >= MAX_CONTROLLER_VALUES, invalid_cv_index);
+
+#define INVALID_CV_INDEX (0xFF)
+EVAR_ASSERT(MAX_CONTROLLER_VALUES <= INVALID_CV_INDEX, max_controller_values);
+
 #define VALID_CV_INDEX(INDEX) ((INDEX) != INVALID_CV_INDEX)
 EVAR_ASSERT(!VALID_CV_INDEX(INVALID_CV_INDEX), valid_cv_index);
 

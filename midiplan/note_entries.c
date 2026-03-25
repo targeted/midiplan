@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include <evar.h>
+#include <evar_assert.h>
 #include <midiplan/note_entries.h>
 
 // this table contains all the notes we could track
