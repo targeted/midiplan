@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <evar_task.h>
 #include <evar_assert.h>
 #include <midiplan/midiplan.h>
 #include <midiplan/controller_values.h>
@@ -111,8 +112,16 @@ static uint8_t read_augmented_byte(
         //             1 = use the parameter as an index to look up into the following inline table with 128 elements
         //      ^      0 = 4-bit value / 4-bit table entry size
         //             1 = 7-bit value / 8-bit table entry size, produces 7 bits
-        //       ^^    when the previous bit is 0 (4-bit values), number of bits to shift value left, 0 to 3
-        //             when the previous bit is 1 (8-bit values), reserved
+        //       ^^    when the previous bit is 0 (4-bit values)
+        //               00 = verbatim
+        //               01 = bits 2-0 of the value are shifted to bits 6-4, bit 3 is ignored
+        //               10 = reserved
+        //               11 = reserved
+        //             when the previous bit is 1 (8-bit values)
+        //               00 = verbatim
+        //               01 = bit 6 of the value is set to 0, reducing value to 6 bits
+        //               10 = reserved
+        //               11 = reserved
         //  ^       when 1:
         //   ^^^^^^    000000 = reset the Roland-style checksum to 0, marking the first byte of a checksummed part of the sequence
         //             000001 = paste the current value of the Roland-checksum
@@ -125,7 +134,7 @@ static uint8_t read_augmented_byte(
             uint8_t parameter_index = (next_byte & 0b00110000) >> 4;
             uint8_t parameter_type  = (next_byte & 0b00001000) >> 3;
             uint8_t parameter_size  = (next_byte & 0b00000100) >> 2;
-            uint8_t parameter_shift = (next_byte & 0b00000011);
+            uint8_t parameter_op    = (next_byte & 0b00000011);
 
             // pick the parameter byte by index
 
@@ -134,7 +143,35 @@ static uint8_t read_augmented_byte(
 
             if (parameter_type == 0) { // literal
                 if (parameter_size == 0) { // use lower 4 bits
-                    parameter_value = (parameter_value & 0x0F) << parameter_shift;
+                    parameter_value &= 0x0F;
+                    switch (parameter_op) {
+                        case 0b00: // verbatim
+                            break;
+                        case 0b01: // bits 2-0 are put to bits 6-4
+                            parameter_value = (parameter_value & 0b111) << 4;
+                            break;
+                        case 0b10: // reserved
+                            break;
+                        case 0b11: // reserved
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else { // use lower 7 bits
+                    switch (parameter_op) {
+                        case 0b00: // verbatim
+                            break;
+                        case 0b01: // reduce to 6 bits
+                            parameter_value &= 0b00111111;
+                            break;
+                        case 0b10: // reserved
+                            break;
+                        case 0b11: // reserved
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
             else { // lookup index
@@ -145,17 +182,41 @@ static uint8_t read_augmented_byte(
                     else {
                         parameter_value = sequence[parameter_value >> 1] >> 4;
                     }
-                    parameter_value <<= parameter_shift;
+                    switch (parameter_op) {
+                        case 0b00: // verbatim
+                            break;
+                        case 0b01: // bits 2-0 are put to bits 6-4
+                            parameter_value = (parameter_value & 0b111) << 4;
+                            break;
+                        case 0b10: // reserved
+                            break;
+                        case 0b11: // reserved
+                            break;
+                        default:
+                            break;
+                    }
                     sequence += 64;
                 }
                 else { // use 8-bit lookup, 128 8-bit entries numbered 0-127 left-to-right, 128 bytes
                     parameter_value = sequence[parameter_value];
+                    switch (parameter_op) {
+                        case 0b00: // verbatim
+                            break;
+                        case 0b01: // reduce to 6 bits
+                            parameter_value &= 0b00111111;
+                            break;
+                        case 0b10: // reserved
+                            break;
+                        case 0b11: // reserved
+                            break;
+                        default:
+                            break;
+                    }
                     sequence += 128;
                 }
             }
 
             augmented_byte |= parameter_value;
-
         }
         else { // assorted operations
 
@@ -372,7 +433,7 @@ static void send_note_on_sequence(
 
     evar_assert(VALID_CHANNEL(out_channel));
     evar_assert(VALID_NOTE(out_note));
-    evar_assert(VALID_DATA_BYTE(out_velocity) && out_velocity > 0);
+    evar_assert(VALID_DATA_BYTE(out_velocity) && (out_velocity > 0));
 
     const midiplan_device_t* p_device = devices[out_port].p_device;
 
@@ -505,7 +566,7 @@ static void send_control_change(
             );
         }
     }
-    else if (control >= 0x40 && control < 0x78) { // short controller value
+    else if ((control >= 0x40) && (control < 0x78)) { // short controller value
 
         if (controller_supported(p_device, control)) {
 
@@ -579,9 +640,7 @@ static void send_control_default(
  * average note duration. Therefore a result of 0 means less that 1/8th,
  * 16 means twice the average and so forth.
  */
-static uint8_t get_note_age(
-    note_entry_id_t note_entry_id
-) {
+static uint8_t get_note_age(note_entry_id_t note_entry_id) {
 
     evar_assert(VALID_NOTE_ENTRY_ID(note_entry_id));
     note_entry_t* p_note_entry = &note_entries[note_entry_id];
@@ -595,7 +654,10 @@ static uint8_t get_note_age(
     }
     evar_assert(average_note_duration_ms <= 2250);
 
-    evar_time_delta_t note_duration_usec = evar__get_time_delta(&p_note_entry->timestamp, &evar_current_timestamp);
+    evar_timestamp_t current_timestamp;
+    evar__get_current_timestamp(&current_timestamp);
+    
+    evar_time_delta_t note_duration_usec = evar__get_time_delta(&p_note_entry->timestamp, &current_timestamp);
     evar_assert(note_duration_usec >= 0);
 
     uint8_t note_age = ((note_duration_usec / 1000) * 8) / average_note_duration_ms;
@@ -672,8 +734,8 @@ static void account_note_off(
     evar_assert(p_device_state->channels[out_channel].notes_playing > 0);
     p_device_state->channels[out_channel].notes_playing -= 1;
 
-    // notice that when the last note is turned off, the previous note can
-    // technically become "the last" but we don't have information on previous notes,
+    // notice that when the last note is turned off, the previous note should
+    // become the new last but we don't have information on previous notes,
     // therefore (notes_playing == 1) does *not* imply VALID_NOTE_ENTRY_ID(last_note_entry_id)
 
     if (p_device_state->channels[out_channel].last_note_entry_id == note_entry_id) {
@@ -1063,7 +1125,10 @@ static void in_note_off(
     // now that we are sure the note is officially not sounding any more,
     // update the program statistics with the note's actual duration
 
-    evar_time_delta_t note_duration_usec = evar__get_time_delta(&p_note_entry->timestamp, &evar_current_timestamp);
+    evar_timestamp_t current_timestamp;
+    evar__get_current_timestamp(&current_timestamp);
+
+    evar_time_delta_t note_duration_usec = evar__get_time_delta(&p_note_entry->timestamp, &current_timestamp);
     evar_assert(note_duration_usec >= 0);
 
     if (note_duration_usec > 0) {
@@ -1144,7 +1209,7 @@ static void collect_controllers_callback(
 
     collect_controllers_context_t* p_collect_controllers_context = (collect_controllers_context_t*)p_callback_context;
 
-    if (VALID_PROGRAM(p_collect_controllers_context->in_program) && in_program != p_collect_controllers_context->in_program) {
+    if (VALID_PROGRAM(p_collect_controllers_context->in_program) && (in_program != p_collect_controllers_context->in_program)) {
         return;
     }
 
@@ -1229,8 +1294,8 @@ static void associate_channels(
         // the previously associated input channel must be disassociated
 
         if (
-            prev_in_channel != in_channel &&
-            input_channels[prev_in_channel].associated_out_channels[out_port] == out_channel
+            (prev_in_channel != in_channel) &&
+            (input_channels[prev_in_channel].associated_out_channels[out_port] == out_channel)
         ) {
             input_channels[prev_in_channel].associated_out_channels[out_port] = INVALID_CHANNEL;
         }
@@ -1432,8 +1497,8 @@ static channel_t associate_out_channel(
         // either way we must then go through full channel search
 
         if (
-            (p_associated_output_channel->out_program == out_program) &&                             // otherwise a program change has been requested
-            !VALID_NOTE_ENTRY_ID(p_associated_output_channel->note_entry_lookup[out_note_index]) &&  // otherwise the same note already plays
+            (p_associated_output_channel->out_program == out_program) &&                            // otherwise a program change has been requested
+            !VALID_NOTE_ENTRY_ID(p_associated_output_channel->note_entry_lookup[out_note_index]) && // otherwise the same note already plays
             ((p_device->max_notes_per_channel == 0) || p_device_state->channels[associated_out_channel].notes_playing < p_device->max_notes_per_channel) // otherwise the channel is full
         ) {
             return associated_out_channel;
@@ -1541,7 +1606,7 @@ static channel_t associate_out_channel(
             pristine_out_channel = out_channel;
         }
 
-        // this output channel has only ever been associated with this input channel
+        // this output channel has *only* ever been associated with this input channel
 
         if (!VALID_CHANNEL(exclusive_out_channel)) {
             if (p_output_channel->associated_in_channels == in_channel_mask) {
@@ -1711,7 +1776,7 @@ static void handle_note_on(
     // register the time at which the note has been received, this will be used
     // to track durations and used to decide whether a note has sounded long enough
 
-    p_note_entry->timestamp = evar_current_timestamp;
+    evar__get_current_timestamp(&p_note_entry->timestamp);
 
     // put the input channel reference to the note entry, this in unconditional
     // by the fact that the note with that number has been received from that channel
@@ -1921,7 +1986,7 @@ static void handle_key_pressure(
     }
 
     note_entry_t* p_note_entry = &note_entries[note_entry_id];
-    evar_assert(p_note_entry->in.note == note_number && p_note_entry->in.channel == in_channel);
+    evar_assert((p_note_entry->in.note == note_number) && (p_note_entry->in.channel == in_channel));
 
     // the message is propagated to every output channel with which the input channel is currently associated
 
@@ -2177,7 +2242,7 @@ static void handle_control_change(
         return;
     }
 
-    // ignore bank select
+    // ignore bank select, no matter what the device configuration says
 
     if ((control_number == MIDI_CONTROL_BANK_SELECT) || (control_number == MIDI_CONTROL_LSB_FOR_MSB_00)) {
         return;
