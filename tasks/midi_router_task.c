@@ -14,14 +14,11 @@
  */
 
 #define EVAR_TASK_NAME midi_router_task
-#define EVAR_TASK_MESSAGE_SIZE 3
-#define EVAR_TASK_MESSAGE_COUNT 256
-//#define EVAR_TASK_MESSAGES_CAN_BE_DROPPED
 #include <evar_task.h>
 
-#include <tasks/midi_router_task.h>
+#define MAX_MESSAGE_COUNT (256)
 
-EVAR_ASSERT(EVAR_TASK_MESSAGE_SIZE == sizeof(midi_message_t), expected_message_size);
+#include <midiplan/midiplan.h>
 
 /*
  * Sends a MIDI message to the specified output port.
@@ -50,10 +47,10 @@ static midiplan_callbacks_t midiplan_callbacks = {
 
 void midi_router_task__initialize(evar_task_info_t* p_task_info) {
     
-    // allocate the message queue for the task
+    // initialize the message queue for the task
 
-    static midi_router_task_message_store_t message_store = { 0 };
-    p_task_info->p_message_store = &message_store;
+    static unsigned char message_store[MESSAGE_STORE_SIZE(MAX_MESSAGE_COUNT)];
+    p_task_info->p_message_store = evar__initialize_message_store(message_store, MAX_MESSAGE_COUNT);
 
     // initialize the router's structures
     
@@ -76,17 +73,17 @@ void midi_router_task__receive(evar_task_info_t* p_task_info) {
 
     do {
 
-        midi_message_t input_midi_message;
+        midi_router_task_message_t midi_router_task_message;
 
-        evar_mq_result_t mq_result = evar__receive_message(&input_midi_message, sizeof(midi_message_t));
+        evar_mq_result_t mq_result = evar__receive_message(&midi_router_task_message);
         if (mq_result == EVAR_MQ_QUEUE_EMPTY) {
             break;
         }
         else if (mq_result != EVAR_MQ_SUCCESS) {
-            evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "midi_router_task__receive: evar__receive_message(input_midi_message) failed");
+            evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "midi_router_task__receive: evar__receive_message(midi_router_task_message) failed");
         }
 
-        midiplan_handle_message(p_task_info->p_task_data, input_midi_message);
+        midiplan_handle_message(p_task_info->p_task_data, midi_router_task_message.midi_message);
 
     } 
     while (false); // the router receives and dispatches one message at a time

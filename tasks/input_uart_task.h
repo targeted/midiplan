@@ -1,8 +1,8 @@
 #ifndef MIDIPLAN_TASKS_INPUT_UART_TASK_H
 #define MIDIPLAN_TASKS_INPUT_UART_TASK_H
 
-#include <tasks/common.h>
-#include <tasks/midi_router_task.h>
+#include <evar.h>
+#include <common.h>
 
 EVAR_TASK(input_uart_task);
 
@@ -18,6 +18,8 @@ typedef struct {
     uint32_t       led_port_base;
     uint32_t       led_pin;
 
+    evar_task_id_t input_uart_task;
+    
     bool           synchronized;
     status_byte_t  status_byte;
     data_byte_t    data_bytes[2];
@@ -28,8 +30,12 @@ typedef struct {
     bool           input_midi_message_pending;
     midi_message_t input_midi_message;
     
-    evar_task_id_t input_uart_task;
-    
 } input_uart_task_data_t;
+
+typedef struct {
+    
+    unsigned char input_uart_byte;
+    
+} input_uart_task_message_t;
 
 #endif

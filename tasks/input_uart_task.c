@@ -1,12 +1,12 @@
 /*
  * MIDIplan
  * Copyright (C) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -14,14 +14,9 @@
  */
 
 #define EVAR_TASK_NAME input_uart_task
-#define EVAR_TASK_MESSAGE_SIZE 1
-#define EVAR_TASK_MESSAGE_COUNT 1024
-//#define EVAR_TASK_MESSAGES_CAN_BE_DROPPED
 #include <evar_task.h>
 
-#include <tasks/input_uart_task.h>
-
-EVAR_ASSERT(EVAR_TASK_MESSAGE_SIZE == sizeof(unsigned char), expected_message_size);
+#define MAX_MESSAGE_COUNT (1024)
 
 /*
  * This is the universal input UART interrupt handler.
@@ -46,12 +41,14 @@ void input_uart_interrupt_handler(input_uart_task_data_t* p_task_data) {
                 continue;
             }
 
-            unsigned char input_uart_byte = (unsigned char)(uart_char & 0xFF);
+            input_uart_task_message_t input_uart_task_message = {
+                .input_uart_byte = (unsigned char)(uart_char & 0xFF)
+            };
 
             evar_mq_result_t mq_result = evar__send_async_message(
-                p_task_data->input_uart_task, 
-                &input_uart_byte,
-                sizeof(unsigned char)
+                p_task_data->input_uart_task,
+                &input_uart_task_message,
+                sizeof(input_uart_task_message_t)
             );
             if (mq_result != EVAR_MQ_SUCCESS) {
                 evar__crash(CRASH_SEND_ASYNC_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_interrupt_handler: evar__send_async_message(input_uart_byte) failed");
@@ -74,11 +71,13 @@ void input_uart_task__initialize(evar_task_info_t* p_task_info) {
 
     input_uart_task_data_t* p_task_data = (input_uart_task_data_t*)p_task_info->p_task_data;
 
-    // allocate the message queue for the task
+    // initialize the message queue for the task
 
-    static input_uart_task_message_store_t message_store = { 0 };
-    p_task_info->p_message_store = &message_store;
+    static unsigned char message_store[MESSAGE_STORE_SIZE(MAX_MESSAGE_COUNT)];
+    p_task_info->p_message_store = evar__initialize_message_store(message_store, MAX_MESSAGE_COUNT);
 
+    // fill in the runtime task data
+    
     p_task_data->input_uart_task = p_task_info->current_task;
 
     // clear the internal state tracking the protocol
@@ -131,7 +130,7 @@ void input_uart_task__wake_up(evar_task_info_t* p_task_info) {
 }
 
 /*
- * Attempts to send the fully composed MIDI message to the router. 
+ * Attempts to send the fully composed MIDI message to the router.
  * Will be retried if it fails.
  */
 static bool submit_pending_input_midi_message(input_uart_task_data_t* p_task_data) {
@@ -205,7 +204,7 @@ static bool consume_input_uart_byte(
     if (IS_MIDI_REAL_TIME_MESSAGE(input_uart_byte)) {
         if (!IS_MIDI_UNDEFINED_MESSAGE(input_uart_byte)) { // real time undefined are easy to ignore because they are always one byte
             submit_input_midi_message(
-                p_task_data, 
+                p_task_data,
                 input_uart_byte,
                 INVALID_DATA_BYTE,
                 INVALID_DATA_BYTE
@@ -241,9 +240,9 @@ static bool consume_input_uart_byte(
         // a system exclusive message can be terminated by any status byte (of which EOX is also one)
 
         submit_input_midi_message(
-            p_task_data, 
-            MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END, 
-            INVALID_DATA_BYTE, 
+            p_task_data,
+            MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END,
+            INVALID_DATA_BYTE,
             INVALID_DATA_BYTE
         );
 
@@ -272,9 +271,9 @@ static bool consume_input_uart_byte(
 
         if (input_uart_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE) {
             submit_input_midi_message(
-                p_task_data, 
-                MIDI_MESSAGE_SYSTEM_EXCLUSIVE, 
-                INVALID_DATA_BYTE, 
+                p_task_data,
+                MIDI_MESSAGE_SYSTEM_EXCLUSIVE,
+                INVALID_DATA_BYTE,
                 INVALID_DATA_BYTE
             );
             return true;
@@ -319,9 +318,9 @@ static bool consume_input_uart_byte(
     if (p_task_data->received_data_bytes == p_task_data->expected_data_bytes) {
 
         submit_input_midi_message(
-            p_task_data, 
-            p_task_data->status_byte, 
-            p_task_data->data_bytes[0], 
+            p_task_data,
+            p_task_data->status_byte,
+            p_task_data->data_bytes[0],
             p_task_data->data_bytes[1]
         );
 
@@ -356,14 +355,14 @@ void input_uart_task__receive(evar_task_info_t* p_task_info) {
         // unblocked, proceed to reading the UART messages
     }
 
-    unsigned char input_uart_byte;
+    input_uart_task_message_t input_uart_task_message;
 
     for (int byte_count = 0; byte_count < 3; ++byte_count) { // this 3 byte limit is artificial, to yield to other tasks occasionally
 
         // the incoming byte cannot be consumed right away, because of the tricky case of
         // an exclusive message terminated not by EOX, but by the next message's status byte
 
-        evar_mq_result_t mq_result = evar__preview_message(&input_uart_byte, sizeof(input_uart_byte));
+        evar_mq_result_t mq_result = evar__preview_message(&input_uart_task_message);
         if (mq_result == EVAR_MQ_QUEUE_EMPTY) {
             break;
         }
@@ -373,9 +372,9 @@ void input_uart_task__receive(evar_task_info_t* p_task_info) {
 
         //UARTprintf("<< %02X\n", input_uart_byte);
 
-        if (consume_input_uart_byte(p_task_data, input_uart_byte)) { // this call will decide whether the byte should be consumed
-            if (evar__receive_message(&input_uart_byte, sizeof(input_uart_byte)) != EVAR_MQ_SUCCESS) {
-                evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_task__receive: evar__receive_message(input_uart_byte) failed");
+        if (consume_input_uart_byte(p_task_data, input_uart_task_message.input_uart_byte)) { // this call will decide whether the byte should be consumed
+            if (evar__receive_message(&input_uart_task_message) != EVAR_MQ_SUCCESS) {
+                evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_task__receive: evar__receive_message(input_uart_task_message) failed");
             }
         }
 

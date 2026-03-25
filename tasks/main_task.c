@@ -16,11 +16,11 @@
 #define EVAR_TASK_NAME main_task
 #include <evar_task.h>
 
-#include <tasks/main_task.h>
+#include "input_uart_task.h"
+#include "midi_router_task.h"
+#include "output_uart_task.h"
 
-#include <tasks/input_uart_task.h>
-#include <tasks/midi_router_task.h>
-#include <tasks/output_uart_task.h>
+#include <midiplan/config.h>
 
 /*
  * Input UART configuration.
@@ -105,6 +105,28 @@ void main_task__initialize(evar_task_info_t* p_task_info) {
 
     EVAR_UNUSED(p_task_info);
 
+    // additional application-specific device initialization (on top of evar_device__initialize)
+
+    // peripheral modules A and F has already been enabled, and we need all of the rest 
+    
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB)) {}
+
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOC)) {}
+
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOD)) {}
+
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOE)) {}
+
+    // unlock one pin that we need to use for an output UART
+
+    HWREG(GPIO_PORTD_BASE + GPIO_O_LOCK) = GPIO_LOCK_KEY;
+    HWREG(GPIO_PORTD_BASE + GPIO_O_CR) |= GPIO_PIN_7;
+    HWREG(GPIO_PORTD_BASE + GPIO_O_LOCK) = 0;
+    
     // output UART tasks
 
     evar_task_id_t output_uart_task_1 = evar__create_task(output_uart_task, &output_uart_task_data_1);
@@ -150,8 +172,6 @@ void main_task__initialize(evar_task_info_t* p_task_info) {
     }
 
     UARTprintf("\nMIDIplan running...\n");
-
-    evar_task__sleep();
 }
 
 void main_task__run(evar_task_info_t* p_task_info) {

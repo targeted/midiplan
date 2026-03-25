@@ -14,23 +14,18 @@
  */
 
 #define EVAR_TASK_NAME output_uart_task
-#define EVAR_TASK_MESSAGE_SIZE 3
-#define EVAR_TASK_MESSAGE_COUNT 340
-//#define EVAR_TASK_MESSAGES_CAN_BE_DROPPED
 #include <evar_task.h>
 
-#include <tasks/output_uart_task.h>
-
-EVAR_ASSERT(EVAR_TASK_MESSAGE_SIZE == sizeof(midi_message_t), expected_message_size);
+#define MAX_MESSAGE_COUNT (340)
 
 void output_uart_task__initialize(evar_task_info_t* p_task_info) {
 
     output_uart_task_data_t* p_task_data = (output_uart_task_data_t*)p_task_info->p_task_data;
 
-    // allocate the message queue for the task
+    // initialize the message queue for the task
 
-    static output_uart_task_message_store_t message_stores[MIDI_OUT_PORT_COUNT] = { 0 };
-    p_task_info->p_message_store = &message_stores[p_task_data->midi_out_port];
+    static unsigned char message_store[MIDI_OUT_PORT_COUNT][MESSAGE_STORE_SIZE(MAX_MESSAGE_COUNT)];
+    p_task_info->p_message_store = evar__initialize_message_store(&message_store[p_task_data->midi_out_port], MAX_MESSAGE_COUNT);
 
     // initialize the hardware output UART
 
@@ -57,10 +52,12 @@ void output_uart_task__initialize(evar_task_info_t* p_task_info) {
 
     p_task_data->delay_usec = 0;
 
-    // wait for incoming messages
+    // turn off the activity LED
 
     GPIOPinTypeGPIOOutput(p_task_data->led_port_base, p_task_data->led_pin);
     GPIOPinWrite(p_task_data->led_port_base, p_task_data->led_pin, p_task_data->led_pin);
+
+    // wait for incoming messages
 
     evar_task__sleep();
 }
@@ -87,33 +84,38 @@ void output_uart_task__receive(evar_task_info_t* p_task_info) {
     // the output UART could be in state of delay, not sending for the specified amount of time
 
     if (p_task_data->delay_usec > 0) {
-        if (evar__get_time_delta(&p_task_data->delay_start, &evar_current_timestamp) < p_task_data->delay_usec) {
+        
+        evar_timestamp_t current_timestamp;
+        evar__get_current_timestamp(&current_timestamp);
+        
+        if (evar__get_time_delta(&p_task_data->delay_start, &current_timestamp) < p_task_data->delay_usec) {
             return evar_task__keep_running(); // since we did not remove the message from the queue, this will result in __receive call immediately
         }
+        
         p_task_data->delay_usec = 0;
     }
 
     // otherwise we proceed as usual
 
-    midi_message_t midi_message;
+    output_uart_task_message_t output_uart_task_message;
 
     while (true) { // this loop is restricted with the size of the output UART FIFO
 
         if (p_task_data->message_bytes_to_send == 0) { // time to get another message from the queue
 
-            evar_mq_result_t mq_result = evar__receive_message(&midi_message, sizeof(midi_message_t));
+            evar_mq_result_t mq_result = evar__receive_message(&output_uart_task_message);
             if (mq_result == EVAR_MQ_QUEUE_EMPTY) {
                 break;
             }
             else if (mq_result != EVAR_MQ_SUCCESS) {
-                evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "output_uart_task__receive: evar__receive_message(midi_message) failed");
+                evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "output_uart_task__receive: evar__receive_message(output_uart_task_message) failed");
             }
 
             // copy the received message to the internal buffer and send from there
 
-            status_byte_t status_byte = midi_message.status_byte;
-            data_byte_t data_byte_1 = midi_message.data_byte_1;
-            data_byte_t data_byte_2 = midi_message.data_byte_2;
+            status_byte_t status_byte = output_uart_task_message.midi_message.status_byte;
+            data_byte_t data_byte_1 = output_uart_task_message.midi_message.data_byte_1;
+            data_byte_t data_byte_2 = output_uart_task_message.midi_message.data_byte_2;
 
             //UARTprintf(
             //    (VALID_DATA_BYTE(data_byte_2) ? "[%d] %02X:%02X:%02X\n" : (VALID_DATA_BYTE(data_byte_1) ? "[%d] %02X:%02X\n" : "[%d] %02X\n")),
@@ -126,7 +128,7 @@ void output_uart_task__receive(evar_task_info_t* p_task_info) {
             if (status_byte == MIDI_MESSAGE_DELAY) {
                 p_task_data->delay_usec = ((data_byte_1 << 7) | data_byte_2) * 1000;
                 evar_assert((p_task_data->delay_usec > 0) && (p_task_data->delay_usec <= EVAR_MAX_POSITIVE_TIME_DELTA));
-                p_task_data->delay_start = evar_current_timestamp;
+                evar__get_current_timestamp(&p_task_data->delay_start);
                 return evar_task__keep_running(); // since we did not remove the message from the queue, this will result in __receive call immediately
             }
 
