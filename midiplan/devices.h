@@ -8,6 +8,7 @@
 #include <midiplan/devices/gm_device.h>
 #include <midiplan/devices/kawai_phm.h>
 #include <midiplan/devices/kawai_xs1.h>
+#include <midiplan/devices/korg_pss60.h>
 #include <midiplan/devices/null_device.h>
 #include <midiplan/devices/roland_gr09.h>
 #include <midiplan/devices/yamaha_dom30.h>
