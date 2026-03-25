@@ -32,7 +32,7 @@ const midiplan_device_t roland_gr09 = {
     .pitch_bend       = 1,
 
     .melodic_programs = {
-        /* 0x00   0  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = GM_PROGRAM_ACOUSTIC_GRAND_PIANO,   .flags = ROLAND_GR09_RANGE_DEFAULT                          },
+        /* 0x00   0  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = GM_PROGRAM_ACOUSTIC_GRAND_PIANO,   .flags = ROLAND_GR09_RANGE_DEFAULT       | VOLUME_DOWN_4DB  },
         /* 0x01   1  GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO */ {  .program = GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO,  .flags = ROLAND_GR09_RANGE_DEFAULT                          },
         /* 0x02   2  GM_PROGRAM_ELECTRIC_GRAND_PIANO  */ {  .program = GM_PROGRAM_ELECTRIC_GRAND_PIANO,   .flags = ROLAND_GR09_RANGE_DEFAULT                          },
         /* 0x03   3  GM_PROGRAM_HONKY_TONK_PIANO      */ {  .program = GM_PROGRAM_HONKY_TONK_PIANO,       .flags = ROLAND_GR09_RANGE_DEFAULT                          },
