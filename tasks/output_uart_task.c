@@ -14,9 +14,8 @@
  */
 
 #define EVAR_TASK_NAME output_uart_task
+#define EVAR_TASK_MESSAGE_COUNT 340
 #include <evar_task.h>
-
-#define MAX_MESSAGE_COUNT (340)
 
 void output_uart_task__initialize(evar_task_info_t* p_task_info) {
 
@@ -24,8 +23,8 @@ void output_uart_task__initialize(evar_task_info_t* p_task_info) {
 
     // initialize the message queue for the task
 
-    static unsigned char message_store[MIDI_OUT_PORT_COUNT][MESSAGE_STORE_SIZE(MAX_MESSAGE_COUNT)];
-    p_task_info->p_message_store = evar__initialize_message_store(&message_store[p_task_data->midi_out_port], MAX_MESSAGE_COUNT);
+    static output_uart_task_message_store_t message_stores[MIDI_OUT_PORT_COUNT];
+    evar__initialize_message_store(&message_stores[p_task_data->midi_out_port]);
 
     // initialize the hardware output UART
 

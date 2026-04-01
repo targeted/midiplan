@@ -14,9 +14,9 @@
  */
 
 #define EVAR_TASK_NAME midi_router_task
+#define EVAR_TASK_MESSAGE_COUNT 256
 #include <evar_task.h>
 
-#define MAX_MESSAGE_COUNT (256)
 
 #include <midiplan/midiplan.h>
 
@@ -47,10 +47,12 @@ static midiplan_callbacks_t midiplan_callbacks = {
 
 void midi_router_task__initialize(evar_task_info_t* p_task_info) {
     
+    EVAR_UNUSED(p_task_info);
+    
     // initialize the message queue for the task
 
-    static unsigned char message_store[MESSAGE_STORE_SIZE(MAX_MESSAGE_COUNT)];
-    p_task_info->p_message_store = evar__initialize_message_store(message_store, MAX_MESSAGE_COUNT);
+    static midi_router_task_message_store_t message_store;
+    evar__initialize_message_store(&message_store);
 
     // initialize the router's structures
     

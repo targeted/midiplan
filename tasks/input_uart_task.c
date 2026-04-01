@@ -14,9 +14,8 @@
  */
 
 #define EVAR_TASK_NAME input_uart_task
+#define EVAR_TASK_MESSAGE_COUNT 1024
 #include <evar_task.h>
-
-#define MAX_MESSAGE_COUNT (1024)
 
 /*
  * This is the universal input UART interrupt handler.
@@ -73,8 +72,8 @@ void input_uart_task__initialize(evar_task_info_t* p_task_info) {
 
     // initialize the message queue for the task
 
-    static unsigned char message_store[MESSAGE_STORE_SIZE(MAX_MESSAGE_COUNT)];
-    p_task_info->p_message_store = evar__initialize_message_store(message_store, MAX_MESSAGE_COUNT);
+    static input_uart_task_message_store_t message_store;
+    evar__initialize_message_store(&message_store);
 
     // fill in the runtime task data
     
