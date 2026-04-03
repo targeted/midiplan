@@ -369,7 +369,7 @@ void input_uart_task__receive(evar_task_info_t* p_task_info) {
             evar__crash(CRASH_PREVIEW_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_task__receive: evar__preview_message(input_uart_byte) failed");
         }
 
-        //UARTprintf("<< %02X\n", input_uart_byte);
+        //UARTprintf("<< %02X\n", input_uart_task_message.input_uart_byte);
 
         if (consume_input_uart_byte(p_task_data, input_uart_task_message.input_uart_byte)) { // this call will decide whether the byte should be consumed
             if (evar__receive_message(&input_uart_task_message) != EVAR_MQ_SUCCESS) {
