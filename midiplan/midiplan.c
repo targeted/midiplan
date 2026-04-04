@@ -656,7 +656,7 @@ static uint8_t get_note_age(note_entry_id_t note_entry_id) {
 
     evar_timestamp_t current_timestamp;
     evar__get_current_timestamp(&current_timestamp);
-    
+
     evar_time_delta_t note_duration_usec = evar__get_time_delta(&p_note_entry->timestamp, &current_timestamp);
     evar_assert(note_duration_usec >= 0);
 
@@ -1854,21 +1854,23 @@ static void handle_note_on(
             // invoked on different input channels, and we would like to have them spread
             // across different bonded devices, thus increasing polyphony and multitimbrality
 
-            // two things to notice here:
+            // three things to notice here:
             // 1. it often happens that the same input program is played on several input
             //    channels in parallel and we could route those notes to different devices
             // 2. what causes multitimbrality collisions are the *output* programs, because
             //    typically there are multiple input programs mapped to the same output program
+            // 3. whether the note is percussion or melodic, is determined in input GM terms,
+            //    even though the output note can become the opposite
 
             uint8_t bonding_key;
 
-            if (IS_MELODIC_PROGRAM(out_program)) {
+            if (IS_MELODIC_PROGRAM(in_program)) {
                 // therefore we use a randomizing function of the input channel and
                 // the output program, both are deterministic and fixed for the note
                 bonding_key = device_bonding_hash(in_channel, out_program);
             }
             else {
-                evar_assert(IS_PERCUSSION_PROGRAM(out_program));
+                evar_assert(IS_PERCUSSION_PROGRAM(in_program));
                 // percussion notes will use simple note number modulo distribution
                 bonding_key = out_note;
             }
