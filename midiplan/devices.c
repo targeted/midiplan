@@ -41,6 +41,12 @@ void configure_devices(void) {
  * The current implementation of bonding is 1 out of N modulo-based,
  * across the namespace of out programs/notes. This can be calculated
  * automatically, knowing what kind of device is on which port.
+ * When more than one device of the same type are configured on
+ * different ports, they become a single logical device of the same
+ * type and each physical device will play only part of the notes.
+ * This increases polyphony/multitimbrality automatically.
+ * "General MIDI" and "Null" devices are not bonded that way,
+ * those will stay segregated and play the same notes.
  */
 static void configure_bonding(void) {
 

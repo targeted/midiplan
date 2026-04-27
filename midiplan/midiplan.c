@@ -1385,7 +1385,7 @@ static void associate_channels(
 
     if (p_output_channel->out_program != out_program) {
 
-        if (IS_MELODIC_PROGRAM(out_program)) { // no need to explicitly switch to a percussion program
+        if (IS_MELODIC_PROGRAM(out_program)) { // no need to explicitly switch to a percussion "program"
             send_program_change_sequence(
                 p_context,
                 out_port,
