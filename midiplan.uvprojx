@@ -584,6 +584,11 @@
               <FileType>1</FileType>
               <FilePath>.\midiplan\devices\korg_pss60.c</FilePath>
             </File>
+            <File>
+              <FileName>roland_cm32p.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\midiplan\devices\roland_cm32p.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
