@@ -60,7 +60,7 @@ static void configure_bonding(void) {
             if (
                 (i != j) &&
                 (devices[j].p_device == devices[i].p_device) &&
-                (devices[j].p_device != &gm_device) && // the generic devices are segregated
+                (devices[j].p_device != &gm_device) && // generic devices are segregated
                 (devices[j].p_device != &null_device)  // and not automatically bonded
             ) {
                 if (i < j) {

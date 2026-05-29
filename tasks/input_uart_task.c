@@ -17,6 +17,8 @@
 #define EVAR_TASK_MESSAGE_COUNT 1024
 #include <evar_task.h>
 
+#include "midi_router_task.h"
+
 /*
  * This is the universal input UART interrupt handler.
  */
@@ -63,7 +65,6 @@ void reset_protocol_state(input_uart_task_data_t* p_task_data) {
     p_task_data->data_bytes[0]  = INVALID_DATA_BYTE;
     p_task_data->data_bytes[1]  = INVALID_DATA_BYTE;
     p_task_data->running_status = INVALID_STATUS_BYTE;
-    p_task_data->input_midi_message_pending = false;
 }
 
 void input_uart_task__initialize(evar_task_info_t* p_task_info) {
@@ -76,12 +77,8 @@ void input_uart_task__initialize(evar_task_info_t* p_task_info) {
     evar__initialize_message_store(&message_store);
 
     // fill in the runtime task data
-    
+
     p_task_data->input_uart_task = p_task_info->current_task;
-
-    // clear the internal state tracking the protocol
-
-    reset_protocol_state(p_task_data);
 
     // initialize the hardware input UART
 
@@ -101,13 +98,21 @@ void input_uart_task__initialize(evar_task_info_t* p_task_info) {
     UARTFIFOEnable(p_task_data->uart_base);
     UARTFIFOLevelSet(p_task_data->uart_base, UART_FIFO_TX1_8, UART_FIFO_RX1_8);
 
-    UARTEnable(p_task_data->uart_base);
-
-    // wait for incoming messages
+    // turn activity LED off
 
     GPIOPinTypeGPIOOutput(p_task_data->led_port_base, p_task_data->led_pin);
 
     GPIOPinWrite(p_task_data->led_port_base, p_task_data->led_pin, p_task_data->led_pin);
+
+    // initialize the internal state
+
+    reset_protocol_state(p_task_data);
+
+    // from now on bytes may arrive from the input UART
+
+    UARTEnable(p_task_data->uart_base);
+
+    // wait for incoming messages
 
     evar_task__sleep();
 }
@@ -121,7 +126,7 @@ void input_uart_task__wake_up(evar_task_info_t* p_task_info) {
 
     input_uart_task_data_t* p_task_data = p_task_info->p_task_data;
 
-    // turn the LED off because there hasn't been a message in the queue for a while
+    // turn activity LED off because there hasn't been a message in the queue for a while
 
     GPIOPinWrite(p_task_data->led_port_base, p_task_data->led_pin, p_task_data->led_pin);
 
@@ -129,47 +134,37 @@ void input_uart_task__wake_up(evar_task_info_t* p_task_info) {
 }
 
 /*
- * Attempts to send the fully composed MIDI message to the router.
- * Will be retried if it fails.
+ * Sends the fully composed MIDI message to the router for processing.
+ * Returns true.
  */
-static bool submit_pending_input_midi_message(input_uart_task_data_t* p_task_data) {
-
-    evar_mq_result_t mq_result = evar__send_message(
-        p_task_data->midi_router_task,
-        &p_task_data->input_midi_message,
-        sizeof(midi_message_t)
-    );
-    if (mq_result == EVAR_MQ_SUCCESS) {
-        p_task_data->input_midi_message_pending = false;
-        return true;
-    }
-    else if (mq_result != EVAR_MQ_QUEUE_FULL) {
-        evar__crash(CRASH_SEND_MESSAGE_FAILED | (unsigned short)mq_result, "submit_pending_input_midi_message: evar__send_message(input_midi_message) failed");
-    }
-
-    return false;
-}
-
-/*
- * Initiates the attempts to deliver the fully composed MIDI message to the router.
- */
-static void submit_input_midi_message(
+static bool submit_midi_message(
     input_uart_task_data_t* p_task_data,
     status_byte_t status_byte,
     data_byte_t data_byte_1,
     data_byte_t data_byte_2
 ) {
 
-    p_task_data->input_midi_message.status_byte = status_byte;
-    p_task_data->input_midi_message.data_byte_1 = data_byte_1;
-    p_task_data->input_midi_message.data_byte_2 = data_byte_2;
+    midi_router_task_message_t midi_router_task_message = {
+        .midi_message = {
+            .status_byte = status_byte,
+            .data_byte_1 = data_byte_1,
+            .data_byte_2 = data_byte_2
+        }
+    };
 
-    p_task_data->input_midi_message_pending = true;
+    // sending must succeed because in the __receive call we have
+    // checked that MIDI router's message queue has free space
 
-    // this is the first attempt to send the MIDI message in for processing,
-    // if it succeeds right away, the pending flag is reset
+    evar_mq_result_t mq_result = evar__send_message(
+        p_task_data->midi_router_task,
+        &midi_router_task_message,
+        sizeof(midi_router_task_message_t)
+    );
+    if (mq_result != EVAR_MQ_SUCCESS) {
+        evar__crash(CRASH_SEND_MESSAGE_FAILED | (unsigned short)mq_result, "submit_midi_message: evar__send_message(midi_router_task_message) failed");
+    }
 
-    submit_pending_input_midi_message(p_task_data);
+    return true;
 }
 
 /*
@@ -177,46 +172,49 @@ static void submit_input_midi_message(
  * which always start with a status byte and have between zero and two data bytes. The moment a MIDI
  * message is completed, it is sent to the next stage of processing.
  *
- * There are two caveats here.
- *
- * One is that an attempt to send the complete MIDI message may fail, because the receiver's queue
- * gets full, then the message becomes "pending" and all this task will be doing then is to keep
- * trying to send it again.
- *
- * Another one is a tricky case of a system exclusive message terminated not by EOX, but by the next
- * message's status byte, which is permitted. In this case, the system exclusive message will be sent,
- * but the status byte will have to be not consumed, false is returned and the caller will retry.
+ * There is one tricky case of a system exclusive message terminated not by EOX, but by the next
+ * message's status byte, which is permitted. In this case, the implied EOX will be sent, but
+ * the status byte will have to not be consumed, false is returned and the caller will retry.
  *
  * System exclusive messages are sent as as a sequence of single-byte "messages" and are therefore
- * unlimited in size from this code's perspective. Any other message is sent in its canonical format.
+ * unlimited in size from this code's perspective. Any other message is sent individually in full,
+ * running status is removed.
  *
  * The only filtering performed at this level is ignoring the undefined messages.
+ *
+ * The additional "midi message produced" output flag returns true if this byte
+ * has resulted in completion and sending out of a MIDI message.
  */
-static bool consume_input_uart_byte(
+static void handle_input_uart_byte(
     input_uart_task_data_t* p_task_data,
-    unsigned char input_uart_byte
+    unsigned char input_uart_byte,
+    bool* p_consume_input_byte,
+    bool* p_midi_message_produced
 ) {
+
+    *p_consume_input_byte = true;
+    *p_midi_message_produced = false;
 
     // real time messages are single bytes which are recognized separately and sent out of band,
     // even before synchronization or in the middle of another message being transmitted
 
     if (IS_MIDI_REAL_TIME_MESSAGE(input_uart_byte)) {
         if (!IS_MIDI_UNDEFINED_MESSAGE(input_uart_byte)) { // real time undefined are easy to ignore because they are always one byte
-            submit_input_midi_message(
+            *p_midi_message_produced = submit_midi_message(
                 p_task_data,
                 input_uart_byte,
                 INVALID_DATA_BYTE,
                 INVALID_DATA_BYTE
             );
         }
-        return true;
+        return;
     }
 
     // after a reset, data bytes and EOX are skipped before the first real status byte is received
 
     if (!p_task_data->synchronized) {
         if (!VALID_STATUS_BYTE(input_uart_byte) || input_uart_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END) {
-            return true; // skip this byte, keep waiting
+            return; // skip this byte, keep waiting for a status byte that can be the first in a new message
         }
         p_task_data->synchronized = true;
     }
@@ -227,18 +225,18 @@ static bool consume_input_uart_byte(
     if (p_task_data->status_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE) {
 
         if (VALID_DATA_BYTE(input_uart_byte)) { // received one more data byte for the current system exclusive message
-            submit_input_midi_message(
+            *p_midi_message_produced = submit_midi_message(
                 p_task_data,
                 MIDI_MESSAGE_SYSTEM_EXCLUSIVE,
                 input_uart_byte,
                 INVALID_DATA_BYTE
             );
-            return true;
+            return;
         }
 
         // a system exclusive message can be terminated by any status byte (of which EOX is also one)
 
-        submit_input_midi_message(
+        *p_midi_message_produced = submit_midi_message(
             p_task_data,
             MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END,
             INVALID_DATA_BYTE,
@@ -252,30 +250,31 @@ static bool consume_input_uart_byte(
 
         // if a system exclusive was terminated by a status byte of the next message,
         // that status byte will be handled again and consumed at the next pass,
-        // and if it was terminated by EOX, it is consumed right away
+        // but if it was EOX that terminated it, it is consumed right away
 
-        return input_uart_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END;
+        *p_consume_input_byte = input_uart_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END;
+        return;
     }
 
     if (VALID_STATUS_BYTE(input_uart_byte)) {
 
         if (VALID_STATUS_BYTE(p_task_data->status_byte)) { // status byte received in the middle of the previous message
             reset_protocol_state(p_task_data);
-            return true;
+            return;
         }
 
         p_task_data->status_byte = input_uart_byte;
 
-        // if we received a SOX, switch to receiving a system exclusive message
+        // if we received a SOX, send it along in a separate message, as any future sysex message byte
 
         if (input_uart_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE) {
-            submit_input_midi_message(
+            *p_midi_message_produced = submit_midi_message(
                 p_task_data,
                 MIDI_MESSAGE_SYSTEM_EXCLUSIVE,
                 INVALID_DATA_BYTE,
                 INVALID_DATA_BYTE
             );
-            return true;
+            return;
         }
 
         // otherwise we are receiving a regular message, determine the number of data bytes
@@ -284,7 +283,7 @@ static bool consume_input_uart_byte(
         uint8_t expected_data_bytes = get_expected_data_bytes(p_task_data->status_byte);
         if (expected_data_bytes == EXPECTED_DATA_BYTES_UNKNOWN) {
             reset_protocol_state(p_task_data);
-            return true;
+            return;
         }
 
         p_task_data->expected_data_bytes = expected_data_bytes;
@@ -297,7 +296,7 @@ static bool consume_input_uart_byte(
 
             if (!VALID_STATUS_BYTE(p_task_data->running_status)) { // no running status either
                 reset_protocol_state(p_task_data);
-                return true;
+                return;
             }
 
             // inherit the running status as if it was received explicitly,
@@ -316,14 +315,14 @@ static bool consume_input_uart_byte(
 
     if (p_task_data->received_data_bytes == p_task_data->expected_data_bytes) {
 
-        submit_input_midi_message(
+        *p_midi_message_produced = submit_midi_message(
             p_task_data,
             p_task_data->status_byte,
             p_task_data->data_bytes[0],
             p_task_data->data_bytes[1]
         );
 
-        if (IS_MIDI_CHANNEL_MESSAGE(p_task_data->status_byte)) { // only a channel message can become current status
+        if (IS_MIDI_CHANNEL_MESSAGE(p_task_data->status_byte)) { // only a channel message can become running status
             p_task_data->running_status = p_task_data->status_byte;
         }
         else {
@@ -334,31 +333,32 @@ static bool consume_input_uart_byte(
         p_task_data->data_bytes[0] = INVALID_DATA_BYTE;
         p_task_data->data_bytes[1] = INVALID_DATA_BYTE;
     }
-
-    return true;
 }
 
 void input_uart_task__receive(evar_task_info_t* p_task_info) {
 
     input_uart_task_data_t* p_task_data = (input_uart_task_data_t*)p_task_info->p_task_data;
 
-    // if the previous attempt to send the complete MIDI message to the router has failed,
-    // keep retrying to send it, before consuming more bytes from the UART queue
+    // the bytes incoming from the input UART are accumulated in this task's message queue,
+    // one byte per message, the most economical way possible, therefore we let them stay
+    // there while we process them one by one
 
-    if (p_task_data->input_midi_message_pending) {
+    // each received byte may complete a MIDI message, and for it to be submitted
+    // we need the router task's message queue to have free space, lest we find out
+    // later that it is full and there is nothing to do but to crash then
 
-        if (!submit_pending_input_midi_message(p_task_data)) {
-            return evar_task__keep_running();
-        }
-
-        // unblocked, proceed to reading the UART messages
+    if (evar__message_queue_full(p_task_data->midi_router_task) != EVAR_MQ_QUEUE_NOT_FULL) {
+        return evar_task__sleep(); // since we did not remove the message from the queue, this will result in the same __receive call immediately
     }
 
-    input_uart_task_message_t input_uart_task_message;
+    // now that we know that we can produce a MIDI message, we will read as many
+    // input bytes as needed to do so, therefore 1 to 3 bytes will be read
 
-    for (int byte_count = 0; byte_count < 3; ++byte_count) { // this 3 byte limit is artificial, to yield to other tasks occasionally
+    while (true) {
 
-        // the incoming byte cannot be consumed right away, because of the tricky case of
+        input_uart_task_message_t input_uart_task_message;
+
+        // the incoming byte cannot always be consumed, because of the tricky case of
         // an exclusive message terminated not by EOX, but by the next message's status byte
 
         evar_mq_result_t mq_result = evar__preview_message(&input_uart_task_message);
@@ -366,30 +366,44 @@ void input_uart_task__receive(evar_task_info_t* p_task_info) {
             break;
         }
         else if (mq_result != EVAR_MQ_SUCCESS) {
-            evar__crash(CRASH_PREVIEW_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_task__receive: evar__preview_message(input_uart_byte) failed");
+            evar__crash(CRASH_PREVIEW_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_task__receive: evar__preview_message failed");
         }
 
-        //UARTprintf("<< %02X\n", input_uart_task_message.input_uart_byte);
+        //UARTprintf("< %02X\n", input_uart_task_message.input_uart_byte);
 
-        if (consume_input_uart_byte(p_task_data, input_uart_task_message.input_uart_byte)) { // this call will decide whether the byte should be consumed
-            if (evar__receive_message(&input_uart_task_message) != EVAR_MQ_SUCCESS) {
-                evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_task__receive: evar__receive_message(input_uart_task_message) failed");
+        // the following call will handle the incoming byte and possibly produce the completed MIDI message
+
+        bool consume_input_byte;
+        bool midi_message_produced;
+
+        handle_input_uart_byte(
+            p_task_data,
+            input_uart_task_message.input_uart_byte,
+            &consume_input_byte,
+            &midi_message_produced
+        );
+
+        if (consume_input_byte) {
+            if (evar__receive_message(NULL) != EVAR_MQ_SUCCESS) { // the first message is dropped by "receiving" it to NULL
+                evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_task__receive: evar__receive_message failed");
             }
         }
+        else {
+            // the only case when the byte is not consumed is when a sysex is terminated
+            // with the next status byte, therefore a EOX message must have been produced
+            evar_assert(midi_message_produced);
+        }
 
-        // if the received byte completed a message, but it failed
-        // to be delivered to the router, switch to retries
-
-        if (p_task_data->input_midi_message_pending) {
-            return evar_task__keep_running();
+        if (midi_message_produced) {
+            break;
         }
     }
 
-    // light up the LED signaling activity
+    // turn activity LED on
 
     GPIOPinWrite(p_task_data->led_port_base, p_task_data->led_pin, 0);
 
-    evar_task__sleep_for(100000);
+    evar_task__sleep_for(100000); // the LED will be turned off if no further message arrives in 0.1 sec
 }
 
 void input_uart_task__cleanup(evar_task_info_t* p_task_info) {

@@ -357,3 +357,65 @@ bool pitch_bend_supported(
 ) {
     return p_device->pitch_bend != 0;
 }
+
+/*
+ * Returns true if this device has custom sequence of the specified type.
+ */
+bool has_custom_sequence(
+    const midiplan_device_t* p_device,
+    custom_sequence_id_t custom_sequence_id
+) {
+    switch (custom_sequence_id) {
+        case INITIALIZATION_SEQUENCE:
+            return p_device->initialization_sequence_offset != INVALID_SEQUENCE_OFFSET;
+        case PROGRAM_CHANGE_SEQUENCE:
+            return p_device->program_change_sequence_offset != INVALID_SEQUENCE_OFFSET;
+        case NOTE_ON_SEQUENCE:
+            return p_device->note_on_sequence_offset != INVALID_SEQUENCE_OFFSET;
+        case NOTE_OFF_SEQUENCE:
+            return p_device->note_off_sequence_offset != INVALID_SEQUENCE_OFFSET;
+        default:
+            evar_assert(false);
+            return false;
+    }
+}
+
+/*
+ * Returns a pointer to the specified initialization sequence for the device.
+ * The reason we use lookup by id instead of simply passing pointers around
+ * is that a pointer would take 4 bytes per message in the queue, whereas id
+ * requires just one byte.
+ */
+const uint8_t* get_custom_sequence(
+    const midiplan_device_t* p_device,
+    custom_sequence_id_t custom_sequence_id
+) {
+
+    uint16_t sequence_offset;
+    
+    switch (custom_sequence_id) {
+        case INITIALIZATION_SEQUENCE:
+            sequence_offset = p_device->initialization_sequence_offset;
+            break;
+        case PROGRAM_CHANGE_SEQUENCE:
+            sequence_offset = p_device->program_change_sequence_offset;
+            break;
+        case NOTE_ON_SEQUENCE:
+            sequence_offset = p_device->note_on_sequence_offset;
+            break;
+        case NOTE_OFF_SEQUENCE:
+            sequence_offset = p_device->note_off_sequence_offset;
+            break;
+        default:
+            evar_assert(false);
+            return NULL;
+    }
+
+    evar_assert(sequence_offset != INVALID_SEQUENCE_OFFSET);
+    
+    if (sequence_offset > 0) {
+        evar_assert(p_device->custom_sequences[sequence_offset - 1] == INVALID_STATUS_BYTE); // buffer integrity check
+    }
+    
+    return p_device->custom_sequences + sequence_offset;
+}

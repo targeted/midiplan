@@ -239,4 +239,23 @@ bool pitch_bend_supported(
     const midiplan_device_t* p_device
 );
 
+/*
+ * Returns true if this device has custom sequence of the specified type.
+ */
+bool has_custom_sequence(
+    const midiplan_device_t* p_device,
+    custom_sequence_id_t custom_sequence_id
+);
+
+/*
+ * Returns a pointer to the specified initialization sequence for the device.
+ * The reason we use lookup by id instead of simply passing pointers around
+ * is that a pointer would take 4 bytes per message in the queue, whereas id
+ * requires just one byte.
+ */
+const uint8_t* get_custom_sequence(
+    const midiplan_device_t* p_device,
+    custom_sequence_id_t custom_sequence_id
+);
+    
 #endif

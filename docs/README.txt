@@ -45,4 +45,4 @@ The unit is now capable of playing polyphonically when it receives MIDI messages
 
 === Korg PSS60 ===
 
-Keep F4 pressed when turning on the unit, it will switch it into "Sound module" mode.
+Keep F4 pressed when turning on the unit, that will switch it into "Sound module" mode.

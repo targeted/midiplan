@@ -5,12 +5,14 @@
 #include <evar_preproc.h>
 
 typedef unsigned char status_byte_t;
-#define VALID_STATUS_BYTE(BYTE) (((BYTE) & 0x80) != 0)
+#define STATUS_BYTE_MSB (0x80)
+#define VALID_STATUS_BYTE(BYTE) (((BYTE) & 0x80) == STATUS_BYTE_MSB)
 #define INVALID_STATUS_BYTE (0x7F)
 EVAR_ASSERT(!VALID_STATUS_BYTE(INVALID_STATUS_BYTE), invalid_status_byte);
 
 typedef unsigned char data_byte_t;
-#define VALID_DATA_BYTE(BYTE) (((BYTE) & 0x80) == 0)
+#define DATA_BYTE_MSB (0x00)
+#define VALID_DATA_BYTE(BYTE) (((BYTE) & 0x80) == DATA_BYTE_MSB)
 #define INVALID_DATA_BYTE (0xFF)
 EVAR_ASSERT(!VALID_DATA_BYTE(INVALID_DATA_BYTE), invalid_data_byte);
 
@@ -59,7 +61,7 @@ typedef enum {
     MIDI_MESSAGE_COMMON_SONG_POSITION_POINTER   = 0xF2,
     MIDI_MESSAGE_COMMON_SONG_SELECT             = 0xF3,
     MIDI_MESSAGE_COMMON_UNDEFINED_F4            = 0xF4,
-    MIDI_MESSAGE_DELAY                          = 0xF4, // repurposed undefined, observed by the output UART
+    MIDI_MESSAGE_DELAY                          = 0xF4, // repurposed undefined, observed by the output UART as a part of a custom sequence
     MIDI_MESSAGE_COMMON_UNDEFINED_F5            = 0xF5,
     MIDI_MESSAGE_COMMON_TUNE_REQUEST            = 0xF6,
     MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END           = 0xF7,

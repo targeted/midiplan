@@ -43,7 +43,7 @@ void midiplan_initialize(midiplan_callbacks_t* p_callbacks_) {
  * before the message hits the UART. All the changes are final, all numbers
  * already absolute in device terms.
  */
-static void send_message(
+static void send_midi_message(
     void* p_context,
     midi_out_port_t out_port,
     midi_channel_t out_channel,
@@ -51,14 +51,13 @@ static void send_message(
     data_byte_t data_byte_1,
     data_byte_t data_byte_2
 ) {
-
-    midi_message_t midi_message = {
-        .status_byte = message_type | out_channel,
-        .data_byte_1 = data_byte_1,
-        .data_byte_2 = data_byte_2
-    };
-
-    p_callbacks->send_message(p_context, out_port, midi_message);
+    p_callbacks->send_midi_message(
+        p_context,
+        out_port,
+        message_type | out_channel,
+        data_byte_1,
+        data_byte_2
+    );
 }
 
 /*
@@ -68,263 +67,36 @@ static void send_message(
  */
 static void broadcast_message(
     void* p_context,
-    midi_message_t midi_message
+    status_byte_t status_byte,
+    data_byte_t data_byte_1,
+    data_byte_t data_byte_2
 ) {
     for (midi_out_port_t out_port = MIDI_OUT_PORT_1; out_port < MIDI_OUT_PORT_COUNT; ++out_port) {
-        p_callbacks->send_message(p_context, out_port, midi_message);
+        p_callbacks->send_midi_message(
+            p_context,
+            out_port,
+            status_byte,
+            data_byte_1,
+            data_byte_2
+        );
     }
 }
 
-typedef struct {
-    uint8_t roland_checksum; // running value of a Roland-style checksum
-} custom_sequence_context_t;
-
 /*
- * This internal utility reads the next byte from a custom sequence in a device configuration.
- * If the MSB parity of the next byte matches the expected (status vs. data), it is returned
- * as is, otherwise all the bytes of the opposite parity are interpreted as instructions on
- * how to augment the upcoming byte, using the provided parameters. After all parameter bytes
- * are processed, we get to the real byte, and the collected augmentation is or-ed into it.
- */
-static uint8_t read_augmented_byte(
-    const uint8_t** p_sequence,
-    const uint8_t** p_parameters,
-    custom_sequence_context_t* p_custom_sequence_context,
-    uint8_t expected_msb
-) {
-
-    const uint8_t* sequence = *p_sequence;
-
-    uint8_t augmented_byte = 0x00;
-
-    uint8_t next_byte = *sequence++;
-
-    while ((next_byte & 0x80) != expected_msb) { // this loop ends when a real sequence byte is received, after the augmentation has been collected
-
-        // the parity of the next byte is not as expected for the MIDI message,
-        // it is interpreted as a parameter, or-augmenting the upcoming real byte
-
-        // because the most significant bit is fixed, that leaves us with 7 bits:
-        // x6543210
-        //  ^       when 0:
-        //   ^^        0 to 3, index into the parameters array to pick the parameter byte (value range 0-127)
-        //     ^       0 = use the parameter as a literal value
-        //             1 = use the parameter as an index to look up into the following inline table with 128 elements
-        //      ^      0 = 4-bit value / 4-bit table entry size
-        //             1 = 7-bit value / 8-bit table entry size, produces 7 bits
-        //       ^^    when the previous bit is 0 (4-bit values)
-        //               00 = verbatim
-        //               01 = bits 2-0 of the value are shifted to bits 6-4, bit 3 is ignored
-        //               10 = reserved
-        //               11 = reserved
-        //             when the previous bit is 1 (8-bit values)
-        //               00 = verbatim
-        //               01 = bit 6 of the value is set to 0, reducing value to 6 bits
-        //               10 = reserved
-        //               11 = reserved
-        //  ^       when 1:
-        //   ^^^^^^    000000 = reset the Roland-style checksum to 0, marking the first byte of a checksummed part of the sequence
-        //             000001 = paste the current value of the Roland-checksum
-        //             others = reserved
-
-        uint8_t parameter_mode  = (next_byte & 0b01000000) >> 6;
-
-        if (parameter_mode == 0) { // parameter-derived value
-
-            uint8_t parameter_index = (next_byte & 0b00110000) >> 4;
-            uint8_t parameter_type  = (next_byte & 0b00001000) >> 3;
-            uint8_t parameter_size  = (next_byte & 0b00000100) >> 2;
-            uint8_t parameter_op    = (next_byte & 0b00000011);
-
-            // pick the parameter byte by index
-
-            uint8_t parameter_value = (*p_parameters)[parameter_index];
-            evar_assert((parameter_value & 0x80) == 0);
-
-            if (parameter_type == 0) { // literal
-                if (parameter_size == 0) { // use lower 4 bits
-                    parameter_value &= 0x0F;
-                    switch (parameter_op) {
-                        case 0b00: // verbatim
-                            break;
-                        case 0b01: // bits 2-0 are put to bits 6-4
-                            parameter_value = (parameter_value & 0b111) << 4;
-                            break;
-                        case 0b10: // reserved
-                            break;
-                        case 0b11: // reserved
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else { // use lower 7 bits
-                    switch (parameter_op) {
-                        case 0b00: // verbatim
-                            break;
-                        case 0b01: // reduce to 6 bits
-                            parameter_value &= 0b00111111;
-                            break;
-                        case 0b10: // reserved
-                            break;
-                        case 0b11: // reserved
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-            else { // lookup index
-                if (parameter_size == 0) { // use 4-bit lookup, 128 4-bit entries numbered 0-127 left-to-right, 64 bytes
-                    if ((parameter_value & 1) != 0) {
-                        parameter_value = sequence[parameter_value >> 1] & 0x0F;
-                    }
-                    else {
-                        parameter_value = sequence[parameter_value >> 1] >> 4;
-                    }
-                    switch (parameter_op) {
-                        case 0b00: // verbatim
-                            break;
-                        case 0b01: // bits 2-0 are put to bits 6-4
-                            parameter_value = (parameter_value & 0b111) << 4;
-                            break;
-                        case 0b10: // reserved
-                            break;
-                        case 0b11: // reserved
-                            break;
-                        default:
-                            break;
-                    }
-                    sequence += 64;
-                }
-                else { // use 8-bit lookup, 128 8-bit entries numbered 0-127 left-to-right, 128 bytes
-                    parameter_value = sequence[parameter_value];
-                    switch (parameter_op) {
-                        case 0b00: // verbatim
-                            break;
-                        case 0b01: // reduce to 6 bits
-                            parameter_value &= 0b00111111;
-                            break;
-                        case 0b10: // reserved
-                            break;
-                        case 0b11: // reserved
-                            break;
-                        default:
-                            break;
-                    }
-                    sequence += 128;
-                }
-            }
-
-            augmented_byte |= parameter_value;
-        }
-        else { // assorted operations
-
-            switch (next_byte & 0b00111111) {
-                case 0b000000: // reset the Roland-style checksum
-                    p_custom_sequence_context->roland_checksum = 0;
-                    break;
-                case 0b000001: // paste the value of the Roland-style checksum
-                    augmented_byte |= (0x80 - (p_custom_sequence_context->roland_checksum & 0x7F)) & 0x7F;
-                    break;
-                default: // reserved
-                    break;
-            }
-        }
-
-        next_byte = *sequence++;
-    }
-
-    uint8_t actual_byte = augmented_byte | next_byte;
-
-    // update running value of the Roland-style checksum
-
-    p_custom_sequence_context->roland_checksum += actual_byte;
-
-    *p_sequence = sequence;
-
-    return actual_byte;
-}
-
-static status_byte_t read_augmented_status_byte(
-    const uint8_t** p_sequence,
-    const uint8_t** p_parameters,
-    custom_sequence_context_t* p_custom_sequence_context
-) {
-    status_byte_t result = read_augmented_byte(p_sequence, p_parameters, p_custom_sequence_context, 0x80);
-    evar_assert(VALID_STATUS_BYTE(result));
-    return result;
-}
-
-static data_byte_t read_augmented_data_byte(
-    const uint8_t** p_sequence,
-    const uint8_t** p_parameters,
-    custom_sequence_context_t* p_custom_sequence_context
-) {
-    data_byte_t result = read_augmented_byte(p_sequence, p_parameters, p_custom_sequence_context, 0x00);
-    evar_assert(VALID_DATA_BYTE(result));
-    return result;
-}
-
-/*
- * Constructs and sends sequence of parameterized MIDI messages.
+ * Sends a parameterized custom message.
  */
 static void send_custom_sequence(
-    void*           p_context,
+    void* p_context,
     midi_out_port_t out_port,
-    const uint8_t*  sequence,
-    const uint8_t   parameters[4]
+    custom_sequence_id_t custom_sequence_id,
+    custom_sequence_parameters_t custom_sequence_parameters
 ) {
-
-    custom_sequence_context_t custom_sequence_context = {
-        .roland_checksum = 0x00
-    };
-
-    while (*sequence != INVALID_STATUS_BYTE) {
-
-        status_byte_t status_byte = read_augmented_status_byte(&sequence, &parameters, &custom_sequence_context);
-
-        midi_message_t midi_message = {
-            .status_byte = status_byte,
-            .data_byte_1 = INVALID_DATA_BYTE,
-            .data_byte_2 = INVALID_DATA_BYTE,
-        };
-
-        if (status_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE) {
-
-            p_callbacks->send_message(p_context, out_port, midi_message);
-
-            while (*sequence != MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END) {
-                midi_message.data_byte_1 = read_augmented_data_byte(&sequence, &parameters, &custom_sequence_context);
-                p_callbacks->send_message(p_context, out_port, midi_message);
-            }
-
-            sequence += 1; // skip EOX
-
-            midi_message.status_byte = MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END;
-            midi_message.data_byte_1 = INVALID_DATA_BYTE;
-
-            p_callbacks->send_message(p_context, out_port, midi_message);
-        }
-        else {
-
-            switch (get_expected_data_bytes(status_byte)) {
-                case 2:
-                    midi_message.data_byte_1 = read_augmented_data_byte(&sequence, &parameters, &custom_sequence_context);
-                    midi_message.data_byte_2 = read_augmented_data_byte(&sequence, &parameters, &custom_sequence_context);
-                    break;
-                case 1:
-                    midi_message.data_byte_1 = read_augmented_data_byte(&sequence, &parameters, &custom_sequence_context);
-                    break;
-                case 0:
-                    break;
-                default:
-                    return;
-            }
-
-            p_callbacks->send_message(p_context, out_port, midi_message);
-        }
-    }
+    p_callbacks->send_custom_sequence(
+        p_context,
+        out_port,
+        custom_sequence_id,
+        custom_sequence_parameters
+    );
 }
 
 /*
@@ -337,29 +109,19 @@ static void send_initialization_sequence(
 
     const midiplan_device_t* p_device = devices[out_port].p_device;
 
-    uint16_t sequence_offset = p_device->initialization_sequence_offset;
-    if (sequence_offset == INVALID_SEQUENCE_OFFSET) {
-        // there is no default initialization sequence
-        return;
+    if (has_custom_sequence(p_device, INITIALIZATION_SEQUENCE)) {
+
+        custom_sequence_parameters_t initialization_sequence_parameters = {
+            .p = { p_device->basic_channel, 0, 0 }
+        };
+
+        send_custom_sequence(
+            p_context,
+            out_port,
+            INITIALIZATION_SEQUENCE,
+            initialization_sequence_parameters
+        );
     }
-
-    if (sequence_offset > 0) {
-        evar_assert(p_device->custom_sequences[sequence_offset - 1] == INVALID_STATUS_BYTE); // buffer integrity check
-    }
-
-    const uint8_t parameters[4] = {
-        p_device->basic_channel,
-        0x00,
-        0x00,
-        0x00
-    };
-
-    send_custom_sequence(
-        p_context,
-        out_port,
-        p_device->custom_sequences + sequence_offset,
-        parameters
-    );
 }
 
 /*
@@ -383,13 +145,22 @@ static void send_program_change_sequence(
         evar_assert(!VALID_NOTE_ENTRY_ID(p_device_state->channels[out_channel].last_note_entry_id));
     }
 
-    uint16_t sequence_offset = p_device->program_change_sequence_offset;
-    if (sequence_offset == INVALID_SEQUENCE_OFFSET) {
+    if (has_custom_sequence(p_device, PROGRAM_CHANGE_SEQUENCE)) {
 
-        // if there is no custom sequence for program change,
-        // we send the default message
+        custom_sequence_parameters_t program_change_sequence_parameters = {
+            .p = { out_channel, out_program, 0 }
+        };
 
-        send_message(
+        send_custom_sequence(
+            p_context,
+            out_port,
+            PROGRAM_CHANGE_SEQUENCE,
+            program_change_sequence_parameters
+        );
+    }
+    else { // if there is no custom sequence, send the default message
+
+        send_midi_message(
             p_context,
             out_port,
             out_channel,
@@ -397,27 +168,7 @@ static void send_program_change_sequence(
             out_program,
             INVALID_DATA_BYTE
         );
-
-        return;
     }
-
-    if (sequence_offset > 0) {
-        evar_assert(p_device->custom_sequences[sequence_offset - 1] == INVALID_STATUS_BYTE); // buffer integrity check
-    }
-
-    const uint8_t parameters[4] = {
-        out_channel,
-        out_program,
-        0x00,
-        0x00
-    };
-
-    send_custom_sequence(
-        p_context,
-        out_port,
-        p_device->custom_sequences + sequence_offset,
-        parameters
-    );
 }
 
 /*
@@ -437,13 +188,22 @@ static void send_note_on_sequence(
 
     const midiplan_device_t* p_device = devices[out_port].p_device;
 
-    uint16_t sequence_offset = p_device->note_on_sequence_offset;
-    if (sequence_offset == INVALID_SEQUENCE_OFFSET) {
+    if (has_custom_sequence(p_device, NOTE_ON_SEQUENCE)) {
 
-        // if there is no custom sequence for note on,
-        // we send the default message
+        custom_sequence_parameters_t note_on_sequence_parameters = {
+            .p = { out_channel, out_note, out_velocity }
+        };
 
-        send_message(
+        send_custom_sequence(
+            p_context,
+            out_port,
+            NOTE_ON_SEQUENCE,
+            note_on_sequence_parameters
+        );
+    }
+    else {
+
+        send_midi_message(
             p_context,
             out_port,
             out_channel,
@@ -451,27 +211,7 @@ static void send_note_on_sequence(
             out_note,
             out_velocity
         );
-
-        return;
     }
-
-    if (sequence_offset > 0) {
-        evar_assert(p_device->custom_sequences[sequence_offset - 1] == INVALID_STATUS_BYTE); // buffer integrity check
-    }
-
-    const uint8_t parameters[4] = {
-        out_channel,
-        out_note,
-        out_velocity,
-        0x00
-    };
-
-    send_custom_sequence(
-        p_context,
-        out_port,
-        p_device->custom_sequences + sequence_offset,
-        parameters
-    );
 }
 
 /*
@@ -491,13 +231,22 @@ static void send_note_off_sequence(
 
     const midiplan_device_t* p_device = devices[out_port].p_device;
 
-    uint16_t sequence_offset = p_device->note_off_sequence_offset;
-    if (sequence_offset == INVALID_SEQUENCE_OFFSET) {
+    if (has_custom_sequence(p_device, NOTE_OFF_SEQUENCE)) {
 
-        // if there is no custom sequence for note off,
-        // we send the default message
+        custom_sequence_parameters_t note_off_sequence_parameters = {
+            .p = { out_channel, out_note, out_velocity }
+        };
 
-        send_message(
+        send_custom_sequence(
+            p_context,
+            out_port,
+            NOTE_OFF_SEQUENCE,
+            note_off_sequence_parameters
+        );
+    }
+    else { // if there is no custom sequence, send the default message
+
+        send_midi_message(
             p_context,
             out_port,
             out_channel,
@@ -505,27 +254,7 @@ static void send_note_off_sequence(
             out_note,
             out_velocity
         );
-
-        return;
     }
-
-    if (sequence_offset > 0) {
-        evar_assert(p_device->custom_sequences[sequence_offset - 1] == INVALID_STATUS_BYTE); // buffer integrity check
-    }
-
-    const uint8_t parameters[4] = {
-        out_channel,
-        out_note,
-        out_velocity,
-        0x00
-    };
-
-    send_custom_sequence(
-        p_context,
-        out_port,
-        p_device->custom_sequences + sequence_offset,
-        parameters
-    );
 }
 
 /*
@@ -547,7 +276,7 @@ static void send_control_change(
 
         if (controller_supported(p_device, control) && controller_supported(p_device, control | 0x20)) {
 
-            send_message(
+            send_midi_message(
                 p_context,
                 out_port,
                 out_channel,
@@ -556,7 +285,7 @@ static void send_control_change(
                 msb_or_value
             );
 
-            send_message(
+            send_midi_message(
                 p_context,
                 out_port,
                 out_channel,
@@ -570,7 +299,7 @@ static void send_control_change(
 
         if (controller_supported(p_device, control)) {
 
-            send_message(
+            send_midi_message(
                 p_context,
                 out_port,
                 out_channel,
@@ -584,7 +313,7 @@ static void send_control_change(
 
         if (channel_pressure_supported(p_device)) {
 
-            send_message(
+            send_midi_message(
                 p_context,
                 out_port,
                 out_channel,
@@ -598,7 +327,7 @@ static void send_control_change(
 
         if (pitch_bend_supported(p_device)) {
 
-            send_message(
+            send_midi_message(
                 p_context,
                 out_port,
                 out_channel,
@@ -2004,7 +1733,7 @@ static void handle_key_pressure(
             continue;
         }
 
-        send_message(
+        send_midi_message(
             p_context,
             out_port,
             out_channel,
@@ -2050,7 +1779,7 @@ static void handle_all_sound_off(
 
             // send "all sound off" to the device
 
-            send_message(
+            send_midi_message(
                 p_context,
                 out_port,
                 out_channel,
@@ -2091,7 +1820,7 @@ static void handle_reset_all_controllers(
 
             // send "reset all controllers" to the device
 
-            send_message(
+            send_midi_message(
                 p_context,
                 out_port,
                 out_channel,
@@ -2416,32 +2145,21 @@ static void handle_special(
     data_byte_t data_byte_1
 ) {
 
-// this is a quick and dirty fix to disable incoming
-// system exclusive messages and will be reworked
 #ifndef SYSTEM_EXCLUSIVE_PASSTHROUGH
     EVAR_UNUSED(data_byte_1);
 #endif
 
-    midi_message_t midi_message = {
-        .status_byte = status_byte,
-        .data_byte_1 = INVALID_DATA_BYTE,
-        .data_byte_2 = INVALID_DATA_BYTE
-    };
-
     if (IS_MIDI_REAL_TIME_MESSAGE(status_byte)) {
-        broadcast_message(p_context, midi_message);
+        broadcast_message(p_context, status_byte, INVALID_DATA_BYTE, INVALID_DATA_BYTE);
     }
-    else if (status_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE) {
 #ifdef SYSTEM_EXCLUSIVE_PASSTHROUGH
-        midi_message.data_byte_1 = data_byte_1;
-        broadcast_message(p_context, midi_message);
-#endif
+    else if (status_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE) {
+        broadcast_message(p_context, status_byte, data_byte_1, INVALID_DATA_BYTE);
     }
     else if (status_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END) {
-#ifdef SYSTEM_EXCLUSIVE_PASSTHROUGH
-        broadcast_message(p_context, midi_message);
-#endif
+        broadcast_message(p_context, status_byte, INVALID_DATA_BYTE, INVALID_DATA_BYTE);
     }
+#endif
     else {
         // all the other special messages are ignored
     }
