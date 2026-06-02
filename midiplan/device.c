@@ -121,11 +121,6 @@ void reset_device_state(midiplan_device_state_t* p_device_state) {
         evar_assert(p_device_state->channels[out_channel].notes_playing == 0);
         evar_assert(!VALID_NOTE_ENTRY_ID(p_device_state->channels[out_channel].last_note_entry_id));
     }
-
-    // schedule delayed initialization for the device,
-    // the actual transmission will happen at the next note
-
-    p_device_state->initialization_pending = true;
 }
 
 /*

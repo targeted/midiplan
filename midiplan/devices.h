@@ -4,6 +4,7 @@
 #include <midiplan/types.h>
 #include <midiplan/config.h>
 #include <midiplan/device.h>
+#include <midiplan/devices/alesis_sr16.h>
 #include <midiplan/devices/casio_csm1.h>
 #include <midiplan/devices/gm_device.h>
 #include <midiplan/devices/kawai_phm.h>

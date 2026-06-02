@@ -449,31 +449,6 @@
               <FileType>1</FileType>
               <FilePath>.\tasks\midi_router_task.c</FilePath>
             </File>
-            <File>
-              <FileName>common.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\tasks\common.h</FilePath>
-            </File>
-            <File>
-              <FileName>input_uart_task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\tasks\input_uart_task.h</FilePath>
-            </File>
-            <File>
-              <FileName>main_task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\tasks\main_task.h</FilePath>
-            </File>
-            <File>
-              <FileName>midi_router_task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\tasks\midi_router_task.h</FilePath>
-            </File>
-            <File>
-              <FileName>output_uart_task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\tasks\output_uart_task.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -588,6 +563,11 @@
               <FileName>roland_cm32p.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\midiplan\devices\roland_cm32p.c</FilePath>
+            </File>
+            <File>
+              <FileName>alesis_sr16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\midiplan\devices\alesis_sr16.c</FilePath>
             </File>
           </Files>
         </Group>

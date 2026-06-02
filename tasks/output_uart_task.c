@@ -19,7 +19,54 @@
 
 #include <midiplan/devices.h>
 
-static output_uart_task_message_store_t message_stores[MIDI_OUT_PORT_COUNT];
+static void activity_led_on(output_uart_task_data_t* p_task_data) {
+    GPIOPinWrite(p_task_data->led_port_base, p_task_data->led_pin, 0);
+}
+
+static void activity_led_off(output_uart_task_data_t* p_task_data) {
+    GPIOPinWrite(p_task_data->led_port_base, p_task_data->led_pin, p_task_data->led_pin);
+}
+
+/*
+ * Returns true if this task has some buffered data being sent.
+ */
+static bool have_bytes_to_send(output_uart_task_data_t* p_task_data) {
+    return (p_task_data->custom_sequence.p_next_byte != NULL) ||
+           (p_task_data->message_data.offs < p_task_data->message_data.size);
+}
+
+/*
+ * Returns true if sending delay has been requested and is still in effect.
+ */
+static bool in_delay(output_uart_task_data_t* p_task_data) {
+
+    if (p_task_data->delay_usec == 0) {
+        return false;
+    }
+
+    evar_timestamp_t current_timestamp;
+    evar__get_current_timestamp(&current_timestamp);
+
+    if (evar__get_time_delta(&p_task_data->delay_start, &current_timestamp) < p_task_data->delay_usec) {
+        return true;
+    }
+
+    p_task_data->delay_usec = 0;
+
+    return false;
+}
+
+/*
+ * Initializes a sending delay.
+ */
+static void go_in_delay(output_uart_task_data_t* p_task_data, evar_time_delta_t delay_usec) {
+
+    evar_assert(!in_delay(p_task_data));
+    evar_assert(delay_usec > 0 && delay_usec <= EVAR_MAX_POSITIVE_TIME_DELTA);
+
+    p_task_data->delay_usec = delay_usec;
+    evar__get_current_timestamp(&p_task_data->delay_start);
+}
 
 void output_uart_task__initialize(evar_task_info_t* p_task_info) {
 
@@ -27,6 +74,7 @@ void output_uart_task__initialize(evar_task_info_t* p_task_info) {
 
     // initialize the message queue for the task
 
+    static output_uart_task_message_store_t message_stores[MIDI_OUT_PORT_COUNT];
     evar__initialize_message_store(&message_stores[p_task_data->midi_out_port]);
 
     // initialize the hardware output UART
@@ -49,34 +97,20 @@ void output_uart_task__initialize(evar_task_info_t* p_task_info) {
 
     p_task_data->message_data.offs = 0;
     p_task_data->message_data.size = 0;
-
     p_task_data->custom_sequence.p_next_byte = NULL;
+    evar_assert(!have_bytes_to_send(p_task_data));
+
+    p_task_data->delay_usec = 0;
+    evar_assert(!in_delay(p_task_data));
 
     p_task_data->running_status = INVALID_STATUS_BYTE;
 
-    p_task_data->delay_usec = 0;
-
-    // turn activity LED off
+    // configure the activity LED and turn it off
 
     GPIOPinTypeGPIOOutput(p_task_data->led_port_base, p_task_data->led_pin);
-    GPIOPinWrite(p_task_data->led_port_base, p_task_data->led_pin, p_task_data->led_pin);
+    activity_led_off(p_task_data);
 
     // wait for incoming messages
-
-    evar_task__sleep();
-}
-
-void output_uart_task__run(evar_task_info_t* p_task_info) {
-    EVAR_UNUSED(p_task_info);
-}
-
-void output_uart_task__wake_up(evar_task_info_t* p_task_info) {
-
-    output_uart_task_data_t* p_task_data = p_task_info->p_task_data;
-
-    // turn activity LED off because there hasn't been a message in the queue for a while
-
-    GPIOPinWrite(p_task_data->led_port_base, p_task_data->led_pin, p_task_data->led_pin);
 
     evar_task__sleep();
 }
@@ -190,7 +224,7 @@ static bool receive_next_message(
         return false;
     }
     else if (mq_result != EVAR_MQ_SUCCESS) {
-        evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "output_uart_task__receive: evar__receive_message failed");
+        evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "receive_next_message: evar__receive_message failed");
     }
 
     if (output_uart_task_message.custom_sequence_id == SINGLE_MIDI_MESSAGE) {
@@ -412,10 +446,12 @@ static bool get_next_custom_sequence_byte(
 
             *p_next_byte = MIDI_MESSAGE_SYSTEM_EXCLUSIVE_END;
             p_task_data->custom_sequence.p_next_byte += 1;
+
         }
         else { // anything else is expected to be a possibly augmented data byte
 
             *p_next_byte = get_augmented_data_byte(p_task_data);
+
         }
 
         return true;
@@ -449,10 +485,7 @@ static bool get_next_custom_sequence_byte(
             data_byte_t data_byte_1 = get_augmented_data_byte(p_task_data);
             data_byte_t data_byte_2 = get_augmented_data_byte(p_task_data);
 
-            p_task_data->delay_usec = ((data_byte_1 << 7) | data_byte_2) * 1000;
-            evar_assert((p_task_data->delay_usec > 0) && (p_task_data->delay_usec <= EVAR_MAX_POSITIVE_TIME_DELTA));
-
-            evar__get_current_timestamp(&p_task_data->delay_start);
+            go_in_delay(p_task_data, ((data_byte_1 << 7) | data_byte_2) * 1000);
 
             return false; // nothing is returned, UART goes into delay
         }
@@ -487,7 +520,10 @@ static bool get_next_midi_message_byte(
 }
 
 /*
- * Returns the next byte from the logical sequence of messages.
+ * Retrieves the next byte from the logical sequence of messages.
+ * Returns true if there is a next byte, false if there is nothing
+ * to send at the moment (the data may be available, but a delay
+ * is being requested).
  */
 static bool get_next_byte(
     output_uart_task_data_t* p_task_data,
@@ -496,13 +532,11 @@ static bool get_next_byte(
 
     // if nothing is currently buffered, pull the next message from the queue
 
-    if (
-        (p_task_data->custom_sequence.p_next_byte == NULL) &&
-        (p_task_data->message_data.offs == p_task_data->message_data.size)
-    ) {
+    if (!have_bytes_to_send(p_task_data)) {
         if (!receive_next_message(p_task_data)) { // no more messages in the queue
             return false;
         }
+        evar_assert(have_bytes_to_send(p_task_data));
     }
 
     if (p_task_data->custom_sequence.p_next_byte != NULL) {
@@ -513,38 +547,60 @@ static bool get_next_byte(
     }
 }
 
-void output_uart_task__receive(evar_task_info_t* p_task_info) {
+/*
+ * This will get invoked if there is a message in the queue or there is some buffered data to send.
+ */
+void output_uart_task__run(evar_task_info_t* p_task_info) {
 
     output_uart_task_data_t* p_task_data = p_task_info->p_task_data;
 
-    // output UART could be in state of delay, not sending for the specified amount of time
+    // output UART could be in state of delay, not sending for the specified
+    // amount of time, sending will continue after the timeout will have elapsed
 
-    if (p_task_data->delay_usec > 0) {
-
-        evar_timestamp_t current_timestamp;
-        evar__get_current_timestamp(&current_timestamp);
-
-        if (evar__get_time_delta(&p_task_data->delay_start, &current_timestamp) < p_task_data->delay_usec) {
-            return evar_task__sleep(); // since we did not remove the message from the queue, this will result in the same __receive call immediately
-        }
-
-        p_task_data->delay_usec = 0;
+    if (in_delay(p_task_data)) {
+        return evar_task__keep_running();
     }
 
     // this loop exits when we run out of input messages, the output UART FIFO is full, or a delay is requested
 
-    uint8_t next_byte;
+    while (true) {
 
-    while (UARTSpaceAvail(p_task_data->uart_base) && get_next_byte(p_task_data, &next_byte)) {
+        if (!UARTSpaceAvail(p_task_data->uart_base)) {
+            return evar_task__keep_running(); // busy wait until output FIFO has sending capacity
+        }
+
+        if (!have_bytes_to_send(p_task_data)) {
+            if (!receive_next_message(p_task_data)) { // nothing buffered and no more messages in the queue
+                return evar_task__sleep_for(100000);
+            }
+            evar_assert(have_bytes_to_send(p_task_data));
+        }
+
+        uint8_t next_byte;
+        if (!get_next_byte(p_task_data, &next_byte)) {
+            return evar_task__keep_running();
+        }
+
         //UARTprintf("> %02X\n", next_byte);
         UARTCharPut(p_task_data->uart_base, next_byte);
+
+        activity_led_on(p_task_data);
     }
 
-    // turn activity LED on
+    return evar_task__keep_running();
+}
 
-    GPIOPinWrite(p_task_data->led_port_base, p_task_data->led_pin, 0);
+/*
+ * This will be invoked when the task has been idle for 100ms.
+ */
+void output_uart_task__wake_up(evar_task_info_t* p_task_info) {
+    output_uart_task_data_t* p_task_data = p_task_info->p_task_data;
+    activity_led_off(p_task_data);
+    evar_task__sleep();
+}
 
-    evar_task__sleep_for(100000); // the LED will be turned off if no message arrives in 0.1 sec
+void output_uart_task__receive(evar_task_info_t* p_task_info) {
+    output_uart_task__run(p_task_info);
 }
 
 void output_uart_task__cleanup(evar_task_info_t* p_task_info) {

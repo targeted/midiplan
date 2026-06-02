@@ -82,7 +82,7 @@ static void send_custom_sequence(
         sizeof(output_uart_task_message_t)
     );
     if (mq_result != EVAR_MQ_SUCCESS) {
-        evar__crash(CRASH_SEND_MESSAGE_FAILED | (unsigned short)mq_result, "send_midi_message: evar__send_message(output_uart_task_message) failed");
+        evar__crash(CRASH_SEND_MESSAGE_FAILED | (unsigned short)mq_result, "send_custom_sequence: evar__send_message(output_uart_task_message) failed");
     }
 }
 
@@ -131,7 +131,7 @@ void midi_router_task__receive(evar_task_info_t* p_task_info) {
     if (mq_result != EVAR_MQ_SUCCESS) {
         evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "midi_router_task__receive: evar__receive_message failed");
     }
-    
+
     //UARTprintf(
     //    (VALID_DATA_BYTE(midi_router_task_message.midi_message.data_byte_2) ? "= %02X:%02X:%02X\n" : (VALID_DATA_BYTE(midi_router_task_message.midi_message.data_byte_1) ? "= %02X:%02X\n" : "= %02X\n")),
     //    midi_router_task_message.midi_message.status_byte, midi_router_task_message.midi_message.data_byte_1, midi_router_task_message.midi_message.data_byte_2

@@ -32,6 +32,7 @@ the LARGE LED will light.
 Switch to mono 8. Optionally set combine to OFF as it is not needed.
 
 === Roland GR-09 ===
+
 1. First, turn off the power.
 2. Turm the power back on while holding down the [-] button. After “P” (Polyphonic Reception) has
 displayed in the second column of the display, the unit continues with its normal startup.
@@ -46,3 +47,8 @@ The unit is now capable of playing polyphonically when it receives MIDI messages
 === Korg PSS60 ===
 
 Keep F4 pressed when turning on the unit, that will switch it into "Sound module" mode.
+
+=== Alesis SR-16 ===
+
+To reset the device, power up while holding “ERASE” and “PLAY”.
+The initialization sequence will overwrite the entire memory anyway.

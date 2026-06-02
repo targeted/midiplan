@@ -100,7 +100,7 @@ static void send_custom_sequence(
 }
 
 /*
- * Sends the specific initialization sequence to a device.
+ * Sends the custom initialization sequence to a device.
  */
 static void send_initialization_sequence(
     void* p_context,
@@ -125,7 +125,7 @@ static void send_initialization_sequence(
 }
 
 /*
- * Sends the specific program change sequence to a device.
+ * Sends the custom or standard program change sequence to a device.
  */
 static void send_program_change_sequence(
     void* p_context,
@@ -172,7 +172,7 @@ static void send_program_change_sequence(
 }
 
 /*
- * Sends the specific note on sequence to a device.
+ * Sends the custom or standard note on sequence to a device.
  */
 static void send_note_on_sequence(
     void* p_context,
@@ -215,7 +215,7 @@ static void send_note_on_sequence(
 }
 
 /*
- * Sends the specific note off sequence to a device.
+ * Sends the custom or standard note off sequence to a device.
  */
 static void send_note_off_sequence(
     void* p_context,
@@ -1609,8 +1609,9 @@ static void handle_note_on(
             }
         }
 
-        // we are considering actually sending a note to a device, this is the moment
-        // when we cue in the initialization sequence for the device
+        // we are considering actually sending a note to a device, if this is the first time
+        // it happens after a restart, we cue in the initialization sequence for the device,
+        // note that this can cause a significant delay before notes may start playing
 
         midiplan_device_state_t* p_device_state = &devices[out_port].state;
 

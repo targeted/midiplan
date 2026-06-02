@@ -21,8 +21,8 @@ static void configure_bonding(void);
 
 void configure_devices(void) {
 
-    devices[MIDI_OUT_PORT_1].p_device = &gm_device;
-    devices[MIDI_OUT_PORT_1].routing  = route_all;
+    devices[MIDI_OUT_PORT_1].p_device = &null_device;
+    devices[MIDI_OUT_PORT_1].routing  = route_none;
 
     devices[MIDI_OUT_PORT_2].p_device = &null_device;
     devices[MIDI_OUT_PORT_2].routing  = route_none;
@@ -93,5 +93,10 @@ void initialize_device_states(void) {
         }
 
         reset_device_state(p_device_state);
+
+        // note that the initialization sequence is only transmitted once after restart
+
+        p_device_state->initialization_pending = true;
+
     }
 }
