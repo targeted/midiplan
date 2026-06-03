@@ -42,6 +42,7 @@ time to connect to any of the supported devices.
 9. Zoom RT-234 (drum + bass)
 10. Roland GR-09
 11. Korg PSS60
+12. Alesis SR-16
 
 ### Demo recordings: 
 
