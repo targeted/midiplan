@@ -17,18 +17,20 @@
 
 const midiplan_device_t kawai_phm = {
 
-    .basic_channel = MIDI_CHANNEL_1,
+    .model_name              = "Kawai PHm",
 
-    .max_melodic_notes     = 16,
-    .max_percussion_notes  = 8,
-    .max_melodic_programs  = 4,
-    .max_notes_per_program = 4,
-    .monotimbral_channels  = 1,
-    .max_notes_per_channel = 0,
+    .basic_channel           = MIDI_CHANNEL_1,
 
-    .key_pressure     = 0,
-    .channel_pressure = 1,
-    .pitch_bend       = 1,
+    .max_melodic_notes       = 16,
+    .max_percussion_notes    = 8,
+    .max_melodic_programs    = 4,
+    .max_notes_per_program   = 4,
+    .monotimbral_channels    = 1,
+    .max_notes_per_channel   = { 0 },
+
+    .key_pressure            = 0,
+    .channel_pressure        = 1,
+    .pitch_bend              = 1,
 
     .melodic_programs = {
         /* 0x00   0  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = KAWAI_PHM_PROGRAM_UP_PIANO,                .flags = KAWAI_PHM_RANGE_DEFAULT                        },
@@ -478,27 +480,18 @@ const midiplan_device_t kawai_phm = {
 
     },
 
-    .initialization_sequence_offset = INVALID_SEQUENCE_OFFSET,
-    .program_change_sequence_offset = 0x0000,
-    .note_on_sequence_offset        = INVALID_SEQUENCE_OFFSET,
-    .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
+    /* program change, p[0] = channel, p[1] = program */
 
-    .custom_sequences = {
+    .program_change_sequence = (const uint8_t[]) {
 
-        /* program change, p[0] = channel, p[1] = program */
+        0b00000000, /* low 4 bits of p[0] */
+        /* over */ 0xC0,
+        0b10010100, /* all 7 bits of p[1] */
+        /* over */ 0x00,
 
-        /* 0000 */ 0b00000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0xC0,
-        /*      */ 0b10010100 /* all 7 bits of p[1] */,
-        /*      */ /* over */ 0x00,
+        MIDI_MESSAGE_DELAY, 0x00, 0x1E, /* 30 ms */
 
-        /* delay */
-
-        /* 0004 */ MIDI_MESSAGE_DELAY,
-        /*      */ 0x00,
-        /*      */ 0x1E, /* 30 ms */
-
-        /* 0007 */ INVALID_STATUS_BYTE,
+        INVALID_STATUS_BYTE,
 
     }
 

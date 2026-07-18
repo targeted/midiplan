@@ -17,18 +17,20 @@
 
 const midiplan_device_t yamaha_emt1 = {
 
-    .basic_channel = MIDI_CHANNEL_1,
+    .model_name              = "Yamaha EMT-1",
 
-    .max_melodic_notes     = 8,
-    .max_percussion_notes  = 0,
-    .max_melodic_programs  = 4,
-    .max_notes_per_program = 3,
-    .monotimbral_channels  = 0,
-    .max_notes_per_channel = 0,
+    .basic_channel           = MIDI_CHANNEL_1,
 
-    .key_pressure     = 0,
-    .channel_pressure = 0,
-    .pitch_bend       = 1,
+    .max_melodic_notes       = 8,
+    .max_percussion_notes    = 0,
+    .max_melodic_programs    = 4,
+    .max_notes_per_program   = 3,
+    .monotimbral_channels    = 0,
+    .max_notes_per_channel   = { 0 },
+
+    .key_pressure            = 0,
+    .channel_pressure        = 0,
+    .pitch_bend              = 1,
 
     .melodic_programs = {
         /* 0x00   0  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = YAMAHA_EMT1_PROGRAM_PIANO,            .flags = YAMAHA_EMT1_RANGE_DEFAULT        },
@@ -478,20 +480,15 @@ const midiplan_device_t yamaha_emt1 = {
 
     },
 
-    .initialization_sequence_offset = 0x0000,
-    .program_change_sequence_offset = INVALID_SEQUENCE_OFFSET,
-    .note_on_sequence_offset        = INVALID_SEQUENCE_OFFSET,
-    .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
+    /* initialization, p[0] = basic channel */
 
-    .custom_sequences = {
-
-        /* initialization, p[0] = basic channel */
+    .initialization_sequence = (const uint8_t[]) {
 
         /* multi mode on */
 
-        /* 0000 */ 0xF0, 0x43, 0x73, 0x14, 0x30, 0x02, 0xF7,
+        0xF0, 0x43, 0x73, 0x14, 0x30, 0x02, 0xF7,
 
-        /* 0007 */ INVALID_STATUS_BYTE
+        INVALID_STATUS_BYTE,
 
     }
 

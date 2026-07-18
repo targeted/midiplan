@@ -9,33 +9,33 @@ extern const midiplan_device_t casio_csm1;
 #define CASIO_CSM1_MIDDLE_C     (60)
 #define CASIO_CSM1_HIGHEST_NOTE (96)
 
-#define CASIO_CSM1_PROGRAM_PIANO               ( 0) // note 36–96
-#define CASIO_CSM1_PROGRAM_HARPSICHORD         ( 1) // note 36–96
-#define CASIO_CSM1_PROGRAM_VIB                 ( 2) // note 36–96
-#define CASIO_CSM1_PROGRAM_ORGAN_1             ( 3) // note 36–96
-#define CASIO_CSM1_PROGRAM_ORGAN_2             ( 4) // note 36–96
-#define CASIO_CSM1_PROGRAM_BRASS_ENS           ( 5) // note 36–96
-#define CASIO_CSM1_PROGRAM_FLUTE               ( 6) // note 36–96
-#define CASIO_CSM1_PROGRAM_CHORUS              ( 7) // note 36–96
-#define CASIO_CSM1_PROGRAM_JAZZ_GUITAR         ( 8) // note 36–96
-#define CASIO_CSM1_PROGRAM_BELLS               ( 9) // note 36–96
-#define CASIO_CSM1_PROGRAM_CLAVI_1             (10) // note 36–96
-#define CASIO_CSM1_PROGRAM_METALLIC_SOUND      (11) // note 36–96
-#define CASIO_CSM1_PROGRAM_SYNTH_ENS           (12) // note 36–96
-#define CASIO_CSM1_PROGRAM_HONKY_TONK_PIANO    (15) // note 36–96
-#define CASIO_CSM1_PROGRAM_E_PIANO             (16) // note 36–96
-#define CASIO_CSM1_PROGRAM_MARIMBA             (17) // note 36–96
-#define CASIO_CSM1_PROGRAM_ORGAN_3             (18) // note 36–96
-#define CASIO_CSM1_PROGRAM_ACCORDION           (19) // note 36–96
-#define CASIO_CSM1_PROGRAM_STRINGS             (20) // note 36–96
-#define CASIO_CSM1_PROGRAM_OBOE                (21) // note 36–96
-#define CASIO_CSM1_PROGRAM_SYNTH_1             (22) // note 36–96
-#define CASIO_CSM1_PROGRAM_HARP                (23) // note 36–96
-#define CASIO_CSM1_PROGRAM_SYNTH_2             (24) // note 36–96
-#define CASIO_CSM1_PROGRAM_CLAVI_2             (25) // note 36–96
-#define CASIO_CSM1_PROGRAM_FANTASY             (26) // note 36–96
-#define CASIO_CSM1_PROGRAM_MIRACLE             (27) // note 36–96
-#define CASIO_CSM1_PROGRAM_BASS                (28) // note 36–59 = wood bass, note 60–96 = slap bass
+#define CASIO_CSM1_PROGRAM_PIANO               ( 0) // note 36-96
+#define CASIO_CSM1_PROGRAM_HARPSICHORD         ( 1) // note 36-96
+#define CASIO_CSM1_PROGRAM_VIB                 ( 2) // note 36-96
+#define CASIO_CSM1_PROGRAM_ORGAN_1             ( 3) // note 36-96
+#define CASIO_CSM1_PROGRAM_ORGAN_2             ( 4) // note 36-96
+#define CASIO_CSM1_PROGRAM_BRASS_ENS           ( 5) // note 36-96
+#define CASIO_CSM1_PROGRAM_FLUTE               ( 6) // note 36-96
+#define CASIO_CSM1_PROGRAM_CHORUS              ( 7) // note 36-96
+#define CASIO_CSM1_PROGRAM_JAZZ_GUITAR         ( 8) // note 36-96
+#define CASIO_CSM1_PROGRAM_BELLS               ( 9) // note 36-96
+#define CASIO_CSM1_PROGRAM_CLAVI_1             (10) // note 36-96
+#define CASIO_CSM1_PROGRAM_METALLIC_SOUND      (11) // note 36-96
+#define CASIO_CSM1_PROGRAM_SYNTH_ENS           (12) // note 36-96
+#define CASIO_CSM1_PROGRAM_HONKY_TONK_PIANO    (15) // note 36-96
+#define CASIO_CSM1_PROGRAM_E_PIANO             (16) // note 36-96
+#define CASIO_CSM1_PROGRAM_MARIMBA             (17) // note 36-96
+#define CASIO_CSM1_PROGRAM_ORGAN_3             (18) // note 36-96
+#define CASIO_CSM1_PROGRAM_ACCORDION           (19) // note 36-96
+#define CASIO_CSM1_PROGRAM_STRINGS             (20) // note 36-96
+#define CASIO_CSM1_PROGRAM_OBOE                (21) // note 36-96
+#define CASIO_CSM1_PROGRAM_SYNTH_1             (22) // note 36-96
+#define CASIO_CSM1_PROGRAM_HARP                (23) // note 36-96
+#define CASIO_CSM1_PROGRAM_SYNTH_2             (24) // note 36-96
+#define CASIO_CSM1_PROGRAM_CLAVI_2             (25) // note 36-96
+#define CASIO_CSM1_PROGRAM_FANTASY             (26) // note 36-96
+#define CASIO_CSM1_PROGRAM_MIRACLE             (27) // note 36-96
+#define CASIO_CSM1_PROGRAM_BASS                (28) // note 36-59 = wood bass, note 60-96 = slap bass
 
 #define CASIO_CSM1_RANGE_INVALID             (0x00)
 #define CASIO_CSM1_RANGE_OCTAVE_HIGHER       (0x01)

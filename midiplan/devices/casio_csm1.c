@@ -17,18 +17,20 @@
 
 const midiplan_device_t casio_csm1 = {
 
-    .basic_channel = MIDI_CHANNEL_1,
+    .model_name              = "Casio CSM-1",
 
-    .max_melodic_notes     = 12,
-    .max_percussion_notes  = 0,
-    .max_melodic_programs  = 4,
-    .max_notes_per_program = 4,
-    .monotimbral_channels  = 0,
-    .max_notes_per_channel = 4, // in fact, it is 6 on channel 1, 4 on channels 4 and 4, and 2 on channel 3, so this is a compromise
+    .basic_channel           = MIDI_CHANNEL_1,
 
-    .key_pressure     = 1,
-    .channel_pressure = 1,
-    .pitch_bend       = 1,
+    .max_melodic_notes       = 12,
+    .max_percussion_notes    = 0,
+    .max_melodic_programs    = 4,
+    .max_notes_per_program   = 4,
+    .monotimbral_channels    = 0,
+    .max_notes_per_channel   = { 6, 4, 2, 4 }, // see https://wiki.sierrahelp.com/images/6/6d/CasioFB01Ad.png
+
+    .key_pressure            = 1,
+    .channel_pressure        = 1,
+    .pitch_bend              = 1,
 
     .melodic_programs = {
         /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = CASIO_CSM1_PROGRAM_PIANO,                               .flags = CASIO_CSM1_RANGE_DEFAULT        },
@@ -477,13 +479,6 @@ const midiplan_device_t casio_csm1 = {
 
         0, //---------------------------------------------------------------------
 
-    },
-
-    .initialization_sequence_offset = INVALID_SEQUENCE_OFFSET,
-    .program_change_sequence_offset = INVALID_SEQUENCE_OFFSET,
-    .note_on_sequence_offset        = INVALID_SEQUENCE_OFFSET,
-    .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
-
-    .custom_sequences = {}
+    }
 
 };

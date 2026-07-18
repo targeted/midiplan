@@ -17,18 +17,20 @@
 
 const midiplan_device_t yamaha_dom30 = {
 
-    .basic_channel = MIDI_CHANNEL_1,
+    .model_name              = "Yamaha DOM-30",
 
-    .max_melodic_notes     = 16,
-    .max_percussion_notes  = 8,
-    .max_melodic_programs  = 16,
-    .max_notes_per_program = 8,
-    .monotimbral_channels  = 0,
-    .max_notes_per_channel = 0,
+    .basic_channel           = MIDI_CHANNEL_1,
 
-    .key_pressure     = 1,
-    .channel_pressure = 1,
-    .pitch_bend       = 1,
+    .max_melodic_notes       = 16,
+    .max_percussion_notes    = 8,
+    .max_melodic_programs    = 16,
+    .max_notes_per_program   = 8,
+    .monotimbral_channels    = 0,
+    .max_notes_per_channel   = { 0 },
+
+    .key_pressure            = 1,
+    .channel_pressure        = 1,
+    .pitch_bend              = 1,
 
     .melodic_programs = {
         /* 0x00   0  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = YAMAHA_DOM30_PROGRAM_PIANO_1,             .flags = YAMAHA_DOM30_RANGE_DEFAULT        },
@@ -476,13 +478,6 @@ const midiplan_device_t yamaha_dom30 = {
 
         0, //---------------------------------------------------------------------
 
-    },
-
-    .initialization_sequence_offset = INVALID_SEQUENCE_OFFSET,
-    .program_change_sequence_offset = INVALID_SEQUENCE_OFFSET,
-    .note_on_sequence_offset        = INVALID_SEQUENCE_OFFSET,
-    .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
-
-    .custom_sequences = {}
+    }
 
 };

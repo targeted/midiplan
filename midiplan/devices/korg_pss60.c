@@ -17,18 +17,20 @@
 
 const midiplan_device_t korg_pss60 = {
 
-    .basic_channel = MIDI_CHANNEL_1,
+    .model_name              = "Korg PSS60",
 
-    .max_melodic_notes     = 8,
-    .max_percussion_notes  = 8,
-    .max_melodic_programs  = 2,
-    .max_notes_per_program = 4,
-    .monotimbral_channels  = 1,
-    .max_notes_per_channel = 0,
+    .basic_channel           = MIDI_CHANNEL_1,
 
-    .key_pressure     = 1,
-    .channel_pressure = 1,
-    .pitch_bend       = 1,
+    .max_melodic_notes       = 8,
+    .max_percussion_notes    = 8,
+    .max_melodic_programs    = 2,
+    .max_notes_per_program   = 4,
+    .monotimbral_channels    = 1,
+    .max_notes_per_channel   = { 0 },
+
+    .key_pressure            = 1,
+    .channel_pressure        = 1,
+    .pitch_bend              = 1,
 
     .melodic_programs = {
         /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = KORG_PSS60_PROGRAM_PIANO1,    .flags = KORG_PSS60_RANGE_DEFAULT               },
@@ -478,24 +480,17 @@ const midiplan_device_t korg_pss60 = {
 
     },
 
-    .initialization_sequence_offset = INVALID_SEQUENCE_OFFSET,
-    .program_change_sequence_offset = 0x0000,
-    .note_on_sequence_offset        = INVALID_SEQUENCE_OFFSET,
-    .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
+    /* program change, p[0] = channel, p[1] = program */
 
-    .custom_sequences = {
-    
-        /* program change, p[0] = channel, p[1] = program */
+    .program_change_sequence = (const uint8_t[]) {
 
-        /* program change */
+        0b00000000, /* low 4 bits of p[0] */
+        /* over */ 0xC0,
+        0b10010101, /* low 6 bits of p[1] */
+        /* over */ 0x00,
 
-        /* 0000 */ 0b00000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0xC0,
-        /*      */ 0b10010101 /* low 6 bits of p[1] */,
-        /*      */ /* over */ 0x00,
+        INVALID_STATUS_BYTE,
 
-        /* 0004 */ INVALID_STATUS_BYTE,
-    
     }
 
 };

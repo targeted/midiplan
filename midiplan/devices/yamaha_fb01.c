@@ -18,18 +18,20 @@
 
 const midiplan_device_t yamaha_fb01 = {
 
-    .basic_channel = MIDI_CHANNEL_1,
+    .model_name              = "Yamaha FB-01",
 
-    .max_melodic_notes     = 8,
-    .max_percussion_notes  = 0,
-    .max_melodic_programs  = 8,
-    .max_notes_per_program = 8,
-    .monotimbral_channels  = 1,
-    .max_notes_per_channel = 1,
+    .basic_channel           = MIDI_CHANNEL_1,
 
-    .key_pressure     = 0,
-    .channel_pressure = 1,
-    .pitch_bend       = 1,
+    .max_melodic_notes       = 8,
+    .max_percussion_notes    = 0,
+    .max_melodic_programs    = 8,
+    .max_notes_per_program   = 8,
+    .monotimbral_channels    = 1,
+    .max_notes_per_channel   = { 1, 1, 1, 1, 1, 1, 1, 1 },
+
+    .key_pressure            = 0,
+    .channel_pressure        = 1,
+    .pitch_bend              = 1,
 
     .melodic_programs = {
         /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = GM_PROGRAM_ACOUSTIC_GRAND_PIANO,   .flags = YAMAHA_FB01_RANGE_DEFAULT                            },
@@ -479,267 +481,262 @@ const midiplan_device_t yamaha_fb01 = {
 
     },
 
-    .initialization_sequence_offset = 0x0000,
-    .program_change_sequence_offset = 0x00DC,
-    .note_on_sequence_offset        = INVALID_SEQUENCE_OFFSET,
-    .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
+    /* initialization, p[0] = basic channel */
 
-    .custom_sequences = {
-
-        /* initialization, p[0] = basic channel */
+    .initialization_sequence = (const uint8_t[]) {
 
         /* switch instruments 1-8 to MIDI channels 1-8 */
 
-        /* 0000 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x00, /* instrument: 1 */
-        /*      */ 0x01, /* parameter: midi channel */
-        /*      */ 0x00, /* midi channel 1 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x00, /* instrument: 1 */
+        0x01, /* parameter: midi channel */
+        0x00, /* midi channel 1 */
+        0xF7,
 
-        /* 0009 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x01, /* instrument: 2 */
-        /*      */ 0x01, /* parameter: midi channel */
-        /*      */ 0x01, /* midi channel 2 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x01, /* instrument: 2 */
+        0x01, /* parameter: midi channel */
+        0x01, /* midi channel 2 */
+        0xF7,
 
-        /* 0012 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x02, /* instrument: 3 */
-        /*      */ 0x01, /* parameter: midi channel */
-        /*      */ 0x02, /* midi channel 3 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x02, /* instrument: 3 */
+        0x01, /* parameter: midi channel */
+        0x02, /* midi channel 3 */
+        0xF7,
 
-        /* 001B */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x03, /* instrument: 4 */
-        /*      */ 0x01, /* parameter: midi channel */
-        /*      */ 0x03, /* midi channel 4 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x03, /* instrument: 4 */
+        0x01, /* parameter: midi channel */
+        0x03, /* midi channel 4 */
+        0xF7,
 
-        /* 0024 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x04, /* instrument: 5 */
-        /*      */ 0x01, /* parameter: midi channel */
-        /*      */ 0x04, /* midi channel 5 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x04, /* instrument: 5 */
+        0x01, /* parameter: midi channel */
+        0x04, /* midi channel 5 */
+        0xF7,
 
-        /* 002D */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x05, /* instrument: 6 */
-        /*      */ 0x01, /* parameter: midi channel */
-        /*      */ 0x05, /* midi channel 6 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x05, /* instrument: 6 */
+        0x01, /* parameter: midi channel */
+        0x05, /* midi channel 6 */
+        0xF7,
 
-        /* 0036 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x06, /* instrument: 7 */
-        /*      */ 0x01, /* parameter: midi channel */
-        /*      */ 0x06, /* midi channel 7 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x06, /* instrument: 7 */
+        0x01, /* parameter: midi channel */
+        0x06, /* midi channel 7 */
+        0xF7,
 
-        /* 003F */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x07, /* instrument: 8 */
-        /*      */ 0x01, /* parameter: midi channel */
-        /*      */ 0x07, /* midi channel 8 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x07, /* instrument: 8 */
+        0x01, /* parameter: midi channel */
+        0x07, /* midi channel 8 */
+        0xF7,
 
         /* set number of notes for instruments 1-8 to 0 (because setting it directly to 1 may not always be possible) */
 
-        /* 0048 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x00, /* instrument: 1 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x00, /* value: 0 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x00, /* instrument: 1 */
+        0x00, /* parameter: # of notes */
+        0x00, /* value: 0 */
+        0xF7,
 
-        /* 0051 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x01, /* instrument: 2 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x00, /* value: 0 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x01, /* instrument: 2 */
+        0x00, /* parameter: # of notes */
+        0x00, /* value: 0 */
+        0xF7,
 
-        /* 005A */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x02, /* instrument: 3 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x00, /* value: 0 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x02, /* instrument: 3 */
+        0x00, /* parameter: # of notes */
+        0x00, /* value: 0 */
+        0xF7,
 
-        /* 0063 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x03, /* instrument: 4 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x00, /* value: 0 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x03, /* instrument: 4 */
+        0x00, /* parameter: # of notes */
+        0x00, /* value: 0 */
+        0xF7,
 
-        /* 006C */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x04, /* instrument: 5 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x00, /* value: 0 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x04, /* instrument: 5 */
+        0x00, /* parameter: # of notes */
+        0x00, /* value: 0 */
+        0xF7,
 
-        /* 0075 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x05, /* instrument: 6 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x00, /* value: 0 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x05, /* instrument: 6 */
+        0x00, /* parameter: # of notes */
+        0x00, /* value: 0 */
+        0xF7,
 
-        /* 007E */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x06, /* instrument: 7 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x00, /* value: 0 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x06, /* instrument: 7 */
+        0x00, /* parameter: # of notes */
+        0x00, /* value: 0 */
+        0xF7,
 
-        /* 0087 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x07, /* instrument: 8 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x00, /* value: 0 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x07, /* instrument: 8 */
+        0x00, /* parameter: # of notes */
+        0x00, /* value: 0 */
+        0xF7,
 
         /* set number of notes for instruments 1-8 to 1 (now it is possible) */
 
-        /* 0090 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x00, /* instrument: 1 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x01, /* value: 1 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x00, /* instrument: 1 */
+        0x00, /* parameter: # of notes */
+        0x01, /* value: 1 */
+        0xF7,
 
-        /* 0099 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x01, /* instrument: 2 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x01, /* value: 1 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x01, /* instrument: 2 */
+        0x00, /* parameter: # of notes */
+        0x01, /* value: 1 */
+        0xF7,
 
-        /* 00A2 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x02, /* instrument: 3 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x01, /* value: 1 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x02, /* instrument: 3 */
+        0x00, /* parameter: # of notes */
+        0x01, /* value: 1 */
+        0xF7,
 
-        /* 00AB */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x03, /* instrument: 4 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x01, /* value: 1 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x03, /* instrument: 4 */
+        0x00, /* parameter: # of notes */
+        0x01, /* value: 1 */
+        0xF7,
 
-        /* 00B4 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x04, /* instrument: 5 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x01, /* value: 1 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x04, /* instrument: 5 */
+        0x00, /* parameter: # of notes */
+        0x01, /* value: 1 */
+        0xF7,
 
-        /* 00BD */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x05, /* instrument: 6 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x01, /* value: 1 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x05, /* instrument: 6 */
+        0x00, /* parameter: # of notes */
+        0x01, /* value: 1 */
+        0xF7,
 
-        /* 00C6 */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x06, /* instrument: 7 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x01, /* value: 1 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x06, /* instrument: 7 */
+        0x00, /* parameter: # of notes */
+        0x01, /* value: 1 */
+        0xF7,
 
-        /* 00CF */ 0xF0, 0x43, 0x75, /* change parameter by instrument number */
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x18 | 0x07, /* instrument: 8 */
-        /*      */ 0x00, /* parameter: # of notes */
-        /*      */ 0x01, /* value: 1 */
-        /*      */ 0xF7,
+        0xF0, 0x43, 0x75, /* change parameter by instrument number */
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x00,
+        0x18 | 0x07, /* instrument: 8 */
+        0x00, /* parameter: # of notes */
+        0x01, /* value: 1 */
+        0xF7,
 
-        /* 00D8 */ MIDI_MESSAGE_DELAY,
-        /*      */ 0x00,
-        /*      */ 0x64, /* 100 ms */
+        MIDI_MESSAGE_DELAY, 0x00, 0x64, /* 100 ms */
 
-        /* 00DB */ INVALID_STATUS_BYTE,
+        INVALID_STATUS_BYTE,
 
-        /* program change, p[0] = channel, p[1] = program */
+    },
+
+    /* program change, p[0] = channel, p[1] = program */
+
+    .program_change_sequence = (const uint8_t[]) {
 
         /* bank switch */
 
-        /* 00DC */ 0xF0,
-        /*      */ 0x43,
-        /*      */ 0b10000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0x10,
-        /*      */ 0x15,
-        /*      */ 0x04,
-        /*      */ 0b10011000 /* 4-bit lookup in the following 64-byte table using p[1] as the index */,
-                    /*          program to device bank mapping                                       */
-                    /*   01    23    45    67    89    AB    CD    EF                                */
-        /*      0_ */  0x33, 0x23, 0x33, 0x23, 0x32, 0x52, 0x22, 0x56,
-        /*      1_ */  0x66, 0x66, 0x63, 0x24, 0x66, 0x26, 0x66, 0x26,
-        /*      2_ */  0x22, 0x25, 0x55, 0x55, 0x44, 0x45, 0x54, 0x22,
-        /*      3_ */  0x44, 0x44, 0x26, 0x65, 0x24, 0x24, 0x24, 0x44,
-        /*      4_ */  0x44, 0x44, 0x22, 0x42, 0x22, 0x44, 0x54, 0x26,
-        /*      5_ */  0x56, 0x35, 0x52, 0x55, 0x56, 0x55, 0x42, 0x45,
-        /*      6_ */  0x63, 0x66, 0x66, 0x26, 0x66, 0x62, 0x66, 0x44,
-        /*      7_ */  0x52, 0x55, 0x52, 0x56, 0x46, 0x62, 0x66, 0x66,
-        /*      */ /* over */ 0x00,
-        /*      */ 0xF7,
+        0xF0,
+        0x43,
+        0b10000000, /* low 4 bits of p[0] */
+        /* over */ 0x10,
+        0x15,
+        0x04,
+        0b10011000, /* 4-bit lookup in the following 64-byte table using p[1] as the index */
+        /*                program to device bank mapping                                   */
+        /*         01    23    45    67    89    AB    CD    EF                            */
+        /* 0_ */  0x33, 0x23, 0x33, 0x23, 0x32, 0x52, 0x22, 0x56,
+        /* 1_ */  0x66, 0x66, 0x63, 0x24, 0x66, 0x26, 0x66, 0x26,
+        /* 2_ */  0x22, 0x25, 0x55, 0x55, 0x44, 0x45, 0x54, 0x22,
+        /* 3_ */  0x44, 0x44, 0x26, 0x65, 0x24, 0x24, 0x24, 0x44,
+        /* 4_ */  0x44, 0x44, 0x22, 0x42, 0x22, 0x44, 0x54, 0x26,
+        /* 5_ */  0x56, 0x35, 0x52, 0x55, 0x56, 0x55, 0x42, 0x45,
+        /* 6_ */  0x63, 0x66, 0x66, 0x26, 0x66, 0x62, 0x66, 0x44,
+        /* 7_ */  0x52, 0x55, 0x52, 0x56, 0x46, 0x62, 0x66, 0x66,
+        /* over */ 0x00,
+        0xF7,
 
         /* program change */
 
-        /* 0125 */ 0b00000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0xC0,
-        /*      */ 0b10011100 /* 8-bit lookup in the following 128-byte table using p[1] as the index                   */,
-                    /*                             program to bank-specific program mapping                             */
-                    /*   _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F   */
-        /*      0_ */  0x07, 0x00, 0x07, 0x0D, 0x14, 0x15, 0x19, 0x21, 0x2E, 0x13, 0x21, 0x14, 0x28, 0x15, 0x24, 0x1A,
-        /*      1_ */  0x07, 0x03, 0x05, 0x09, 0x06, 0x2F, 0x1D, 0x2C, 0x0F, 0x10, 0x08, 0x12, 0x11, 0x13, 0x25, 0x18,
-        /*      2_ */  0x0A, 0x09, 0x29, 0x14, 0x12, 0x11, 0x17, 0x1D, 0x13, 0x12, 0x18, 0x13, 0x0D, 0x20, 0x1B, 0x1F,
-        /*      3_ */  0x16, 0x14, 0x17, 0x15, 0x27, 0x21, 0x20, 0x2B, 0x02, 0x04, 0x21, 0x03, 0x21, 0x0A, 0x07, 0x0B,
-        /*      4_ */  0x2E, 0x2F, 0x2E, 0x2F, 0x11, 0x01, 0x28, 0x12, 0x10, 0x0F, 0x25, 0x24, 0x0A, 0x22, 0x22, 0x1E,
-        /*      5_ */  0x05, 0x14, 0x2D, 0x07, 0x1C, 0x1C, 0x09, 0x08, 0x0C, 0x1F, 0x04, 0x06, 0x19, 0x24, 0x1D, 0x00,
-        /*      6_ */  0x24, 0x27, 0x29, 0x0D, 0x1D, 0x26, 0x2D, 0x28, 0x1C, 0x16, 0x1B, 0x16, 0x17, 0x0B, 0x13, 0x27,
-        /*      7_ */  0x25, 0x1E, 0x28, 0x2D, 0x2A, 0x2C, 0x29, 0x24, 0x10, 0x27, 0x27, 0x23, 0x2D, 0x2E, 0x27, 0x2C,
-        /*      */ /* over */ 0x00,
+        0b00000000, /* low 4 bits of p[0] */
+        /* over */ 0xC0,
+        0b10011100, /* 8-bit lookup in the following 128-byte table using p[1] as the index                       */
+        /*                                   program to bank-specific program mapping                             */
+        /*         _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F   */
+        /* 0_ */  0x07, 0x00, 0x07, 0x0D, 0x14, 0x15, 0x19, 0x21, 0x2E, 0x13, 0x21, 0x14, 0x28, 0x15, 0x24, 0x1A,
+        /* 1_ */  0x07, 0x03, 0x05, 0x09, 0x06, 0x2F, 0x1D, 0x2C, 0x0F, 0x10, 0x08, 0x12, 0x11, 0x13, 0x25, 0x18,
+        /* 2_ */  0x0A, 0x09, 0x29, 0x14, 0x12, 0x11, 0x17, 0x1D, 0x13, 0x12, 0x18, 0x13, 0x0D, 0x20, 0x1B, 0x1F,
+        /* 3_ */  0x16, 0x14, 0x17, 0x15, 0x27, 0x21, 0x20, 0x2B, 0x02, 0x04, 0x21, 0x03, 0x21, 0x0A, 0x07, 0x0B,
+        /* 4_ */  0x2E, 0x2F, 0x2E, 0x2F, 0x11, 0x01, 0x28, 0x12, 0x10, 0x0F, 0x25, 0x24, 0x0A, 0x22, 0x22, 0x1E,
+        /* 5_ */  0x05, 0x14, 0x2D, 0x07, 0x1C, 0x1C, 0x09, 0x08, 0x0C, 0x1F, 0x04, 0x06, 0x19, 0x24, 0x1D, 0x00,
+        /* 6_ */  0x24, 0x27, 0x29, 0x0D, 0x1D, 0x26, 0x2D, 0x28, 0x1C, 0x16, 0x1B, 0x16, 0x17, 0x0B, 0x13, 0x27,
+        /* 7_ */  0x25, 0x1E, 0x28, 0x2D, 0x2A, 0x2C, 0x29, 0x24, 0x10, 0x27, 0x27, 0x23, 0x2D, 0x2E, 0x27, 0x2C,
+        /* over */ 0x00,
 
         /* delay */
 
-        /* 016A */ MIDI_MESSAGE_DELAY,
-        /*      */ 0x00,
-        /*      */ 0x14, /* 20 ms */
+        MIDI_MESSAGE_DELAY, 0x00, 0x14, /* 20 ms */
 
-        /* 016D */ INVALID_STATUS_BYTE,
+        INVALID_STATUS_BYTE,
 
     }
 

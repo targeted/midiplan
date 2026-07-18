@@ -17,18 +17,20 @@
 
 const midiplan_device_t null_device = {
 
-    .basic_channel = MIDI_CHANNEL_1,
+    .model_name              = "None",
 
-    .max_melodic_notes     = 0,
-    .max_percussion_notes  = 0,
-    .max_melodic_programs  = 0,
-    .max_notes_per_program = 0,
-    .monotimbral_channels  = 0,
-    .max_notes_per_channel = 0,
+    .basic_channel           = MIDI_CHANNEL_1,
 
-    .key_pressure     = 0,
-    .channel_pressure = 0,
-    .pitch_bend       = 0,
+    .max_melodic_notes       = 0,
+    .max_percussion_notes    = 0,
+    .max_melodic_programs    = 0,
+    .max_notes_per_program   = 0,
+    .monotimbral_channels    = 0,
+    .max_notes_per_channel   = { 0 },
+
+    .key_pressure            = 0,
+    .channel_pressure        = 0,
+    .pitch_bend              = 0,
 
     .melodic_programs = {
         /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = INVALID_PROGRAM,  .flags = NULL_DEVICE_RANGE_INVALID  },
@@ -476,13 +478,6 @@ const midiplan_device_t null_device = {
 
         0, //---------------------------------------------------------------------
 
-    },
-
-    .initialization_sequence_offset = INVALID_SEQUENCE_OFFSET,
-    .program_change_sequence_offset = INVALID_SEQUENCE_OFFSET,
-    .note_on_sequence_offset        = INVALID_SEQUENCE_OFFSET,
-    .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
-
-    .custom_sequences = {}
+    }
 
 };

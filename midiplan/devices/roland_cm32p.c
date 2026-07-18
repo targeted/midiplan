@@ -17,37 +17,39 @@
 
 const midiplan_device_t roland_cm32p = {
 
-    .basic_channel = MIDI_CHANNEL_1,
+    .model_name              = "Roland CM-32P",
 
-    .max_melodic_notes     = 16,
-    .max_percussion_notes  = 0,
-    .max_melodic_programs  = 6,
-    .max_notes_per_program = 8,
-    .monotimbral_channels  = 1,
-    .max_notes_per_channel = 0,
+    .basic_channel           = MIDI_CHANNEL_1,
 
-    .key_pressure     = 0,
-    .channel_pressure = 0,
-    .pitch_bend       = 1,
+    .max_melodic_notes       = 16,
+    .max_percussion_notes    = 0,
+    .max_melodic_programs    = 6,
+    .max_notes_per_program   = 8,
+    .monotimbral_channels    = 1,
+    .max_notes_per_channel   = { 0 },
+
+    .key_pressure            = 0,
+    .channel_pressure        = 0,
+    .pitch_bend              = 1,
 
     .melodic_programs = {
-        /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = ROLAND_CM32P_A_PIANO_1,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  }, 
-        /* 0x01   2  GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO */ {  .program = ROLAND_CM32P_A_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  }, 
-        /* 0x02   3  GM_PROGRAM_ELECTRIC_GRAND_PIANO  */ {  .program = ROLAND_CM32P_A_PIANO_7,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x03   4  GM_PROGRAM_HONKY_TONK_PIANO      */ {  .program = ROLAND_CM32P_A_PIANO_4,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x04   5  GM_PROGRAM_ELECTRIC_PIANO_1      */ {  .program = ROLAND_CM32P_E_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x05   6  GM_PROGRAM_ELECTRIC_PIANO_2      */ {  .program = ROLAND_CM32P_E_PIANO_1,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x06   7  GM_PROGRAM_HARPSICHORD           */ {  .program = ROLAND_CM32P_A_GUITAR_1,  .flags = ROLAND_CM32P_RANGE_DEFAULT                  }, 
-        /* 0x07   8  GM_PROGRAM_CLAVI                 */ {  .program = ROLAND_CM32P_E_PIANO_5,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x08   9  GM_PROGRAM_CELESTA               */ {  .program = ROLAND_CM32P_E_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x09  10  GM_PROGRAM_GLOCKENSPIEL          */ {  .program = ROLAND_CM32P_E_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x0A  11  GM_PROGRAM_MUSIC_BOX             */ {  .program = ROLAND_CM32P_E_PIANO_5,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x0B  12  GM_PROGRAM_VIBRAPHONE            */ {  .program = ROLAND_CM32P_E_PIANO_1,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x0C  13  GM_PROGRAM_MARIMBA               */ {  .program = ROLAND_CM32P_E_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x0D  14  GM_PROGRAM_XYLOPHONE             */ {  .program = ROLAND_CM32P_E_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x0E  15  GM_PROGRAM_TUBULAR_BELLS         */ {  .program = ROLAND_CM32P_E_PIANO_1,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },  
-        /* 0x0F  16  GM_PROGRAM_DULCIMER              */ {  .program = ROLAND_CM32P_A_PIANO_7,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },   
-        /* 0x10  17  GM_PROGRAM_DRAWBAR_ORGAN         */ {  .program = ROLAND_CM32P_E_ORGAN_2,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },   
+        /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = ROLAND_CM32P_A_PIANO_1,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x01   2  GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO */ {  .program = ROLAND_CM32P_A_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x02   3  GM_PROGRAM_ELECTRIC_GRAND_PIANO  */ {  .program = ROLAND_CM32P_A_PIANO_7,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x03   4  GM_PROGRAM_HONKY_TONK_PIANO      */ {  .program = ROLAND_CM32P_A_PIANO_4,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x04   5  GM_PROGRAM_ELECTRIC_PIANO_1      */ {  .program = ROLAND_CM32P_E_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x05   6  GM_PROGRAM_ELECTRIC_PIANO_2      */ {  .program = ROLAND_CM32P_E_PIANO_1,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x06   7  GM_PROGRAM_HARPSICHORD           */ {  .program = ROLAND_CM32P_A_GUITAR_1,  .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x07   8  GM_PROGRAM_CLAVI                 */ {  .program = ROLAND_CM32P_E_PIANO_5,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x08   9  GM_PROGRAM_CELESTA               */ {  .program = ROLAND_CM32P_E_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x09  10  GM_PROGRAM_GLOCKENSPIEL          */ {  .program = ROLAND_CM32P_E_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x0A  11  GM_PROGRAM_MUSIC_BOX             */ {  .program = ROLAND_CM32P_E_PIANO_5,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x0B  12  GM_PROGRAM_VIBRAPHONE            */ {  .program = ROLAND_CM32P_E_PIANO_1,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x0C  13  GM_PROGRAM_MARIMBA               */ {  .program = ROLAND_CM32P_E_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x0D  14  GM_PROGRAM_XYLOPHONE             */ {  .program = ROLAND_CM32P_E_PIANO_3,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x0E  15  GM_PROGRAM_TUBULAR_BELLS         */ {  .program = ROLAND_CM32P_E_PIANO_1,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x0F  16  GM_PROGRAM_DULCIMER              */ {  .program = ROLAND_CM32P_A_PIANO_7,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x10  17  GM_PROGRAM_DRAWBAR_ORGAN         */ {  .program = ROLAND_CM32P_E_ORGAN_2,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x11  18  GM_PROGRAM_PERCUSSIVE_ORGAN      */ {  .program = ROLAND_CM32P_E_ORGAN_8,   .flags = ROLAND_CM32P_RANGE_OCTAVE_LOWER             },
         /* 0x12  19  GM_PROGRAM_ROCK_ORGAN            */ {  .program = ROLAND_CM32P_E_ORGAN_8,   .flags = ROLAND_CM32P_RANGE_OCTAVE_LOWER             },
         /* 0x13  20  GM_PROGRAM_CHURCH_ORGAN          */ {  .program = ROLAND_CM32P_E_ORGAN_10,  .flags = ROLAND_CM32P_RANGE_OCTAVE_LOWER             },
@@ -74,7 +76,7 @@ const midiplan_device_t roland_cm32p = {
         /* 0x28  41  GM_PROGRAM_VIOLIN                */ {  .program = ROLAND_CM32P_STRINGS_2,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x29  42  GM_PROGRAM_VIOLA                 */ {  .program = ROLAND_CM32P_STRINGS_2,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x2A  43  GM_PROGRAM_CELLO                 */ {  .program = ROLAND_CM32P_STRINGS_2,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
-        /* 0x2B  44  GM_PROGRAM_CONTRABASS            */ {  .program = ROLAND_CM32P_STRINGS_1,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  }, 
+        /* 0x2B  44  GM_PROGRAM_CONTRABASS            */ {  .program = ROLAND_CM32P_STRINGS_1,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x2C  45  GM_PROGRAM_TREMOLO_STRINGS       */ {  .program = ROLAND_CM32P_STRINGS_2,   .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x2D  46  GM_PROGRAM_PIZZICATO_STRINGS     */ {  .program = ROLAND_CM32P_E_GUITAR_2,  .flags = ROLAND_CM32P_RANGE_OCTAVE_HIGHER            },
         /* 0x2E  47  GM_PROGRAM_ORCHESTRAL_HARP       */ {  .program = ROLAND_CM32P_FINGERED_2,  .flags = ROLAND_CM32P_RANGE_PROG_73                  },
@@ -95,14 +97,14 @@ const midiplan_device_t roland_cm32p = {
         /* 0x3D  62  GM_PROGRAM_BRASS_SECTION         */ {  .program = ROLAND_CM32P_BRASS_4,     .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x3E  63  GM_PROGRAM_SYNTHBRASS_1          */ {  .program = ROLAND_CM32P_BRASS_3,     .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x3F  64  GM_PROGRAM_SYNTHBRASS_2          */ {  .program = ROLAND_CM32P_TP_TRB_5,    .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
-        /* 0x40  65  GM_PROGRAM_SOPRANO_SAX           */ {  .program = ROLAND_CM32P_SAX_2,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },          
+        /* 0x40  65  GM_PROGRAM_SOPRANO_SAX           */ {  .program = ROLAND_CM32P_SAX_2,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x41  66  GM_PROGRAM_ALTO_SAX              */ {  .program = ROLAND_CM32P_SAX_1,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x42  67  GM_PROGRAM_TENOR_SAX             */ {  .program = ROLAND_CM32P_SAX_3,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x43  68  GM_PROGRAM_BARITONE_SAX          */ {  .program = ROLAND_CM32P_SAX_5,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
-        /* 0x44  69  GM_PROGRAM_OBOE                  */ {  .program = ROLAND_CM32P_SAX_2,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },          
-        /* 0x45  70  GM_PROGRAM_ENGLISH_HORN          */ {  .program = ROLAND_CM32P_SAX_2,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },          
+        /* 0x44  69  GM_PROGRAM_OBOE                  */ {  .program = ROLAND_CM32P_SAX_2,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
+        /* 0x45  70  GM_PROGRAM_ENGLISH_HORN          */ {  .program = ROLAND_CM32P_SAX_2,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x46  71  GM_PROGRAM_BASSOON               */ {  .program = ROLAND_CM32P_BRASS_1,     .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
-        /* 0x47  72  GM_PROGRAM_CLARINET              */ {  .program = ROLAND_CM32P_SAX_2,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },          
+        /* 0x47  72  GM_PROGRAM_CLARINET              */ {  .program = ROLAND_CM32P_SAX_2,       .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x48  73  GM_PROGRAM_PICCOLO               */ {  .program = ROLAND_CM32P_BRASS_5,     .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x49  74  GM_PROGRAM_FLUTE                 */ {  .program = ROLAND_CM32P_FRETLESS_1,  .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
         /* 0x4A  75  GM_PROGRAM_RECORDER              */ {  .program = ROLAND_CM32P_FRETLESS_1,  .flags = ROLAND_CM32P_RANGE_DEFAULT                  },
@@ -478,75 +480,73 @@ const midiplan_device_t roland_cm32p = {
 
     },
 
-    .initialization_sequence_offset = 0x0000,
-    .program_change_sequence_offset = 0x000E,
-    .note_on_sequence_offset        = INVALID_SEQUENCE_OFFSET,
-    .note_off_sequence_offset       = INVALID_SEQUENCE_OFFSET,
+    /* initialization, p[0] = basic channel */
 
-    .custom_sequences = {
-    
-        /* initialization, p[0] = basic channel */
-        
+    .initialization_sequence = (const uint8_t[]) {
+
         /* system reset */
-        
-        /* 0000 */ 0xF0, 0x41, 0x10, 0x16, 0x12, /* "set data" sysex */
-        /*      */ /* 7F 00 00 = "system area" */
-        /*      */ 0b11000000 /* reset Roland checksum */,
-        /*      */ /* over */ 0x7F,
-        /*      */ 0x00,
-        /*      */ 0x00,
-        /*      */ 0x00, /* any data byte */
-        /*      */ 0b11000001 /* insert Roland checksum */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0xF7, /* end of sysex */
-        
-        /* 000D */ INVALID_STATUS_BYTE,
 
-        /* program change, p[0] = channel, p[1] = program */
-        
-        /* 000E */ 0xF0, 0x41, 0x10, 0x16, 0x12, /* "set data" sysex */
-        /*      */ /* 51 XX XX+08 = "patch memory, reverb switch" */
-        /*      */ 0b11000000 /* reset Roland checksum */,
-        /*      */ /* over */ 0x51,
-        /*      */ 0b10011100 /* 8-bit lookup in the following 128-byte table using p[1] as the index                   */,
-                    /*                              program to high offset byte mapping                                 */
-                    /*   _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F   */
-        /*      0_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02,
-        /*      1_ */  0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x04, 0x04,
-        /*      2_ */  0x04, 0x04, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x07,
-        /*      3_ */  0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x09, 0x09, 0x09,
-        /*      4_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        /*      5_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        /*      6_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        /*      7_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        /*      */ /* over */ 0x00,
-        /*      */ 0b10011100 /* 8-bit lookup in the following 128-byte table using p[1] as the index                   */,
-                    /*                              program to low offset byte mapping                                  */
-                    /*   _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F   */
-        /*      0_ */  0x08, 0x1B, 0x2E, 0x41, 0x54, 0x67, 0x7A, 0x0D, 0x20, 0x33, 0x46, 0x59, 0x6C, 0x7F, 0x12, 0x25,
-        /*      1_ */  0x38, 0x4B, 0x5E, 0x71, 0x04, 0x17, 0x2A, 0x3D, 0x50, 0x63, 0x76, 0x09, 0x1C, 0x2F, 0x42, 0x55,
-        /*      2_ */  0x68, 0x7B, 0x0E, 0x21, 0x34, 0x47, 0x5A, 0x6D, 0x00, 0x13, 0x26, 0x39, 0x4C, 0x5F, 0x72, 0x05,
-        /*      3_ */  0x18, 0x2B, 0x3E, 0x51, 0x64, 0x77, 0x0A, 0x1D, 0x30, 0x43, 0x56, 0x69, 0x7C, 0x0F, 0x22, 0x35,
-        /*      4_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        /*      5_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        /*      6_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        /*      7_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        /*      */ /* over */ 0x00,
-        /*      */ 0x00, /* data byte 0 = reverb off */
-        /*      */ 0b11000001 /* insert Roland checksum */,
-        /*      */ /* over */ 0x00,
-        /*      */ 0xF7, /* end of sysex */
+        0xF0, 0x41, 0x10, 0x16, 0x12, /* "set data" sysex */
+        /* 7F 00 00 = "system area" */
+        0b11000000, /* reset Roland checksum */
+        /* over */ 0x7F,
+        0x00,
+        0x00,
+        0x00, /* any data byte */
+        0b11000001, /* insert Roland checksum */
+        /* over */ 0x00,
+        0xF7, /* end of sysex */
 
-        /*      */ 0b00000000 /* low 4 bits of p[0] */,
-        /*      */ /* over */ 0xC0,
-        /*      */ 0b10010100 /* all 7 bits of p[1] */,
-        /*      */ /* over */ 0x00,
+        INVALID_STATUS_BYTE,
 
-        /*      */ MIDI_MESSAGE_DELAY,
-        /*      */ 0x00,
-        /*      */ 0x14, /* 20 ms */
-        
-        /*      */ INVALID_STATUS_BYTE
+    },
+
+    /* program change, p[0] = channel, p[1] = program */
+
+    .program_change_sequence = (const uint8_t[]) {
+
+        0xF0, 0x41, 0x10, 0x16, 0x12, /* "set data" sysex */
+        /* 51 XX XX+08 = "patch memory, reverb switch" */
+        0b11000000, /* reset Roland checksum */
+        /* over */ 0x51,
+        0b10011100, /* 8-bit lookup in the following 128-byte table using p[1] as the index                       */
+        /*                             program to high offset byte mapping                                        */
+        /*         _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F   */
+        /* 0_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02,
+        /* 1_ */  0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x04, 0x04,
+        /* 2_ */  0x04, 0x04, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x07,
+        /* 3_ */  0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x09, 0x09, 0x09,
+        /* 4_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* 5_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* 6_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* 7_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* over */ 0x00,
+        0b10011100, /* 8-bit lookup in the following 128-byte table using p[1] as the index                       */
+        /*                              program to low offset byte mapping                                        */
+        /*         _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F   */
+        /* 0_ */  0x08, 0x1B, 0x2E, 0x41, 0x54, 0x67, 0x7A, 0x0D, 0x20, 0x33, 0x46, 0x59, 0x6C, 0x7F, 0x12, 0x25,
+        /* 1_ */  0x38, 0x4B, 0x5E, 0x71, 0x04, 0x17, 0x2A, 0x3D, 0x50, 0x63, 0x76, 0x09, 0x1C, 0x2F, 0x42, 0x55,
+        /* 2_ */  0x68, 0x7B, 0x0E, 0x21, 0x34, 0x47, 0x5A, 0x6D, 0x00, 0x13, 0x26, 0x39, 0x4C, 0x5F, 0x72, 0x05,
+        /* 3_ */  0x18, 0x2B, 0x3E, 0x51, 0x64, 0x77, 0x0A, 0x1D, 0x30, 0x43, 0x56, 0x69, 0x7C, 0x0F, 0x22, 0x35,
+        /* 4_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* 5_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* 6_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* 7_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* over */ 0x00,
+        0x00, /* data byte 0 = reverb off */
+        0b11000001, /* insert Roland checksum */
+        /* over */ 0x00,
+        0xF7, /* end of sysex */
+
+        0b00000000, /* low 4 bits of p[0] */
+        /* over */ 0xC0,
+        0b10010100, /* all 7 bits of p[1] */
+        /* over */ 0x00,
+
+        MIDI_MESSAGE_DELAY, 0x00, 0x14, /* 20 ms */
+
+        INVALID_STATUS_BYTE,
+
     }
 
 };
