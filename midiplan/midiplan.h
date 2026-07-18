@@ -1,8 +1,8 @@
 #ifndef MIDIPLAN_MIDIPLAN_H
 #define MIDIPLAN_MIDIPLAN_H
 
-#include <midiplan/types.h>
-#include <midiplan/config.h>
+#include "types.h"
+#include "devices.h"
 
 /*
  * Sends a MIDI message to the specified output port.
@@ -10,7 +10,7 @@
  * when the output UART task later pulls this message from its queue.
  */
 typedef void (*midiplan_callback_send_midi_message_t)(
-    void* p_context, 
+    void* p_callback_context,
     midi_out_port_t out_port,
     status_byte_t status_byte,
     data_byte_t data_byte_1,
@@ -23,27 +23,33 @@ typedef void (*midiplan_callback_send_midi_message_t)(
  * when the output UART task later pulls this message from its queue.
  */
 typedef void (*midiplan_callback_send_custom_sequence_t)(
-    void* p_context, 
+    void* p_callback_context,
     midi_out_port_t out_port,
     custom_sequence_id_t custom_sequence_id,
     custom_sequence_parameters_t custom_sequence_parameters
 );
 
 typedef struct {
-    midiplan_callback_send_midi_message_t send_midi_message;
-    midiplan_callback_send_custom_sequence_t send_custom_sequence;
-} midiplan_callbacks_t;
+    
+    void* p_callback_context;
+    
+    struct {
+        midiplan_callback_send_midi_message_t send_midi_message;
+        midiplan_callback_send_custom_sequence_t send_custom_sequence;
+    } callbacks;
+    
+} midiplan_context_t;
 
 /*
- * Initializes the module.
+ * Initializes the structures.
  */
-void midiplan_initialize(midiplan_callbacks_t* p_callbacks);
+void midiplan__initialize(void);
 
 /*
  * Processes a MIDI message incoming from the input UART.
  */
-void midiplan_handle_message(
-    void* p_context, 
+void midiplan__handle_message(
+    midiplan_context_t* p_midiplan_context,
     midi_message_t midi_message
 );
 

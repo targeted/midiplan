@@ -14,74 +14,14 @@
  */
 
 #include <evar_assert.h>
-#include <midiplan/device.h>
-
-midiplan_device_routing_t route_all = {
-    .melodic_programs_bitmap = {
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111
-    },
-    .percussion_notes_bitmap = {
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111
-    }
-};
-
-midiplan_device_routing_t route_none = {
-    .melodic_programs_bitmap = {
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000
-    },
-    .percussion_notes_bitmap = {
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000
-    }
-};
-
-midiplan_device_routing_t route_melodic = {
-    .melodic_programs_bitmap = {
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111
-    },
-    .percussion_notes_bitmap = {
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000
-    }
-};
-
-midiplan_device_routing_t route_percussion = {
-    .melodic_programs_bitmap = {
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000,
-        0b00000000000000000000000000000000
-    },
-    .percussion_notes_bitmap = {
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111,
-        0b11111111111111111111111111111111
-    }
-};
+#include "device.h"
 
 /*
  * These pre-calculated lookup tables are used to turn velocity up/down when a note is translated.
- * The first three are +2dB, +4dB, +6dB, the last three are -2dB, -4dB, -6dB,
- * velocity values range from 1 to 128, hence 127 elements in each array.
+ * The first three are +2dB, +4dB, +6dB, the last three are -2dB, -4dB, -6dB.
+ * Velocity values range from 1 to 128, hence 127 elements in each array.
  */
-data_byte_t velocity_curves[6][127] = {
+static data_byte_t velocity_curves[6][127] = {
     {  3,   5,   6,   8,  10,  11,  13,  14,  16,  17,  18,  19,  21,  22,  23,  24,  26,  27,  28,  29,  30,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  44,  45,  46,  47,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  62,  63,  64,  65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  76,  77,  78,  79,  80,  81,  82,  83,  84,  84,  85,  86,  87,  88,  89,  90,  91,  91,  92,  93,  94,  95,  96,  97,  97,  98,  99, 100, 101, 102, 103, 103, 104, 105, 106, 107, 108, 108, 109, 110, 111, 112, 112, 113, 114, 115, 116, 117, 117, 118, 119, 120, 121, 121, 122, 123, 124, 125, 125, 126, 127  },
     {  6,   9,  12,  14,  16,  19,  20,  22,  24,  26,  27,  29,  30,  32,  33,  34,  36,  37,  38,  40,  41,  42,  43,  44,  46,  47,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,  65,  66,  67,  68,  69,  70,  71,  71,  72,  73,  74,  75,  76,  77,  77,  78,  79,  80,  81,  82,  82,  83,  84,  85,  86,  86,  87,  88,  89,  90,  90,  91,  92,  93,  93,  94,  95,  96,  96,  97,  98,  99,  99, 100, 101, 101, 102, 103, 104, 104, 105, 106, 106, 107, 108, 109, 109, 110, 111, 111, 112, 113, 113, 114, 115, 115, 116, 117, 117, 118, 119, 119, 120, 121, 121, 122, 123, 123, 124, 124, 125, 126, 126, 127  },
     { 11,  16,  19,  22,  25,  28,  30,  32,  34,  36,  37,  39,  41,  42,  44,  45,  46,  48,  49,  50,  52,  53,  54,  55,  56,  57,  58,  60,  61,  62,  63,  64,  65,  66,  67,  68,  68,  69,  70,  71,  72,  73,  74,  75,  76,  76,  77,  78,  79,  80,  80,  81,  82,  83,  83,  84,  85,  86,  86,  87,  88,  89,  89,  90,  91,  91,  92,  93,  94,  94,  95,  96,  96,  97,  98,  98,  99,  99, 100, 101, 101, 102, 103, 103, 104, 104, 105, 106, 106, 107, 107, 108, 109, 109, 110, 110, 111, 112, 112, 113, 113, 114, 114, 115, 115, 116, 117, 117, 118, 118, 119, 119, 120, 120, 121, 121, 122, 122, 123, 123, 124, 124, 125, 125, 126, 126, 127  },
@@ -91,72 +31,25 @@ data_byte_t velocity_curves[6][127] = {
 };
 
 /*
- * Used to produce deterministic "random" numbers to pick a device from a bonding set.
+ * Translates note parameters (program/note/velocity) for the device.
+ * This is an idempotent call, basing its decisions only on the device
+ * configuration and the input note parameters. In particular, the output
+ * note that we return, the device might not be able to play *at the moment*
+ * because it is overloaded, but that check will be done later.
+ * Similarly, the note may be supported by the device, but routing may be
+ * configured so that it is not sent to this device, also a separate concern.
+ * It is crucial that notes are translated the same for all note messages - 
+ * on, off, key pressure, and for controllers that are related to notes.
  */
-uint8_t device_bonding_hash(midi_channel_t channel, program_t program) {
-
-    uint32_t h = (channel << 8) | program;
-    h ^= h >> 7;
-    h *= 0x9E3779B1;
-    h ^= h >> 11;
-
-    return h & 0xff;
-}
-
-/*
- * This is called at startup and during handling of "all notes off" after a device has become idle.
- */
-void reset_device_state(midiplan_device_state_t* p_device_state) {
-
-    evar_assert(p_device_state->melodic_programs_playing == 0);
-    evar_assert(p_device_state->melodic_notes_playing == 0);
-
-    for (uint8_t i = 0; i < 128 + 1; ++i) {
-        evar_assert(p_device_state->melodic_notes_per_program[i] == 0);
-    }
-
-    evar_assert(p_device_state->percussion_notes_playing == 0);
-
-    for (midi_channel_t out_channel = MIDI_CHANNEL_1; out_channel < MIDI_CHANNEL_COUNT; ++out_channel) {
-        evar_assert(p_device_state->channels[out_channel].notes_playing == 0);
-        evar_assert(!VALID_NOTE_ENTRY_ID(p_device_state->channels[out_channel].last_note_entry_id));
-    }
-}
-
-/*
- * Returns the set of channels on which this device program/note can be played.
- * This is expressed in device-specific terms.
- */
-midi_channels_bitmap_t get_note_channels(
+bool translate_note_to_device(
     const midiplan_device_t* p_device,
-    program_t                out_program,
-    note_t                   out_note
-) {
-
-    evar_assert(VALID_PROGRAM(out_program));
-    evar_assert(VALID_NOTE(out_note));
-
-    if (IS_PERCUSSION_PROGRAM(out_program)) {
-        return p_device->percussion_channels_bitmap;
-    }
-
-    uint8_t melodic_channels_bitmap_index = (p_device->melodic_channels_bitmaps_refs[out_program >> 4] >> ((out_program & 0x0f) << 1)) & 0x03;
-    return p_device->melodic_channels_bitmaps[melodic_channels_bitmap_index];
-}
-
-/*
- * Translates/filters a note on parameters for the particular device.
- * It is crucial that note numbers are translated the same for all note
- * messages, on, off and key pressure, and for certain controllers.
- */
-bool translate_note(
-    const midiplan_device_t* p_device,
-    program_t                in_program,
-    note_t                   in_note,
-    data_byte_t              in_velocity,
-    program_t*               p_out_program,
-    note_t*                  p_out_note,
-    data_byte_t*             p_out_velocity
+    program_t in_program,
+    note_t in_note,
+    data_byte_t in_velocity,
+    program_t* p_out_program,
+    note_t* p_out_note,
+    data_byte_t* p_out_velocity,
+    midi_channels_bitmap_t* p_out_channels_bitmap 
 ) {
 
     evar_assert(VALID_PROGRAM(in_program));
@@ -166,6 +59,7 @@ bool translate_note(
     program_t out_program = INVALID_PROGRAM;
     note_t out_note = INVALID_NOTE;
     data_byte_t out_velocity = INVALID_DATA_BYTE;
+    midi_channels_bitmap_t out_channels_bitmap = 0;
 
     if (IS_MELODIC_PROGRAM(in_program)) {
 
@@ -303,23 +197,37 @@ bool translate_note(
         }
     }
 
+    // also return the set of channels on which this output note could be played   
+    
+    if (IS_PERCUSSION_PROGRAM(out_program)) {
+        out_channels_bitmap = p_device->percussion_channels_bitmap;
+    }
+    else {
+        uint8_t melodic_channels_bitmap_index = (p_device->melodic_channels_bitmaps_refs[out_program >> 4] >> ((out_program & 0x0f) << 1)) & 0x03;
+        out_channels_bitmap = p_device->melodic_channels_bitmaps[melodic_channels_bitmap_index];
+    }
+
+    if (out_channels_bitmap == 0) {
+        return false;
+    }
+
     evar_assert(VALID_PROGRAM(out_program));
     evar_assert(VALID_NOTE(out_note));
     evar_assert(VALID_DATA_BYTE(out_velocity) && (out_velocity > 0));
-
-    //UARTprintf("NOTE %d %d %d -> %d %d %d\n", in_program, in_note, in_velocity, out_program, out_note, out_velocity);
+    evar_assert(out_channels_bitmap != 0);
 
     *p_out_program = out_program;
     *p_out_note = out_note;
     *p_out_velocity = out_velocity;
-
+    *p_out_channels_bitmap = out_channels_bitmap;
+    
     return true;
 }
 
 /*
  * Filters controller change messages for the particular device.
  */
-bool controller_supported(
+bool device_supports_controller(
     const midiplan_device_t* p_device,
     midi_control_number_t control_number
 ) {
@@ -329,7 +237,7 @@ bool controller_supported(
 /*
  * Filters key pressure messages for the particular device.
  */
-bool key_pressure_supported(
+bool device_supports_key_pressure(
     const midiplan_device_t* p_device
 ) {
     return p_device->key_pressure != 0;
@@ -338,7 +246,7 @@ bool key_pressure_supported(
 /*
  * Filters channel pressure messages for the particular device.
  */
-bool channel_pressure_supported(
+bool device_supports_channel_pressure(
     const midiplan_device_t* p_device
 ) {
     return p_device->channel_pressure != 0;
@@ -347,7 +255,7 @@ bool channel_pressure_supported(
 /*
  * Filters pitch bend messages for the particular device.
  */
-bool pitch_bend_supported(
+bool device_supports_pitch_bend(
     const midiplan_device_t* p_device
 ) {
     return p_device->pitch_bend != 0;
@@ -356,19 +264,19 @@ bool pitch_bend_supported(
 /*
  * Returns true if this device has custom sequence of the specified type.
  */
-bool has_custom_sequence(
+bool device_has_custom_sequence(
     const midiplan_device_t* p_device,
     custom_sequence_id_t custom_sequence_id
 ) {
     switch (custom_sequence_id) {
         case INITIALIZATION_SEQUENCE:
-            return p_device->initialization_sequence_offset != INVALID_SEQUENCE_OFFSET;
+            return p_device->initialization_sequence != NULL;
         case PROGRAM_CHANGE_SEQUENCE:
-            return p_device->program_change_sequence_offset != INVALID_SEQUENCE_OFFSET;
+            return p_device->program_change_sequence != NULL;
         case NOTE_ON_SEQUENCE:
-            return p_device->note_on_sequence_offset != INVALID_SEQUENCE_OFFSET;
+            return p_device->note_on_sequence != NULL;
         case NOTE_OFF_SEQUENCE:
-            return p_device->note_off_sequence_offset != INVALID_SEQUENCE_OFFSET;
+            return p_device->note_off_sequence != NULL;
         default:
             evar_assert(false);
             return false;
@@ -381,36 +289,68 @@ bool has_custom_sequence(
  * is that a pointer would take 4 bytes per message in the queue, whereas id
  * requires just one byte.
  */
-const uint8_t* get_custom_sequence(
+const uint8_t* get_device_custom_sequence(
     const midiplan_device_t* p_device,
     custom_sequence_id_t custom_sequence_id
 ) {
-
-    uint16_t sequence_offset;
-    
     switch (custom_sequence_id) {
         case INITIALIZATION_SEQUENCE:
-            sequence_offset = p_device->initialization_sequence_offset;
-            break;
+            return p_device->initialization_sequence;
         case PROGRAM_CHANGE_SEQUENCE:
-            sequence_offset = p_device->program_change_sequence_offset;
-            break;
+            return p_device->program_change_sequence;
         case NOTE_ON_SEQUENCE:
-            sequence_offset = p_device->note_on_sequence_offset;
-            break;
+            return p_device->note_on_sequence;
         case NOTE_OFF_SEQUENCE:
-            sequence_offset = p_device->note_off_sequence_offset;
-            break;
+            return p_device->note_off_sequence;
         default:
             evar_assert(false);
             return NULL;
     }
-
-    evar_assert(sequence_offset != INVALID_SEQUENCE_OFFSET);
-    
-    if (sequence_offset > 0) {
-        evar_assert(p_device->custom_sequences[sequence_offset - 1] == INVALID_STATUS_BYTE); // buffer integrity check
-    }
-    
-    return p_device->custom_sequences + sequence_offset;
 }
+
+/*
+ * This is called once at startup.
+ */
+void initialize_device_state(
+    midiplan_device_state_t* p_device_state
+) {
+
+    p_device_state->melodic_programs_playing = 0;
+    p_device_state->melodic_notes_playing = 0;
+
+    for (uint8_t i = 0; i < 128 + 1; ++i) {
+        p_device_state->melodic_notes_per_program[i] = 0;
+    }
+
+    p_device_state->percussion_notes_playing = 0;
+
+    for (midi_channel_t out_channel = MIDI_CHANNEL_1; out_channel < MIDI_CHANNEL_COUNT; ++out_channel) {
+        p_device_state->channels[out_channel].notes_playing = 0;
+        p_device_state->channels[out_channel].last_note_entry_id = INVALID_NOTE_ENTRY_ID;
+    }
+}
+
+/*
+ * This is called at initialization and during handling of "all notes off" after a device has become idle.
+ * Currently there is nothing but debug checks here, because if everything went well,
+ * all the notes have been turned off properly and now the state is empty anyway.
+ */
+void reset_device_state(
+    midiplan_device_state_t* p_device_state
+) {
+
+    evar_assert(p_device_state->melodic_programs_playing == 0);
+    evar_assert(p_device_state->melodic_notes_playing == 0);
+
+    for (uint8_t i = 0; i < 128 + 1; ++i) {
+        evar_assert(p_device_state->melodic_notes_per_program[i] == 0);
+    }
+
+    evar_assert(p_device_state->percussion_notes_playing == 0);
+
+    for (midi_channel_t out_channel = MIDI_CHANNEL_1; out_channel < MIDI_CHANNEL_COUNT; ++out_channel) {
+        evar_assert(p_device_state->channels[out_channel].notes_playing == 0);
+        evar_assert(!VALID_NOTE_ENTRY_ID(p_device_state->channels[out_channel].last_note_entry_id));
+    }
+}
+

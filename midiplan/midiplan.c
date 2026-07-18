@@ -15,21 +15,20 @@
 
 #include <evar_task.h>
 #include <evar_assert.h>
-#include <midiplan/midiplan.h>
-#include <midiplan/controller_values.h>
-#include <midiplan/note_entries.h>
-#include <midiplan/channels.h>
-#include <midiplan/devices.h>
+#include "channels.h"
+#include "controller_values.h"
+#include "devices.h"
+#include "midiplan.h"
+#include "note_entries.h"
 
-static midiplan_callbacks_t* p_callbacks;
-
-void midiplan_initialize(midiplan_callbacks_t* p_callbacks_) {
-
-    p_callbacks = p_callbacks_;
+/*
+ * Initializes the structures.
+ */
+void midiplan__initialize(void) {
 
     configure_devices();
 
-    initialize_device_states();
+    initialize_devices();
     initialize_controller_values();
     initialize_note_entries();
     initialize_channels();
@@ -44,15 +43,15 @@ void midiplan_initialize(midiplan_callbacks_t* p_callbacks_) {
  * already absolute in device terms.
  */
 static void send_midi_message(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_out_port_t out_port,
     midi_channel_t out_channel,
     midi_message_type_t message_type,
     data_byte_t data_byte_1,
     data_byte_t data_byte_2
 ) {
-    p_callbacks->send_midi_message(
-        p_context,
+    p_midiplan_context->callbacks.send_midi_message(
+        p_midiplan_context->p_callback_context,
         out_port,
         message_type | out_channel,
         data_byte_1,
@@ -66,14 +65,14 @@ static void send_midi_message(
  * It does not apply any translation, the messages are sent verbatim.
  */
 static void broadcast_message(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     status_byte_t status_byte,
     data_byte_t data_byte_1,
     data_byte_t data_byte_2
 ) {
     for (midi_out_port_t out_port = MIDI_OUT_PORT_1; out_port < MIDI_OUT_PORT_COUNT; ++out_port) {
-        p_callbacks->send_midi_message(
-            p_context,
+        p_midiplan_context->callbacks.send_midi_message(
+            p_midiplan_context->p_callback_context,
             out_port,
             status_byte,
             data_byte_1,
@@ -86,13 +85,13 @@ static void broadcast_message(
  * Sends a parameterized custom message.
  */
 static void send_custom_sequence(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_out_port_t out_port,
     custom_sequence_id_t custom_sequence_id,
     custom_sequence_parameters_t custom_sequence_parameters
 ) {
-    p_callbacks->send_custom_sequence(
-        p_context,
+    p_midiplan_context->callbacks.send_custom_sequence(
+        p_midiplan_context->p_callback_context,
         out_port,
         custom_sequence_id,
         custom_sequence_parameters
@@ -103,20 +102,20 @@ static void send_custom_sequence(
  * Sends the custom initialization sequence to a device.
  */
 static void send_initialization_sequence(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_out_port_t out_port
 ) {
 
     const midiplan_device_t* p_device = devices[out_port].p_device;
 
-    if (has_custom_sequence(p_device, INITIALIZATION_SEQUENCE)) {
+    if (device_has_custom_sequence(p_device, INITIALIZATION_SEQUENCE)) {
 
         custom_sequence_parameters_t initialization_sequence_parameters = {
             .p = { p_device->basic_channel, 0, 0 }
         };
 
         send_custom_sequence(
-            p_context,
+            p_midiplan_context,
             out_port,
             INITIALIZATION_SEQUENCE,
             initialization_sequence_parameters
@@ -128,7 +127,7 @@ static void send_initialization_sequence(
  * Sends the custom or standard program change sequence to a device.
  */
 static void send_program_change_sequence(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_out_port_t out_port,
     channel_t out_channel,
     program_t out_program
@@ -145,14 +144,14 @@ static void send_program_change_sequence(
         evar_assert(!VALID_NOTE_ENTRY_ID(p_device_state->channels[out_channel].last_note_entry_id));
     }
 
-    if (has_custom_sequence(p_device, PROGRAM_CHANGE_SEQUENCE)) {
+    if (device_has_custom_sequence(p_device, PROGRAM_CHANGE_SEQUENCE)) {
 
         custom_sequence_parameters_t program_change_sequence_parameters = {
             .p = { out_channel, out_program, 0 }
         };
 
         send_custom_sequence(
-            p_context,
+            p_midiplan_context,
             out_port,
             PROGRAM_CHANGE_SEQUENCE,
             program_change_sequence_parameters
@@ -161,7 +160,7 @@ static void send_program_change_sequence(
     else { // if there is no custom sequence, send the default message
 
         send_midi_message(
-            p_context,
+            p_midiplan_context,
             out_port,
             out_channel,
             MIDI_MESSAGE_PROGRAM_CHANGE,
@@ -175,7 +174,7 @@ static void send_program_change_sequence(
  * Sends the custom or standard note on sequence to a device.
  */
 static void send_note_on_sequence(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_out_port_t out_port,
     channel_t out_channel,
     note_t out_note,
@@ -188,14 +187,14 @@ static void send_note_on_sequence(
 
     const midiplan_device_t* p_device = devices[out_port].p_device;
 
-    if (has_custom_sequence(p_device, NOTE_ON_SEQUENCE)) {
+    if (device_has_custom_sequence(p_device, NOTE_ON_SEQUENCE)) {
 
         custom_sequence_parameters_t note_on_sequence_parameters = {
             .p = { out_channel, out_note, out_velocity }
         };
 
         send_custom_sequence(
-            p_context,
+            p_midiplan_context,
             out_port,
             NOTE_ON_SEQUENCE,
             note_on_sequence_parameters
@@ -204,7 +203,7 @@ static void send_note_on_sequence(
     else {
 
         send_midi_message(
-            p_context,
+            p_midiplan_context,
             out_port,
             out_channel,
             MIDI_MESSAGE_NOTE_ON,
@@ -218,7 +217,7 @@ static void send_note_on_sequence(
  * Sends the custom or standard note off sequence to a device.
  */
 static void send_note_off_sequence(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_out_port_t out_port,
     channel_t out_channel,
     note_t out_note,
@@ -231,14 +230,14 @@ static void send_note_off_sequence(
 
     const midiplan_device_t* p_device = devices[out_port].p_device;
 
-    if (has_custom_sequence(p_device, NOTE_OFF_SEQUENCE)) {
+    if (device_has_custom_sequence(p_device, NOTE_OFF_SEQUENCE)) {
 
         custom_sequence_parameters_t note_off_sequence_parameters = {
             .p = { out_channel, out_note, out_velocity }
         };
 
         send_custom_sequence(
-            p_context,
+            p_midiplan_context,
             out_port,
             NOTE_OFF_SEQUENCE,
             note_off_sequence_parameters
@@ -247,7 +246,7 @@ static void send_note_off_sequence(
     else { // if there is no custom sequence, send the default message
 
         send_midi_message(
-            p_context,
+            p_midiplan_context,
             out_port,
             out_channel,
             MIDI_MESSAGE_NOTE_OFF,
@@ -262,7 +261,7 @@ static void send_note_off_sequence(
  * The message is sent only if that controller is supported by the device.
  */
 static void send_control_change(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_out_port_t out_port,
     midi_channel_t out_channel,
     control_t control,
@@ -274,10 +273,10 @@ static void send_control_change(
 
     if (control < 0x20) { // long controller value
 
-        if (controller_supported(p_device, control) && controller_supported(p_device, control | 0x20)) {
+        if (device_supports_controller(p_device, control) && device_supports_controller(p_device, control | 0x20)) {
 
             send_midi_message(
-                p_context,
+                p_midiplan_context,
                 out_port,
                 out_channel,
                 MIDI_MESSAGE_CONTROL_CHANGE,
@@ -286,7 +285,7 @@ static void send_control_change(
             );
 
             send_midi_message(
-                p_context,
+                p_midiplan_context,
                 out_port,
                 out_channel,
                 MIDI_MESSAGE_CONTROL_CHANGE,
@@ -297,10 +296,10 @@ static void send_control_change(
     }
     else if ((control >= 0x40) && (control < 0x78)) { // short controller value
 
-        if (controller_supported(p_device, control)) {
+        if (device_supports_controller(p_device, control)) {
 
             send_midi_message(
-                p_context,
+                p_midiplan_context,
                 out_port,
                 out_channel,
                 MIDI_MESSAGE_CONTROL_CHANGE,
@@ -311,10 +310,10 @@ static void send_control_change(
     }
     else if (control == CONTROL_PRESSURE) { // channel pressure, one byte
 
-        if (channel_pressure_supported(p_device)) {
+        if (device_supports_channel_pressure(p_device)) {
 
             send_midi_message(
-                p_context,
+                p_midiplan_context,
                 out_port,
                 out_channel,
                 MIDI_MESSAGE_CHANNEL_PRESSURE,
@@ -325,10 +324,10 @@ static void send_control_change(
     }
     else if (control == CONTROL_PITCH_BEND) { // channel pitch bend, two bytes
 
-        if (pitch_bend_supported(p_device)) {
+        if (device_supports_pitch_bend(p_device)) {
 
             send_midi_message(
-                p_context,
+                p_midiplan_context,
                 out_port,
                 out_channel,
                 MIDI_MESSAGE_PITCH_BEND,
@@ -344,7 +343,7 @@ static void send_control_change(
  * The message is sent only if that controller is supported by the device.
  */
 static void send_control_default(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_out_port_t out_port,
     midi_channel_t out_channel,
     control_t control
@@ -353,14 +352,14 @@ static void send_control_default(
     evar_assert(VALID_CONTROL(control));
 
     if (control == CONTROL_PRESSURE) {
-        send_control_change(p_context, out_port, out_channel, CONTROL_PRESSURE, 0, 0);
+        send_control_change(p_midiplan_context, out_port, out_channel, CONTROL_PRESSURE, 0, 0);
     }
     else if (control == CONTROL_PITCH_BEND) {
-        send_control_change(p_context, out_port, out_channel, CONTROL_PRESSURE, 64, 0);
+        send_control_change(p_midiplan_context, out_port, out_channel, CONTROL_PRESSURE, 64, 0);
     }
     else {
         data_byte_t msb_or_value = get_default_controller_value(control);
-        send_control_change(p_context, out_port, out_channel, control, msb_or_value, 0);
+        send_control_change(p_midiplan_context, out_port, out_channel, control, msb_or_value, 0);
     }
 }
 
@@ -427,7 +426,7 @@ static void account_note_off(
     const midiplan_device_t* p_device = devices[out_port].p_device;
     midiplan_device_state_t* p_device_state = &devices[out_port].state;
 
-    // percussion notes are accounted as melodic if max_percussion_notes = 0
+    // percussion notes are accounted as melodic if max_percussion_notes == 0
     // and we are still having a percussion output program here
 
     if (USES_MELODIC_TIMBRE(p_device, out_program)) {
@@ -496,7 +495,7 @@ static void account_note_on(
     const midiplan_device_t* p_device = devices[out_port].p_device;
     midiplan_device_state_t* p_device_state = &devices[out_port].state;
 
-    // percussion notes are accounted as melodic if max_percussion_notes = 0
+    // percussion notes are accounted as melodic if max_percussion_notes == 0
     // and we are still having a percussion output program here
 
     if (USES_MELODIC_TIMBRE(p_device, out_program)) {
@@ -542,7 +541,7 @@ static void account_note_on(
  * is still kept and the other output channels are not affected.
  */
 static void out_note_off(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     note_entry_id_t note_entry_id,
     midi_out_port_t out_port,
     data_byte_t velocity
@@ -579,7 +578,7 @@ static void out_note_off(
     // send "note off" to the device
 
     send_note_off_sequence(
-        p_context,
+        p_midiplan_context,
         out_port,
         out_channel,
         out_note,
@@ -592,14 +591,14 @@ static void out_note_off(
  * to the evict_note_callback below.
  */
 typedef struct {
-    void*            p_context;
-    midi_out_port_t  out_port;
-    program_t        out_program;
-    bool             polyphony_exceeded;
-    bool             notes_per_program_exceeded;
-    bool             multitimbrality_exceeded;
-    note_entry_id_t  candidate_note_entry_id;
-    uint8_t          candidate_note_age;
+    midiplan_context_t* p_midiplan_context;
+    midi_out_port_t     out_port;
+    program_t           out_program;
+    bool                polyphony_exceeded;
+    bool                notes_per_program_exceeded;
+    bool                multitimbrality_exceeded;
+    note_entry_id_t     candidate_note_entry_id;
+    uint8_t             candidate_note_age;
 } evict_note_context_t;
 
 /*
@@ -698,7 +697,7 @@ static void evict_note_callback(
  * the new note is accepted.
  */
 static bool note_can_be_accepted(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_out_port_t out_port,
     program_t out_program
 ) {
@@ -735,7 +734,7 @@ static bool note_can_be_accepted(
         // the incoming one, and we are still under the limits
 
         evict_note_context_t evict_note_context = {
-            .p_context                  = p_context,
+            .p_midiplan_context         = p_midiplan_context,
             .out_port                   = out_port,
             .out_program                = out_program,
             .polyphony_exceeded         = polyphony_exceeded,
@@ -766,7 +765,7 @@ static bool note_can_be_accepted(
 
         // this is the output note we decided to evict, we turn it off, but the note entry still remains
 
-        out_note_off(p_context, evicted_note_entry_id, out_port, 0);
+        out_note_off(p_midiplan_context, evicted_note_entry_id, out_port, 0);
 
         // now we have capacity for the new note
 
@@ -780,7 +779,7 @@ static bool note_can_be_accepted(
  * channels *currently* associated with this input channel.
  */
 static void propagate_control_change(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     control_t control,
     data_byte_t msb_or_value,
@@ -797,7 +796,7 @@ static void propagate_control_change(
         }
 
         send_control_change(
-            p_context,
+            p_midiplan_context,
             out_port,
             out_channel,
             control,
@@ -816,7 +815,7 @@ static void propagate_control_change(
  * supposed to be playing.
  */
 static void in_note_off(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     note_entry_id_t note_entry_id,
     data_byte_t velocity
 ) {
@@ -828,7 +827,7 @@ static void in_note_off(
 
     for (midi_out_port_t out_port = MIDI_OUT_PORT_1; out_port < MIDI_OUT_PORT_COUNT; ++out_port) {
         if (VALID_CHANNEL(p_note_entry->out[out_port].channel)) {
-            out_note_off(p_context, note_entry_id, out_port, velocity);
+            out_note_off(p_midiplan_context, note_entry_id, out_port, velocity);
         }
     }
 
@@ -871,7 +870,7 @@ static void in_note_off(
  * After this call returns, the note entry is cleared and deallocated.
  */
 static void handle_note_off(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     midi_note_number_t note_number,
     data_byte_t velocity
@@ -896,7 +895,7 @@ static void handle_note_off(
         return;
     }
 
-    in_note_off(p_context, note_entry_id, velocity);
+    in_note_off(p_midiplan_context, note_entry_id, velocity);
 
     // release the now empty entry back to the pool
 
@@ -958,7 +957,7 @@ static void collect_controllers_callback(
  * to the restore_program_controllers_callback below.
  */
 typedef struct {
-    void* p_context;
+    midiplan_context_t* p_midiplan_context;
     program_t in_program;
     midi_out_port_t out_port;
     midi_channel_t out_channel;
@@ -990,7 +989,7 @@ static void restore_program_controllers_callback(
     if (VALID_DATA_BYTE(msb_or_value)) {
 
         send_control_change(
-            p_restore_program_controllers_context->p_context,
+            p_restore_program_controllers_context->p_midiplan_context,
             p_restore_program_controllers_context->out_port,
             p_restore_program_controllers_context->out_channel,
             control,
@@ -1001,7 +1000,7 @@ static void restore_program_controllers_callback(
 }
 
 static void associate_channels(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     program_t in_program,
     midi_out_port_t out_port,
@@ -1095,18 +1094,17 @@ static void associate_channels(
             for (uint8_t j = 0; j < 32; ++j) {
                 if ((bitmap & (1 << j)) != 0) {
                     midi_control_number_t control_number = (i * 32) + j;
-                    evar_assert(control_number < 128);
-                    send_control_default(p_context, out_port, out_channel, control_number);
+                    send_control_default(p_midiplan_context, out_port, out_channel, control_number);
                 }
             }
         }
 
         if (p_channel_controllers->pressure) {
-            send_control_default(p_context, out_port, out_channel, CONTROL_PRESSURE);
+            send_control_default(p_midiplan_context, out_port, out_channel, CONTROL_PRESSURE);
         }
 
         if (p_channel_controllers->pitch_bend) {
-            send_control_default(p_context, out_port, out_channel, CONTROL_PITCH_BEND);
+            send_control_default(p_midiplan_context, out_port, out_channel, CONTROL_PITCH_BEND);
         }
     }
 
@@ -1116,7 +1114,7 @@ static void associate_channels(
 
         if (IS_MELODIC_PROGRAM(out_program)) { // no need to explicitly switch to a percussion "program"
             send_program_change_sequence(
-                p_context,
+                p_midiplan_context,
                 out_port,
                 out_channel,
                 out_program
@@ -1130,10 +1128,10 @@ static void associate_channels(
     // this is expected to go through exactly the same controllers as collected in collect_program_controllers_context
 
     restore_program_controllers_context_t restore_program_controllers_context = {
-        .p_context   = p_context,
-        .in_program  = in_program,
-        .out_port    = out_port,
-        .out_channel = out_channel
+        .p_midiplan_context = p_midiplan_context,
+        .in_program         = in_program,
+        .out_port           = out_port,
+        .out_channel        = out_channel
     };
 
     enumerate_controller_values(
@@ -1188,7 +1186,7 @@ static midi_channel_t select_random_channel(midi_channels_bitmap_t channels_bitm
  * (3) a note with the same number can already be playing on the selected output channel
  */
 static channel_t associate_out_channel(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     program_t in_program,
     midi_out_port_t out_port,
@@ -1225,10 +1223,12 @@ static channel_t associate_out_channel(
         // 3. we hit the limit of notes playing per channel
         // either way we must then go through full channel search
 
+        uint8_t max_notes_on_associated_channel = p_device->max_notes_per_channel[associated_out_channel];
+        
         if (
             (p_associated_output_channel->out_program == out_program) &&                            // otherwise a program change has been requested
             !VALID_NOTE_ENTRY_ID(p_associated_output_channel->note_entry_lookup[out_note_index]) && // otherwise the same note already plays
-            ((p_device->max_notes_per_channel == 0) || p_device_state->channels[associated_out_channel].notes_playing < p_device->max_notes_per_channel) // otherwise the channel is full
+            ((max_notes_on_associated_channel == 0) || p_device_state->channels[associated_out_channel].notes_playing < max_notes_on_associated_channel) // otherwise the channel is full
         ) {
             return associated_out_channel;
         }
@@ -1304,9 +1304,11 @@ static channel_t associate_out_channel(
         // ideally we would want to turn off the oldest note, but doing so would require an expensive
         // note enumeration
 
+        uint8_t max_notes_on_out_channel = p_device->max_notes_per_channel[out_channel];
+        
         if (
-            (p_device->max_notes_per_channel > 0) &&
-            (p_device_state->channels[out_channel].notes_playing == p_device->max_notes_per_channel)
+            (max_notes_on_out_channel > 0) &&
+            (p_device_state->channels[out_channel].notes_playing == max_notes_on_out_channel)
         ) {
             note_entry_id_t last_note_entry_id = p_device_state->channels[out_channel].last_note_entry_id;
             if (
@@ -1419,7 +1421,7 @@ static channel_t associate_out_channel(
     note_entry_id_t same_note_entry_id = p_associated_output_channel->note_entry_lookup[out_note_index];
 
     if (VALID_NOTE_ENTRY_ID(same_note_entry_id)) {
-        out_note_off(p_context, same_note_entry_id, out_port, 0);
+        out_note_off(p_midiplan_context, same_note_entry_id, out_port, 0);
     }
 
     // if the device can play only one program per channel and there already is
@@ -1432,27 +1434,29 @@ static channel_t associate_out_channel(
         if (p_device_state->channels[associated_out_channel].notes_playing == 1) {
             note_entry_id_t last_note_entry_id = p_device_state->channels[associated_out_channel].last_note_entry_id;
             evar_assert(get_note_age(last_note_entry_id) >= MIN_REPLACEABLE_NOTE_AGE);
-            out_note_off(p_context, last_note_entry_id, out_port, 0);
+            out_note_off(p_midiplan_context, last_note_entry_id, out_port, 0);
         }
     }
 
     // if the device can't play more than N notes on the same channel, and we are
     // already at the limit, the last note on the selected channel is turned off
 
+    uint8_t max_notes_on_associated_out_channel = p_device->max_notes_per_channel[associated_out_channel];
+    
     if (
-        (p_device->max_notes_per_channel > 0) &&
-        (p_device_state->channels[associated_out_channel].notes_playing == p_device->max_notes_per_channel)
+        (max_notes_on_associated_out_channel > 0) &&
+        (p_device_state->channels[associated_out_channel].notes_playing == max_notes_on_associated_out_channel)
     ) {
         note_entry_id_t last_note_entry_id = p_device_state->channels[associated_out_channel].last_note_entry_id;
         evar_assert(VALID_NOTE_ENTRY_ID(last_note_entry_id));
-        out_note_off(p_context, last_note_entry_id, out_port, 0);
+        out_note_off(p_midiplan_context, last_note_entry_id, out_port, 0);
     }
 
     // finally, all the preparatory work is done and we can associate
     // the channels (which requires a lot of additional work by itself)
 
     associate_channels(
-        p_context,
+        p_midiplan_context,
         in_channel,
         in_program,
         out_port,
@@ -1469,7 +1473,7 @@ static channel_t associate_out_channel(
  * This is called in response to an incoming "note on" message and does all the heavy lifting.
  */
 static void handle_note_on(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     midi_note_number_t note_number,
     data_byte_t velocity
@@ -1483,7 +1487,7 @@ static void handle_note_on(
     // it is turned off completely before proceeding, as if "note off"
     // was received before it
 
-    handle_note_off(p_context, in_channel, note_number, 0); // if there was no such note, nothing happens
+    handle_note_off(p_midiplan_context, in_channel, note_number, 0); // if there was no such note, nothing happens
 
     if (velocity == 0) { // if this was a disguised request to turn
         return;          // the note off, nothing else is to be done
@@ -1531,40 +1535,39 @@ static void handle_note_on(
     evar_assert(!VALID_NOTE_ENTRY_ID(p_input_channel->note_entry_lookup[in_note_index]));
     p_input_channel->note_entry_lookup[in_note_index] = note_entry_id;
 
-    // every note will possibly be routed to each of the output devices
+    // every note will possibly be routed to each of the output devices,
+    // possibly none, but even in this case, the note will logically be
+    // sounding, even though nothing was sent to any device
 
     for (midi_out_port_t out_port = MIDI_OUT_PORT_1; out_port < MIDI_OUT_PORT_COUNT; ++out_port) {
 
-        // is the note routed through this device at all (this is expressed in terms of the original input GM program/note)
-
-        midiplan_device_routing_t* p_device_routing = &devices[out_port].routing;
-
-        if (IS_MELODIC_PROGRAM(in_program)) {
-            if ((p_device_routing->melodic_programs_bitmap[in_program >> 5] & (1 << (in_program & 0x1F))) == 0) {
-                continue;
-            }
-        }
-        else if (IS_PERCUSSION_PROGRAM(in_program)) {
-            if ((p_device_routing->percussion_notes_bitmap[in_note >> 5] & (1 << (in_note & 0x1F))) == 0) {
-                continue;
-            }
+        // is the note routed to this device at all (this is expressed in terms of the original input GM program/note)
+        
+        if (!route_note_to_device(out_port, in_channel, in_program, in_note)) {
+            continue;
         }
 
-        // what happens to the note after that is defined by the device capabilities and its current state
-
-        const midiplan_device_t* p_device = devices[out_port].p_device;
-
-        // translate the original program/note pair into a device-specific pair
+        // translate the original program/note/velocity into device-specific
 
         program_t out_program;
         note_t out_note;
         data_byte_t out_velocity;
+        midi_channels_bitmap_t out_channels_bitmap;
 
-        if (!translate_note(p_device, in_program, in_note, velocity, &out_program, &out_note, &out_velocity)) {
+        if (!translate_note_to_device(
+                devices[out_port].p_device,
+                in_program,
+                in_note, 
+                velocity, 
+                &out_program, 
+                &out_note, 
+                &out_velocity,
+                &out_channels_bitmap
+        )) {
             continue; // the device does not support such note
         }
 
-        evar_assert(VALID_PROGRAM(out_program) && VALID_NOTE(out_note) && VALID_DATA_BYTE(out_velocity) && (out_velocity > 0));
+        evar_assert(VALID_PROGRAM(out_program) && VALID_NOTE(out_note) && VALID_DATA_BYTE(out_velocity) && (out_velocity > 0) && (out_channels_bitmap != 0));
 
         if ((out_note < MIDI_LOWEST_NOTE) || (out_note > MIDI_HIGHEST_NOTE)) {
             continue; // the translated note is so low or so high that we can't use it
@@ -1572,71 +1575,16 @@ static void handle_note_on(
 
         uint8_t out_note_index = out_note - MIDI_LOWEST_NOTE;
 
-        // in case there are several identical devices playing, each
-        // could take only a fraction of the programs / percussion notes
-
-        midiplan_device_bonding_t* p_device_bonding = &devices[out_port].bonding;
-
-        if (p_device_bonding->device_count > 1) {
-
-            // the problem that we are trying to solve here is that the same program can be
-            // invoked on different input channels, and we would like to have them spread
-            // across different bonded devices, thus increasing polyphony and multitimbrality
-
-            // three things to notice here:
-            // 1. it often happens that the same input program is played on several input
-            //    channels in parallel and we could route those notes to different devices
-            // 2. what causes multitimbrality collisions are the *output* programs, because
-            //    typically there are multiple input programs mapped to the same output program
-            // 3. whether the note is percussion or melodic, is determined in input GM terms,
-            //    even though the output note can become the opposite
-
-            uint8_t bonding_key;
-
-            if (IS_MELODIC_PROGRAM(in_program)) {
-                // therefore we use a randomizing function of the input channel and
-                // the output program, both are deterministic and fixed for the note
-                bonding_key = device_bonding_hash(in_channel, out_program);
-            }
-            else {
-                evar_assert(IS_PERCUSSION_PROGRAM(in_program));
-                // percussion notes will use simple note number modulo distribution
-                bonding_key = out_note;
-            }
-
-            if ((bonding_key % p_device_bonding->device_count) != p_device_bonding->device_index) {
-                continue;
-            }
-        }
-
-        // we are considering actually sending a note to a device, if this is the first time
-        // it happens after a restart, we cue in the initialization sequence for the device,
-        // note that this can cause a significant delay before notes may start playing
-
-        midiplan_device_state_t* p_device_state = &devices[out_port].state;
-
-        if (p_device_state->initialization_pending) {
-            send_initialization_sequence(p_context, out_port);
-            p_device_state->initialization_pending = false;
-        }
-
         // check that the device still has capacity to play another note on this program
 
-        if (!note_can_be_accepted(p_context, out_port, out_program)) {
+        if (!note_can_be_accepted(p_midiplan_context, out_port, out_program)) {
             continue; // the device has exceeded its limits and will not be able to play this note without hiccup
-        }
-
-        // this is the set of output channels on which this note can be played
-
-        midi_channels_bitmap_t out_channels_bitmap = get_note_channels(p_device, out_program, out_note);
-        if (out_channels_bitmap == 0) {
-            continue;
         }
 
         // associate the input channel with one of the output channels capable of playing this note
 
         channel_t out_channel = associate_out_channel(
-            p_context,
+            p_midiplan_context,
             in_channel,
             in_program,
             out_port,
@@ -1680,7 +1628,7 @@ static void handle_note_on(
         // send "note on" to the device
 
         send_note_on_sequence(
-            p_context,
+            p_midiplan_context,
             out_port,
             out_channel,
             out_note,
@@ -1697,7 +1645,7 @@ static void handle_note_on(
  * from the originating input channel, but the note will still be adjusted.
  */
 static void handle_key_pressure(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     midi_note_number_t note_number,
     data_byte_t pressure
@@ -1730,12 +1678,12 @@ static void handle_key_pressure(
         }
 
         const midiplan_device_t* p_device = devices[out_port].p_device;
-        if (!key_pressure_supported(p_device)) {
+        if (!device_supports_key_pressure(p_device)) {
             continue;
         }
 
         send_midi_message(
-            p_context,
+            p_midiplan_context,
             out_port,
             out_channel,
             MIDI_MESSAGE_KEY_PRESSURE,
@@ -1758,7 +1706,7 @@ static void handle_key_pressure(
  * > still be followed.
  */
 static void handle_all_sound_off(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel
 ) {
 
@@ -1781,7 +1729,7 @@ static void handle_all_sound_off(
             // send "all sound off" to the device
 
             send_midi_message(
-                p_context,
+                p_midiplan_context,
                 out_port,
                 out_channel,
                 MIDI_MESSAGE_CONTROL_CHANGE,
@@ -1799,7 +1747,7 @@ static void handle_all_sound_off(
  * the programs and the channel associations also remain intact.
  */
 static void handle_reset_all_controllers(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel
 ) {
 
@@ -1822,7 +1770,7 @@ static void handle_reset_all_controllers(
             // send "reset all controllers" to the device
 
             send_midi_message(
-                p_context,
+                p_midiplan_context,
                 out_port,
                 out_channel,
                 MIDI_MESSAGE_CONTROL_CHANGE,
@@ -1843,10 +1791,10 @@ static void handle_reset_all_controllers(
  * to the all_notes_off_callback below.
  */
 typedef struct {
-    void* p_context;
-    midi_channel_t in_channel;
-    note_entry_id_t note_entry_ids[MAX_NOTE_ENTRIES];
-    uint8_t note_entry_ids_count;
+    midiplan_context_t* p_midiplan_context;
+    midi_channel_t      in_channel;
+    note_entry_id_t     note_entry_ids[MAX_NOTE_ENTRIES];
+    uint8_t             note_entry_ids_count;
 } all_notes_off_context_t;
 
 /*
@@ -1868,7 +1816,7 @@ static void all_notes_off_callback(
         return;
     }
 
-    in_note_off(p_all_notes_off_context->p_context, note_entry_id, 0);
+    in_note_off(p_all_notes_off_context->p_midiplan_context, note_entry_id, 0);
 
     // notice that the note entry can't be deallocated here, as it would break the enumeration,
     // instead we collect the turned off entries in the context, and the caller will deallocate
@@ -1885,12 +1833,12 @@ static void all_notes_off_callback(
  * and the programs remain unchanged.
  */
 static void handle_all_notes_off(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel
 ) {
 
     all_notes_off_context_t all_notes_off_context = {
-        .p_context            = p_context,
+        .p_midiplan_context     = p_midiplan_context,
         .in_channel           = in_channel,
         .note_entry_ids       = { INVALID_NOTE_ENTRY_ID },
         .note_entry_ids_count = 0
@@ -1930,21 +1878,21 @@ static void handle_all_notes_off(
  * messages that are borrowing namespace from control change messages.
  */
 static void handle_channel_mode(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     midi_control_number_t channel_mode
 ) {
     switch (channel_mode) {
         case MIDI_CHANNEL_MODE_ALL_SOUND_OFF:
-            handle_all_sound_off(p_context, in_channel);
+            handle_all_sound_off(p_midiplan_context, in_channel);
             break;
         case MIDI_CHANNEL_MODE_RESET_ALL_CONTROLLERS:
-            handle_reset_all_controllers(p_context, in_channel);
+            handle_reset_all_controllers(p_midiplan_context, in_channel);
             break;
         case MIDI_CHANNEL_MODE_LOCAL_CONTROL_ON_OFF:
             break;
         case MIDI_CHANNEL_MODE_ALL_NOTES_OFF:
-            handle_all_notes_off(p_context, in_channel);
+            handle_all_notes_off(p_midiplan_context, in_channel);
             break;
         case MIDI_CHANNEL_MODE_OMNI_OFF:
         case MIDI_CHANNEL_MODE_OMNI_ON:
@@ -1961,7 +1909,7 @@ static void handle_channel_mode(
  * and after that the internally tracked state of the controller is updated.
  */
 static void handle_control_change(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     midi_control_number_t control_number,
     data_byte_t control_value
@@ -1970,7 +1918,7 @@ static void handle_control_change(
     // mode channel messages are not control messages and are handled separately
 
     if (IS_MIDI_CHANNEL_MODE(control_number)) {
-        handle_channel_mode(p_context, in_channel, control_number);
+        handle_channel_mode(p_midiplan_context, in_channel, control_number);
         return;
     }
 
@@ -1993,7 +1941,7 @@ static void handle_control_change(
         p_controller_value->lsb = 0;
 
         propagate_control_change(
-            p_context,
+            p_midiplan_context,
             in_channel,
             control_number,
             p_controller_value->msb,
@@ -2007,7 +1955,7 @@ static void handle_control_change(
 
         if (VALID_DATA_BYTE(p_controller_value->msb)) {
             propagate_control_change(
-                p_context,
+                p_midiplan_context,
                 in_channel,
                 control_number,
                 p_controller_value->msb,
@@ -2021,7 +1969,7 @@ static void handle_control_change(
         p_controller_value->value = control_value;
 
         propagate_control_change(
-            p_context,
+            p_midiplan_context,
             in_channel,
             control_number,
             p_controller_value->value,
@@ -2036,12 +1984,12 @@ static void handle_control_change(
  * all the channel associations are broken.
  */
 static void handle_program_change(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     midi_program_number_t program_number
 ) {
 
-    EVAR_UNUSED(p_context);
+    EVAR_UNUSED(p_midiplan_context);
 
     // attempt to change a program on the percussion channel is ignored
 
@@ -2075,7 +2023,7 @@ static void handle_program_change(
  * "Channel pressure" has the same logic as any other channel controller change.
  */
 static void handle_channel_pressure(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     data_byte_t pressure
 ) {
@@ -2094,7 +2042,7 @@ static void handle_channel_pressure(
     // send the same message to all associated channels
 
     propagate_control_change(
-        p_context,
+        p_midiplan_context,
         in_channel,
         CONTROL_PRESSURE,
         p_pressure->value,
@@ -2106,7 +2054,7 @@ static void handle_channel_pressure(
  * "Pitch bend" has the same logic as any other channel controller change.
  */
 static void handle_pitch_bend(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     midi_channel_t in_channel,
     data_byte_t pitch_bend_lsb,
     data_byte_t pitch_bend_msb
@@ -2127,7 +2075,7 @@ static void handle_pitch_bend(
     // send the same message to all associated channels
 
     propagate_control_change(
-        p_context,
+        p_midiplan_context,
         in_channel,
         CONTROL_PITCH_BEND,
         p_pitch_bend->msb,
@@ -2141,7 +2089,7 @@ static void handle_pitch_bend(
  * it is the output UART which will reassemble them into a stream of bytes.
  */
 static void handle_special(
-    void* p_context,
+    midiplan_context_t* p_midiplan_context,
     status_byte_t status_byte,
     data_byte_t data_byte_1
 ) {
@@ -2151,7 +2099,7 @@ static void handle_special(
 #endif
 
     if (IS_MIDI_REAL_TIME_MESSAGE(status_byte)) {
-        broadcast_message(p_context, status_byte, INVALID_DATA_BYTE, INVALID_DATA_BYTE);
+        broadcast_message(p_midiplan_context, status_byte, INVALID_DATA_BYTE, INVALID_DATA_BYTE);
     }
 #ifdef SYSTEM_EXCLUSIVE_PASSTHROUGH
     else if (status_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE) {
@@ -2169,8 +2117,8 @@ static void handle_special(
 /*
  * Processes a MIDI message incoming from the input UART.
  */
-void midiplan_handle_message(
-    void* p_context,
+void midiplan__handle_message(
+    midiplan_context_t* p_midiplan_context,
     midi_message_t midi_message
 ) {
 
@@ -2178,20 +2126,20 @@ void midiplan_handle_message(
 
     switch (MIDI_MESSAGE_TYPE(midi_message.status_byte)) {
         case MIDI_MESSAGE_NOTE_OFF:
-            return handle_note_off(p_context, in_channel, midi_message.data_byte_1, midi_message.data_byte_2);
+            return handle_note_off(p_midiplan_context, in_channel, midi_message.data_byte_1, midi_message.data_byte_2);
         case MIDI_MESSAGE_NOTE_ON:
-            return handle_note_on(p_context, in_channel, midi_message.data_byte_1, midi_message.data_byte_2);
+            return handle_note_on(p_midiplan_context, in_channel, midi_message.data_byte_1, midi_message.data_byte_2);
         case MIDI_MESSAGE_KEY_PRESSURE:
-            return handle_key_pressure(p_context, in_channel, midi_message.data_byte_1, midi_message.data_byte_2);
+            return handle_key_pressure(p_midiplan_context, in_channel, midi_message.data_byte_1, midi_message.data_byte_2);
         case MIDI_MESSAGE_CONTROL_CHANGE:
-            return handle_control_change(p_context, in_channel, midi_message.data_byte_1, midi_message.data_byte_2);
+            return handle_control_change(p_midiplan_context, in_channel, midi_message.data_byte_1, midi_message.data_byte_2);
         case MIDI_MESSAGE_PROGRAM_CHANGE:
-            return handle_program_change(p_context, in_channel, midi_message.data_byte_1);
+            return handle_program_change(p_midiplan_context, in_channel, midi_message.data_byte_1);
         case MIDI_MESSAGE_CHANNEL_PRESSURE:
-            return handle_channel_pressure(p_context, in_channel, midi_message.data_byte_1);
+            return handle_channel_pressure(p_midiplan_context, in_channel, midi_message.data_byte_1);
         case MIDI_MESSAGE_PITCH_BEND:
-            return handle_pitch_bend(p_context, in_channel, midi_message.data_byte_1, midi_message.data_byte_2);
+            return handle_pitch_bend(p_midiplan_context, in_channel, midi_message.data_byte_1, midi_message.data_byte_2);
         case MIDI_MESSAGE_SPECIAL:
-            return handle_special(p_context, midi_message.status_byte, midi_message.data_byte_1);
+            return handle_special(p_midiplan_context, midi_message.status_byte, midi_message.data_byte_1);
     }
 }

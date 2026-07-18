@@ -1,16 +1,19 @@
 #ifndef MIDIPLAN_DEVICE_H
 #define MIDIPLAN_DEVICE_H
 
-#include <midiplan/types.h>
-#include <midiplan/config.h>
-#include <midiplan/note_entries.h>
+#include "types.h"
+#include "config.h"
+#include "note_entries.h"
 
 /*
- * This is a read-only configuration structure that contains all kinds of maps describing the device.
+ * This is an immutable read-only configuration structure 
+ * that contains all kinds of maps describing the device.
  */
 typedef struct {
 
-    midi_channel_t basic_channel;
+    char* model_name;              // NULL-terminated printable ASCII "Manufacturer Model"
+
+    midi_channel_t basic_channel;  // channel, to which initialization messages may be sent
 
     /* the following affect the viability of a note being played */
 
@@ -22,7 +25,7 @@ typedef struct {
     /* the following affect the channel association process */
 
     uint8_t monotimbral_channels;  // 0 or 1, 1 if there can't be more than one program playing over one channel concurrently, 0 if many programs can play over one channel concurrently
-    uint8_t max_notes_per_channel; // how many notes can be played on one channel at the same time (on one program or different programs), 0 if there is no restriction
+    uint8_t max_notes_per_channel[MIDI_CHANNEL_COUNT]; // how many notes can be played on each channel at the same time (on one program or different programs), 0 if there is no restriction
 
 #define USES_MELODIC_TIMBRE(DEVICE, PROGRAM) (IS_MELODIC_PROGRAM(PROGRAM) || ((DEVICE)->max_percussion_notes == 0))
 #define USES_PERCUSSION_TIMBRE(DEVICE, PROGRAM) (IS_PERCUSSION_PROGRAM(PROGRAM) && ((DEVICE)->max_percussion_notes != 0))
@@ -49,9 +52,11 @@ typedef struct {
     } melodic_programs[128];
 
     struct {
+
         note_t lowest_note;        // changing lowest and highest notes allows for split keyboard configuration
         note_t middle_c;           // the received middle C would be shifted to this note, this allows arbitrary transposition
         note_t highest_note;
+
     } melodic_note_ranges[16];
 
     /* percussion notes mapping */
@@ -77,50 +82,17 @@ typedef struct {
 
     uint32_t controllers_bitmap[128 / 32];               // one bit per controller number, set to 1 if supported by the device
 
-    /* offsets of parameterized sequences into the following array of messages */
+    /* pointers to optional variable-sized arrays of messages, used instead of the standard MIDI sequences */
 
-    uint16_t initialization_sequence_offset;
-    uint16_t program_change_sequence_offset;
-    uint16_t note_on_sequence_offset;
-    uint16_t note_off_sequence_offset;
-
-#define INVALID_SEQUENCE_OFFSET (0xFFFF)
-
-    /* variable-sized buffer containing device-specific sequences of parameterized messages */
-
-    uint8_t custom_sequences[];
+    const uint8_t* initialization_sequence;
+    const uint8_t* program_change_sequence;
+    const uint8_t* note_on_sequence;
+    const uint8_t* note_off_sequence;
 
 } midiplan_device_t;
 
 /*
- * One bit per program/note to indicate what is routed to the device.
- */
-typedef struct {
-
-    // in terms of *input* program/note, this is used to filter the incoming notes before any handling
-
-    uint32_t melodic_programs_bitmap[128 / 32]; // one bit per program, set to 1 if the program is routed to this device
-    uint32_t percussion_notes_bitmap[128 / 32]; // one bit per note, set to 1 if the note is routed to this device
-
-} midiplan_device_routing_t;
-
-/*
- * Typical routing configurations.
- */
-extern midiplan_device_routing_t route_all;
-extern midiplan_device_routing_t route_none;
-extern midiplan_device_routing_t route_melodic;
-extern midiplan_device_routing_t route_percussion;
-
-/*
- * These pre-calculated lookup tables are used to turn volume up/down when a note is translated.
- * The first three are +2dB, +4dB, +6dB, the last three are -2dB, -4dB, -6dB
- */
-extern data_byte_t velocity_curves[6][127];
-
-/*
- * These are not direct indexes into the above table, but all possible
- * values of 3 bits in device configuration flags for note volume control.
+ * These are the 3 bits in device configuration flags for note volume control.
  */
 #define VELOCITY_DEFAULT   (0x0) // note velocity is not changed
 #define VELOCITY_UP_2DB    (0x1) // -> velocity curve [0] = +2dB
@@ -145,75 +117,31 @@ extern data_byte_t velocity_curves[6][127];
 #define VOLUME_SILENCE     ((VELOCITY_SILENCE)  << 4)
 
 /*
- * This structure describes bonding of multiple identical devices playing as one.
+ * Translates note parameters (program/note/velocity) for the device.
+ * This is an idempotent call, basing its decisions only on the device
+ * configuration and the input note parameters. In particular, the output
+ * note that we return, the device might not be able to play *at the moment*
+ * because it is overloaded, but that check will be done later.
+ * Similarly, the note may be supported by the device, but routing may be
+ * configured so that it is not sent to this device, also a separate concern.
+ * It is crucial that notes are translated the same for all note messages - 
+ * on, off, key pressure, and for controllers that are related to notes.
  */
-typedef struct {
-
-    // in terms of *output* program/note, this is the 1/Nth fraction
-    // of the namespace which this device will handle
-
-    uint8_t device_index;
-    uint8_t device_count;
-
-} midiplan_device_bonding_t;
-
-/*
- * Used to produce deterministic "random" numbers to pick a device from a bonding set.
- */
-uint8_t device_bonding_hash(midi_channel_t channel, program_t program);
-
-/*
- * This is the runtime state of the device, expressed in output terms.
- */
-typedef struct {
-
-    uint8_t melodic_programs_playing;              // how many different *output* programs are currently playing on all channels
-    uint8_t melodic_notes_per_program[128 + 1];    // how many notes are playing on that *output* program (128 melodic plus 1 for percussion *when it uses a melodic timbre*)
-    uint8_t melodic_notes_playing;                 // how many notes are currently playing on all *output* melodic programs together (sum of melodic_notes_per_program)
-    uint8_t percussion_notes_playing;              // how many notes are currently playing on the percussion program *when it uses a percussion timbre*
-
-    struct {
-        uint8_t notes_playing;                     // how many notes (on any program) are playing on this channel, including percussion
-        note_entry_id_t last_note_entry_id;        // the last note initiated on this channel (erased when that note is turned off)
-    } channels[MIDI_CHANNEL_COUNT];
-
-    bool initialization_pending;                   // true if the device's initialization sequence is pending to be transmitted
-
-} midiplan_device_state_t;
-
-/*
- * This is called at startup and during handling of "all notes off" after a device has become idle.
- */
-void reset_device_state(midiplan_device_state_t* p_device_state);
-
-/*
- * Returns the set of channels on which this device program/note can be played.
- */
-midi_channels_bitmap_t get_note_channels(
+bool translate_note_to_device(
     const midiplan_device_t* p_device,
-    program_t                out_program,
-    note_t                   out_note
-);
-
-/*
- * Translates/filters a note on parameters for the particular device.
- * It is crucial that note numbers are translated the same for all note
- * messages, on, off and key pressure, and for certain controllers.
- */
-bool translate_note(
-    const midiplan_device_t* p_device,
-    program_t                in_program,
-    note_t                   in_note,
-    data_byte_t              in_velocity,
-    program_t*               p_out_program,
-    note_t*                  p_out_note,
-    data_byte_t*             p_out_velocity
+    program_t in_program,
+    note_t in_note,
+    data_byte_t in_velocity,
+    program_t* p_out_program,
+    note_t* p_out_note,
+    data_byte_t* p_out_velocity,
+    midi_channels_bitmap_t* p_out_channels_bitmap 
 );
 
 /*
  * Filters controller change messages for the particular device.
  */
-bool controller_supported(
+bool device_supports_controller(
     const midiplan_device_t* p_device,
     midi_control_number_t control_number
 );
@@ -221,28 +149,28 @@ bool controller_supported(
 /*
  * Filters key pressure messages for the particular device.
  */
-bool key_pressure_supported(
+bool device_supports_key_pressure(
     const midiplan_device_t* p_device
 );
 
 /*
  * Filters channel pressure messages for the particular device.
  */
-bool channel_pressure_supported(
+bool device_supports_channel_pressure(
     const midiplan_device_t* p_device
 );
 
 /*
  * Filters pitch bend messages for the particular device.
  */
-bool pitch_bend_supported(
+bool device_supports_pitch_bend(
     const midiplan_device_t* p_device
 );
 
 /*
  * Returns true if this device has custom sequence of the specified type.
  */
-bool has_custom_sequence(
+bool device_has_custom_sequence(
     const midiplan_device_t* p_device,
     custom_sequence_id_t custom_sequence_id
 );
@@ -253,9 +181,41 @@ bool has_custom_sequence(
  * is that a pointer would take 4 bytes per message in the queue, whereas id
  * requires just one byte.
  */
-const uint8_t* get_custom_sequence(
+const uint8_t* get_device_custom_sequence(
     const midiplan_device_t* p_device,
     custom_sequence_id_t custom_sequence_id
 );
-    
+
+/*
+ * This is the runtime state of the device, expressed in output terms.
+ * Used to account for device restrictions.
+ */
+typedef struct {
+
+    uint8_t melodic_programs_playing;           // how many different *output* programs are currently playing on all channels
+    uint8_t melodic_notes_per_program[128 + 1]; // how many notes are playing on that *output* program (128 melodic plus 1 for percussion *when it uses a melodic timbre*)
+    uint8_t melodic_notes_playing;              // how many notes are currently playing on all *output* melodic programs together (sum of melodic_notes_per_program)
+    uint8_t percussion_notes_playing;           // how many notes are currently playing on the percussion program *when it uses a percussion timbre*
+
+    struct {
+        uint8_t notes_playing;                  // how many notes (on any program) are playing on this channel, including percussion
+        note_entry_id_t last_note_entry_id;     // the last note initiated on this channel (erased when that note is turned off)
+    } channels[MIDI_CHANNEL_COUNT];
+
+} midiplan_device_state_t;
+
+/*
+ * This is called once at startup.
+ */
+void initialize_device_state(
+    midiplan_device_state_t* p_device_state
+);
+
+/*
+ * This is called at initialization and during handling of "all notes off" after a device has become idle.
+ */
+void reset_device_state(
+    midiplan_device_state_t* p_device_state
+);
+
 #endif
