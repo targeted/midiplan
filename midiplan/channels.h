@@ -1,9 +1,9 @@
 #ifndef MIDIPLAN_CHANNELS_H
 #define MIDIPLAN_CHANNELS_H
 
-#include <midiplan/types.h>
-#include <midiplan/config.h>
-#include <midiplan/note_entries.h>
+#include "types.h"
+#include "config.h"
+#include "note_entries.h"
 
 /*
  * This is an index referencing note entries from note numbers.

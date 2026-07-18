@@ -14,7 +14,7 @@
  */
 
 #include <evar_assert.h>
-#include <midiplan/note_entries.h>
+#include "note_entries.h"
 
 // this table contains all the notes we could track
 

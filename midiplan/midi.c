@@ -13,7 +13,8 @@
  * GNU General Public License for more details.
  */
 
-#include <midiplan/midi.h>
+#include <evar_assert.h>
+#include "midi.h"
 
 /*
  * Returns the number of data bytes a MIDI message with this status byte expects.

@@ -14,7 +14,7 @@
  */
 
 #include <evar_assert.h>
-#include <midiplan/channels.h>
+#include "channels.h"
 
 input_channel_t input_channels[MIDI_CHANNEL_COUNT];
 output_channel_t output_channels[MIDI_OUT_PORT_COUNT][MIDI_CHANNEL_COUNT];

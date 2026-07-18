@@ -2,8 +2,8 @@
 #define MIDIPLAN_NOTE_ENTRIES_H
 
 #include <evar.h>
-#include <midiplan/types.h>
-#include <midiplan/config.h>
+#include "types.h"
+#include "config.h"
 
 typedef uint8_t note_entry_id_t;
 EVAR_ASSERT(sizeof(note_entry_id_t) <= sizeof(uint8_t), sizeof_note_entry_id_t); // because uint8_t is used to iterate through note entries

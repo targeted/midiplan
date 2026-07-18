@@ -2,8 +2,8 @@
 #define MIDIPLAN_TYPES_H
 
 #include <stdbool.h>
-#include <midiplan/midi.h>
-#include <midiplan/config.h>
+#include "midi.h"
+#include "config.h"
 
 /*
  * MIDI channel plus special values.
@@ -38,9 +38,9 @@ EVAR_ASSERT(!VALID_PROGRAM(INVALID_PROGRAM), invalid_program);
 /*
  * MIDI note plus special values.
  */
-typedef uint8_t note_t;    // midi_note_number_t plus the following special value
-#define INVALID_NOTE       (0xFF)
-#define VALID_NOTE(NOTE)   (((NOTE) & 0x80) == 0)
+typedef uint8_t note_t;  // midi_note_number_t plus the following special value
+#define INVALID_NOTE     (0xFF)
+#define VALID_NOTE(NOTE) (((NOTE) & 0x80) == 0)
 EVAR_ASSERT(!VALID_NOTE(INVALID_NOTE), invalid_note);
 
 /*

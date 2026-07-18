@@ -1,8 +1,8 @@
 #ifndef MIDIPLAN_CONTROLLER_VALUES_H
 #define MIDIPLAN_CONTROLLER_VALUES_H
 
-#include <midiplan/types.h>
-#include <midiplan/config.h>
+#include "types.h"
+#include "config.h"
 
 /*
  * This structure contains a currently tracked value of a controller,

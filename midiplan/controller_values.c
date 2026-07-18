@@ -14,7 +14,7 @@
  */
 
 #include <evar_assert.h>
-#include <midiplan/controller_values.h>
+#include "controller_values.h"
 
 typedef uint8_t cv_index_t;
 
