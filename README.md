@@ -19,9 +19,8 @@ synths of various kinds.
 
 ### Technical description
 
-The firmware currently runs on EK-TM4C123GXL development board containing
-Texas Instruments TM4C123GH6PM MCU. To build it you would need Keil uVision 
-ARM and TivaWare SDK.
+The firmware currently runs on CY8CKIT-059 development board containing
+Cypress CY8C5888LTI-LP097 MCU. To build it you would need PSoC Creator 4.4.
 
 The application is built on top of a task scheduler, which you can find
 in the sister repository at https://github.com/targeted/evar
