@@ -31,18 +31,19 @@ time to connect to any of the supported devices.
 
 ### Currently supported devices:
 
-1. Yamaha EMT-1
-2. Yamaha EMR-1 (drum)
-3. Yamaha FB-01
-4. Yamaha DOM-30
-5. Casio CSM-1
-6. Kawai PHm
-7. Kawai XS-1
-8. Roland CM-32P
-9. Zoom RT-234 (drum + bass)
-10. Roland GR-09
-11. Korg PSS60
-12. Alesis SR-16 (drum)
+1. Alesis SR-16 (drum)
+2. Casio CSM-1
+3. Kawai PHm
+4. Kawai XS-1
+5. Korg PSS60
+6. Roland CM-32P
+7. Roland GR-09
+8. Roland MT-32
+9. Yamaha DOM-30
+10. Yamaha EMR-1 (drum)
+11. Yamaha EMT-1
+12. Yamaha FB-01
+13. Zoom RT-234 (drum + bass)
 
 ### Demo recordings: 
 
