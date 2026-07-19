@@ -2143,3 +2143,14 @@ void midiplan__handle_message(
             return handle_special(p_midiplan_context, midi_message.status_byte, midi_message.data_byte_1);
     }
 }
+
+/*
+ * Sends initialization sequences to all ports.
+ */
+void midiplan__initialize_devices(
+    midiplan_context_t* p_midiplan_context
+) {
+    for (midi_out_port_t out_port = MIDI_OUT_PORT_1; out_port < MIDI_OUT_PORT_COUNT; ++out_port) {
+        send_initialization_sequence(p_midiplan_context, out_port);
+    }
+}

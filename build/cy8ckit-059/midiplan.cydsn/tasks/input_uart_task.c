@@ -26,10 +26,10 @@
  */
 void input_uart_interrupt_handler(input_uart_task_data_t* p_task_data) {
 
-    while (p_task_data->UART_GetRxBufferSize() > 0) {
+    while (p_task_data->UART.GetRxBufferSize() > 0) {
         
         input_uart_task_message_t input_uart_task_message = {
-            .input_uart_byte = p_task_data->UART_ReadRxData()
+            .input_uart_byte = p_task_data->UART.ReadRxData()
         };
         
         evar_mq_result_t mq_result = evar__send_async_message(
@@ -38,7 +38,7 @@ void input_uart_interrupt_handler(input_uart_task_data_t* p_task_data) {
             sizeof(input_uart_task_message_t)
         );
         if (mq_result != EVAR_MQ_SUCCESS) {
-            evar__crash(CRASH_SEND_ASYNC_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_interrupt_handler: evar__send_async_message(input_uart_byte) failed");
+            evar__crash(CRASH_SEND_ASYNC_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_interrupt_handler: evar__send_async_message() failed");
         }
     }
 }
@@ -59,12 +59,12 @@ void input_uart_task__initialize(evar_task_info_t* p_task_info) {
 
     // turn activity LED off
 
-    p_task_data->LED_Write(0);
+    p_task_data->LED.Write(0);
 
     // start the hardware input UART
     
-    p_task_data->UART_IRQ_StartEx(p_task_data->interrupt_handler);
-    p_task_data->UART_Start();
+    p_task_data->UART.IRQ_StartEx(p_task_data->UART.interrupt_handler);
+    p_task_data->UART.Start();
 
     // wait for incoming messages
 
@@ -81,7 +81,7 @@ void input_uart_task__run(evar_task_info_t* p_task_info) {
  */
 void input_uart_task__wake_up(evar_task_info_t* p_task_info) {
     input_uart_task_data_t* p_task_data = p_task_info->p_task_data;
-    p_task_data->LED_Write(0);
+    p_task_data->LED.Write(0);
     evar_task__sleep();
 }
 
@@ -117,14 +117,16 @@ void input_uart_task__receive(evar_task_info_t* p_task_info) {
         else if (mq_result != EVAR_MQ_SUCCESS) {
             evar__crash(CRASH_PREVIEW_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_task__receive: evar__preview_message failed");
         }
-        
+
         //DEBUG_PRINT1("< %02X\r\n", input_uart_task_message.input_uart_byte);
-        
+
         // the following call will handle the incoming byte and possibly produce the completed MIDI message
 
+        midi_router_task_message_t midi_router_task_message = {
+            .type = MIDI_ROUTER_HANDLE_MESSAGE
+        };
+
         bool consume_input_byte;
-        midi_router_task_message_t midi_router_task_message;
-        
         bool midi_message_produced = handle_midi_input_byte(
                 &p_task_data->midi_input_state,
                 input_uart_task_message.input_uart_byte,
@@ -151,7 +153,7 @@ void input_uart_task__receive(evar_task_info_t* p_task_info) {
         }
     }
 
-    p_task_data->LED_Write(1); // turn activity LED on
+    p_task_data->LED.Write(1); // turn activity LED on
 
     evar_task__sleep_for(100000); // if this timeout expires before another message, wake_up is called and the LED is turned off
 }

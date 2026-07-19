@@ -98,9 +98,9 @@ void midi_router_task__initialize(evar_task_info_t* p_task_info) {
 
     // initialize the framework structures
     
-    p_task_data->midiplan_state.p_callback_context             = p_task_data;
-    p_task_data->midiplan_state.callbacks.send_midi_message    = send_midi_message;
-    p_task_data->midiplan_state.callbacks.send_custom_sequence = send_custom_sequence;
+    p_task_data->midiplan_context.p_callback_context             = p_task_data;
+    p_task_data->midiplan_context.callbacks.send_midi_message    = send_midi_message;
+    p_task_data->midiplan_context.callbacks.send_custom_sequence = send_custom_sequence;
     
     midiplan__initialize();
     
@@ -123,17 +123,25 @@ void midi_router_task__receive(evar_task_info_t* p_task_info) {
 
     midi_router_task_message_t midi_router_task_message;
 
-    // we handle one MIDI message at a time
+    // we handle one message at a time
     
     evar_mq_result_t mq_result = evar__receive_message(&midi_router_task_message);
     if (mq_result != EVAR_MQ_SUCCESS) {
         evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "midi_router_task__receive: evar__receive_message failed");
     }
 
-    // and the actual handling is done in the framework call
-
-    midiplan__handle_message(&p_task_data->midiplan_state, midi_router_task_message.midi_message);
-
+    switch (midi_router_task_message.type) {
+        case MIDI_ROUTER_HANDLE_MESSAGE:
+            midiplan__handle_message(&p_task_data->midiplan_context, midi_router_task_message.midi_message);
+            break;
+        case MIDI_ROUTER_INITIALIZE_DEVICES:
+            midiplan__initialize_devices(&p_task_data->midiplan_context);
+            break;
+        default:
+            evar_assert(false);
+            break;
+    }
+    
     evar_task__sleep();
 }
 

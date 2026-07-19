@@ -53,4 +53,11 @@ void midiplan__handle_message(
     midi_message_t midi_message
 );
 
+/*
+ * Sends initialization sequences to all ports.
+ */
+void midiplan__initialize_devices(
+    midiplan_context_t* p_midiplan_context
+);
+
 #endif

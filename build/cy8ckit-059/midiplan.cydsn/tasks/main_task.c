@@ -19,6 +19,8 @@
 #include "input_uart_task.h"
 #include "midi_router_task.h"
 #include "output_uart_task.h"
+#include "ui_task.h"
+#include "push_button_task.h"
 #include <midiplan/devices.h>
 #include <midiplan/config.h>
 
@@ -29,12 +31,16 @@
 static void INPUT_UART_1_interrupt_handler(void);
 
 static input_uart_task_data_t input_uart_task_data_1 = {
-    .interrupt_handler    = INPUT_UART_1_interrupt_handler,
-    .UART_Start           = INPUT_UART_1_Start,
-    .UART_IRQ_StartEx     = INPUT_UART_1_IRQ_StartEx,
-    .UART_GetRxBufferSize = INPUT_UART_1_GetRxBufferSize,
-    .UART_ReadRxData      = INPUT_UART_1_ReadRxData,
-    .LED_Write            = INPUT_UART_1_LED_Write,
+    .UART = {
+        .interrupt_handler = INPUT_UART_1_interrupt_handler,
+        .Start             = INPUT_UART_1_Start,
+        .IRQ_StartEx       = INPUT_UART_1_IRQ_StartEx,
+        .GetRxBufferSize   = INPUT_UART_1_GetRxBufferSize,
+        .ReadRxData        = INPUT_UART_1_ReadRxData
+    },
+    .LED = {
+        .Write             = INPUT_UART_1_LED_Write
+    }
 };
 
 static void INPUT_UART_1_interrupt_handler(void) {
@@ -99,6 +105,31 @@ static output_uart_task_data_t output_uart_task_data_4 = {
     .LED_Write         = OUTPUT_UART_4_LED_Write
 };
 
+/*
+ * UI mediator task.
+ */
+static ui_task_data_t ui_task_data_1 = {
+};
+
+/*
+ * Push buttons.
+ */
+
+static void init_button_interrupt_handler(void);
+
+static push_button_task_data_t init_button_task_data = {
+    .IRQ = {
+        .interrupt_handler = init_button_interrupt_handler,
+        .SetVector         = INIT_BUTTON_IRQ_SetVector,
+        .Enable            = INIT_BUTTON_IRQ_Enable
+    },
+    .button_id = INIT_BUTTON_ID
+};
+
+static void init_button_interrupt_handler(void) {
+    push_button_interrupt_handler(&init_button_task_data);
+}
+
 void main_task__initialize(evar_task_info_t* p_task_info) {
 
     EVAR_UNUSED(p_task_info);
@@ -114,22 +145,22 @@ void main_task__initialize(evar_task_info_t* p_task_info) {
     // create output UART tasks
 
     evar_task_id_t output_uart_task_1 = evar__create_task(output_uart_task, &output_uart_task_data_1);
-    if (output_uart_task_1 == EVAR_INVALID_TASK_ID) {
+    if (!VALID_TASK_ID(output_uart_task_1)) {
         evar__crash(CRASH_CREATE_TASK_FAILED, "main_task__initialize: evar__create_task(output_uart_task_1) failed");
     }
 
     evar_task_id_t output_uart_task_2 = evar__create_task(output_uart_task, &output_uart_task_data_2);
-    if (output_uart_task_2 == EVAR_INVALID_TASK_ID) {
+    if (!VALID_TASK_ID(output_uart_task_2)) {
         evar__crash(CRASH_CREATE_TASK_FAILED, "main_task__initialize: evar__create_task(output_uart_task_2) failed");
     }
 
     evar_task_id_t output_uart_task_3 = evar__create_task(output_uart_task, &output_uart_task_data_3);
-    if (output_uart_task_3 == EVAR_INVALID_TASK_ID) {
+    if (!VALID_TASK_ID(output_uart_task_3)) {
         evar__crash(CRASH_CREATE_TASK_FAILED, "main_task__initialize: evar__create_task(output_uart_task_3) failed");
     }
 
     evar_task_id_t output_uart_task_4 = evar__create_task(output_uart_task, &output_uart_task_data_4);
-    if (output_uart_task_4 == EVAR_INVALID_TASK_ID) {
+    if (!VALID_TASK_ID(output_uart_task_4)) {
         evar__crash(CRASH_CREATE_TASK_FAILED, "main_task__initialize: evar__create_task(output_uart_task_4) failed");
     }
 
@@ -141,7 +172,7 @@ void main_task__initialize(evar_task_info_t* p_task_info) {
     midi_router_task_data.output_uart_tasks[MIDI_OUT_PORT_4] = output_uart_task_4;
 
     evar_task_id_t midi_router_task_1 = evar__create_task(midi_router_task, &midi_router_task_data);
-    if (midi_router_task_1 == EVAR_INVALID_TASK_ID) {
+    if (!VALID_TASK_ID(midi_router_task_1)) {
         evar__crash(CRASH_CREATE_TASK_FAILED, "main_task__initialize: evar__create_task(midi_router_task_1) failed");
     }
 
@@ -150,8 +181,26 @@ void main_task__initialize(evar_task_info_t* p_task_info) {
     input_uart_task_data_1.midi_router_task = midi_router_task_1;
 
     evar_task_id_t input_uart_task_1 = evar__create_task(input_uart_task, &input_uart_task_data_1);
-    if (input_uart_task_1 == EVAR_INVALID_TASK_ID) {
+    if (!VALID_TASK_ID(input_uart_task_1)) {
         evar__crash(CRASH_CREATE_TASK_FAILED, "main_task__initialize: evar__create_task(input_uart_task_1) failed");
+    }
+    
+    // create UI task
+
+    ui_task_data_1.midi_router_task = midi_router_task_1;
+    
+    evar_task_id_t ui_task_1 = evar__create_task(ui_task, &ui_task_data_1);
+    if (!VALID_TASK_ID(ui_task_1)) {
+        evar__crash(CRASH_CREATE_TASK_FAILED, "main_task__initialize: evar__create_task(ui_task_1) failed");
+    }
+
+    // create push button tasks
+
+    init_button_task_data.ui_task = ui_task_1;
+    
+    evar_task_id_t init_button_task_1 = evar__create_task(push_button_task, &init_button_task_data);
+    if (init_button_task_1 != EVAR_TASK_INITIALIZED) {
+        evar__crash(CRASH_CREATE_TASK_FAILED, "main_task__initialize: evar__create_task(init_button_task_1) failed");
     }
 
     DEBUG_PRINT("MIDIplan running\r\n");

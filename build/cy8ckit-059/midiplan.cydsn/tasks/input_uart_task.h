@@ -2,7 +2,7 @@
 #define MIDIPLAN_TASKS_INPUT_UART_TASK_H
 
 #include <CyLib.h>
-#include <tasks/common.h>
+#include "common.h"
 #include <midiplan/midi_input.h>
 
 EVAR_TASK(input_uart_task);
@@ -11,12 +11,17 @@ typedef struct {
 
     /* initialization parameters */
 
-    cyisraddress       interrupt_handler;
-    void               (*UART_Start)           (void);
-    void               (*UART_IRQ_StartEx)     (cyisraddress interrupt_handler);
-    uint8_t            (*UART_GetRxBufferSize) (void);
-    uint8_t            (*UART_ReadRxData)      (void);
-    void               (*LED_Write)            (uint8_t value);
+    struct {
+        cyisraddress  interrupt_handler;
+        void          (*Start)           (void);
+        void          (*IRQ_StartEx)     (cyisraddress interrupt_handler);
+        uint8_t       (*GetRxBufferSize) (void);
+        uint8_t       (*ReadRxData)      (void);
+    } UART;
+        
+    struct {
+        void          (*Write)           (uint8_t value);
+    } LED;
     
     evar_task_id_t     midi_router_task;
 

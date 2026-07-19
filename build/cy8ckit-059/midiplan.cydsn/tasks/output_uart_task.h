@@ -2,7 +2,7 @@
 #define MIDIPLAN_TASKS_OUTPUT_UART_TASK_H
 
 #include <CyLib.h>
-#include <tasks/common.h>
+#include "common.h"
 #include <midiplan/midi_output.h>
 
 EVAR_TASK(output_uart_task);
