@@ -22,10 +22,12 @@ const midiplan_device_t roland_mt32 = {
 
     .basic_channel           = MIDI_CHANNEL_1,
 
-    .max_melodic_notes       = 32,
-    .max_percussion_notes    = 32,
+    // see https://battleofthebits.com/lyceum/View/Specification%20of%20General%20MIDI%20and%20Roland%20MT-32%20patches
+
+    .max_melodic_notes       = 9, // 32 partials, average of below 3 partials per patch
+    .max_percussion_notes    = 0,
     .max_melodic_programs    = 8,
-    .max_notes_per_program   = 32,
+    .max_notes_per_program   = 4,
     .monotimbral_channels    = 1,
     .max_notes_per_channel   = { 0 },
 
@@ -332,7 +334,7 @@ const midiplan_device_t roland_mt32 = {
         0b0000000000000000, // 00
         0b0000000000000000, // 01
         0b0000000000000000, // 10
-        0b0000000111111110  // 11
+        0b0000000011111111  // 11
     },
 
     .percussion_channels_bitmap = 0b0000001000000000,
@@ -2357,6 +2359,34 @@ const midiplan_device_t roland_mt32 = {
         0x07, 0x01, 0x7F, 0x64, 0x07, 0x01, 0x7F, 0x64, 0x07, 0x01, 0x7F, 0x64, 0x07, 0x01, 0x7F, 0x64, 0x07, 0x01,
         0x7F, 0x64, 0x07, 0x01, 0x7F, 0x64, 0x07, 0x01, 0x7F, 0x64, 0x07, 0x01, 0x7F, 0x64, 0x07, 0x01, 0x7F, 0x64,
         0x07, 0x01, 0x1D, 0xF7,
+
+        MIDI_MESSAGE_DELAY, 0x00, 0x28, /* 40 ms */
+
+        INVALID_STATUS_BYTE,
+
+    },
+
+    .synchronization_sequence = (uint8_t[]) {
+
+        MIDI_MESSAGE_DELAY, 0x07, 0x68, /* 1000 ms */
+
+        0xC0, 0x00,
+
+        0x90, 0x3C, 0x7F,
+        MIDI_MESSAGE_DELAY, 0x00, 0x7D, /* 125 ms */
+        0x80, 0x3C, 0x00,
+
+        MIDI_MESSAGE_DELAY, 0x00, 0x28, /* 40 ms */
+
+        0x90, 0x3C, 0x7F,
+        MIDI_MESSAGE_DELAY, 0x00, 0x7D, /* 125 ms */
+        0x80, 0x3C, 0x00,
+
+        MIDI_MESSAGE_DELAY, 0x00, 0x28, /* 40 ms */
+
+        0x90, 0x3C, 0x7F,
+        MIDI_MESSAGE_DELAY, 0x00, 0x7D, /* 125 ms */
+        0x80, 0x3C, 0x00,
 
         INVALID_STATUS_BYTE,
 

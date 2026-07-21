@@ -6,7 +6,7 @@
 #include "note_entries.h"
 
 /*
- * This is an immutable read-only configuration structure 
+ * This is an immutable read-only configuration structure
  * that contains all kinds of maps describing the device.
  */
 typedef struct {
@@ -17,8 +17,8 @@ typedef struct {
 
     /* the following affect the viability of a note being played */
 
-    uint8_t max_melodic_notes;     // how many notes can be playing on melodic programs at the same time, including percussion if max_percussion_notes = 0
-    uint8_t max_percussion_notes;  // how many notes can be playing on percussion program at the same time, if 0 then percussion notes are accounted as melodic
+    uint8_t max_melodic_notes;     // how many notes can be playing on all melodic programs at the same time, including percussion if max_percussion_notes = 0
+    uint8_t max_percussion_notes;  // how many notes can be playing on the percussion program at the same time, if 0 then percussion notes are accounted as melodic
     uint8_t max_melodic_programs;  // how many melodic programs can be playing at the same time, including percussion program if max_percussion_notes = 0
     uint8_t max_notes_per_program; // how many notes can be played at the same time for any given melodic program, including percussion if max_percussion_notes = 0
 
@@ -88,6 +88,7 @@ typedef struct {
     const uint8_t* program_change_sequence;
     const uint8_t* note_on_sequence;
     const uint8_t* note_off_sequence;
+    const uint8_t* synchronization_sequence;
 
 } midiplan_device_t;
 
@@ -124,7 +125,7 @@ typedef struct {
  * because it is overloaded, but that check will be done later.
  * Similarly, the note may be supported by the device, but routing may be
  * configured so that it is not sent to this device, also a separate concern.
- * It is crucial that notes are translated the same for all note messages - 
+ * It is crucial that notes are translated the same for all note messages -
  * on, off, key pressure, and for controllers that are related to notes.
  */
 bool translate_note_to_device(
@@ -135,7 +136,7 @@ bool translate_note_to_device(
     program_t* p_out_program,
     note_t* p_out_note,
     data_byte_t* p_out_velocity,
-    midi_channels_bitmap_t* p_out_channels_bitmap 
+    midi_channels_bitmap_t* p_out_channels_bitmap
 );
 
 /*
@@ -202,19 +203,14 @@ typedef struct {
         note_entry_id_t last_note_entry_id;     // the last note initiated on this channel (erased when that note is turned off)
     } channels[MIDI_CHANNEL_COUNT];
 
+    bool all_notes_off;                         // no notes are playing *because "all notes off" has been received and acted upon*
+
 } midiplan_device_state_t;
 
 /*
  * This is called once at startup.
  */
 void initialize_device_state(
-    midiplan_device_state_t* p_device_state
-);
-
-/*
- * This is called at initialization and during handling of "all notes off" after a device has become idle.
- */
-void reset_device_state(
     midiplan_device_state_t* p_device_state
 );
 

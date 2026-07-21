@@ -49,11 +49,12 @@ EVAR_ASSERT(!VALID_NOTE(INVALID_NOTE), invalid_note);
  * message, not a sequence, and is handled differently.
  */
 typedef enum {
-    INITIALIZATION_SEQUENCE = 0,
-    PROGRAM_CHANGE_SEQUENCE = 1,
-    NOTE_ON_SEQUENCE        = 2,
-    NOTE_OFF_SEQUENCE       = 3,
-    SINGLE_MIDI_MESSAGE     = 0xFF
+    INITIALIZATION_SEQUENCE  = 0,
+    PROGRAM_CHANGE_SEQUENCE  = 1,
+    NOTE_ON_SEQUENCE         = 2,
+    NOTE_OFF_SEQUENCE        = 3,
+    SYNCHRONIZATION_SEQUENCE = 4,
+    SINGLE_MIDI_MESSAGE      = 0xFF
 } custom_sequence_id_t;
 
 /*

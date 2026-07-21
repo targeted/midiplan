@@ -24,7 +24,7 @@ extern const midiplan_device_routing_t route_melodic;
 extern const midiplan_device_routing_t route_percussion;
 
 /*
- * This structure is used for bonding of multiple identical devices 
+ * This structure is used for bonding of multiple identical devices
  * playing as one, selects the 1/Nth fraction of the note space.
  */
 typedef struct {
@@ -48,6 +48,25 @@ typedef struct {
 } attached_device_t;
 
 extern attached_device_t devices[MIDI_OUT_PORT_COUNT];
+
+/*
+ * This is the order in which the devices will be considered to play a note on.
+ * The logic behind this is as follows:
+ * 1. We go "left to right", from port 1 to port 4.
+ * 2. Bonded devices are treated as one logical device, therefore if identical
+ *    devices are configured on ports 2 and 4, then the order will be 1-2-4-3,
+ *    but if 1 and 3 were also identical, then 1-3-2-4.
+ * 3. Specific (non-GM-compatible) devices consume the notes they play,
+ *    GM-compatible devices are transparent, the note is propagated.
+ */
+typedef struct {
+
+    midi_out_port_t out_port;
+    bool            consume_note;
+
+} device_order_t;
+
+extern device_order_t device_order[MIDI_OUT_PORT_COUNT];
 
 void configure_devices(void);
 void initialize_devices(void);

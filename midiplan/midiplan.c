@@ -257,6 +257,34 @@ static void send_note_off_sequence(
 }
 
 /*
+ * Sends the custom synchronization sequence to a device.
+ * The purpose of this sequence is to emit a brief beep at "all notes off".
+ * This will allow to synchronize the layered recordings of several logical
+ * bonded devices, while having just one hardware device
+ */
+static void send_synchronization_sequence(
+    midiplan_context_t* p_midiplan_context,
+    midi_out_port_t out_port
+) {
+
+    const midiplan_device_t* p_device = devices[out_port].p_device;
+
+    if (device_has_custom_sequence(p_device, SYNCHRONIZATION_SEQUENCE)) {
+
+        custom_sequence_parameters_t synchronization_sequence_parameters = {
+            .p = { 0, 0, 0 }
+        };
+
+        send_custom_sequence(
+            p_midiplan_context,
+            out_port,
+            SYNCHRONIZATION_SEQUENCE,
+            synchronization_sequence_parameters
+        );
+    }
+}
+
+/*
  * Sends a message to change controller value on an output channel.
  * The message is sent only if that controller is supported by the device.
  */
@@ -529,6 +557,10 @@ static void account_note_on(
         p_device_state->percussion_notes_playing += 1;
     }
 
+    // this indicates that some notes have been playing since last "all notes off"
+
+    p_device_state->all_notes_off = false;
+
     // per-channel statistics is updated
 
     p_device_state->channels[out_channel].notes_playing += 1;
@@ -713,9 +745,8 @@ static bool note_can_be_accepted(
 
     if (USES_MELODIC_TIMBRE(p_device, out_program)) {
 
-        uint8_t program_note_count = p_device_state->melodic_notes_per_program[out_program];
-
         polyphony_exceeded         = (p_device_state->melodic_notes_playing == p_device->max_melodic_notes);
+        uint8_t program_note_count = p_device_state->melodic_notes_per_program[out_program];
         notes_per_program_exceeded = (program_note_count == p_device->max_notes_per_program);
         multitimbrality_exceeded   = (program_note_count == 0) && (p_device_state->melodic_programs_playing == p_device->max_melodic_programs);
     }
@@ -724,7 +755,7 @@ static bool note_can_be_accepted(
         evar_assert(USES_PERCUSSION_TIMBRE(p_device, out_program));
 
         polyphony_exceeded         = (p_device_state->percussion_notes_playing == p_device->max_percussion_notes);
-        notes_per_program_exceeded = (p_device_state->percussion_notes_playing == p_device->max_notes_per_program);
+        notes_per_program_exceeded = (p_device_state->percussion_notes_playing == p_device->max_percussion_notes);
         multitimbrality_exceeded   = false;
     }
 
@@ -1224,7 +1255,7 @@ static channel_t associate_out_channel(
         // either way we must then go through full channel search
 
         uint8_t max_notes_on_associated_channel = p_device->max_notes_per_channel[associated_out_channel];
-        
+
         if (
             (p_associated_output_channel->out_program == out_program) &&                            // otherwise a program change has been requested
             !VALID_NOTE_ENTRY_ID(p_associated_output_channel->note_entry_lookup[out_note_index]) && // otherwise the same note already plays
@@ -1305,7 +1336,7 @@ static channel_t associate_out_channel(
         // note enumeration
 
         uint8_t max_notes_on_out_channel = p_device->max_notes_per_channel[out_channel];
-        
+
         if (
             (max_notes_on_out_channel > 0) &&
             (p_device_state->channels[out_channel].notes_playing == max_notes_on_out_channel)
@@ -1442,7 +1473,7 @@ static channel_t associate_out_channel(
     // already at the limit, the last note on the selected channel is turned off
 
     uint8_t max_notes_on_associated_out_channel = p_device->max_notes_per_channel[associated_out_channel];
-    
+
     if (
         (max_notes_on_associated_out_channel > 0) &&
         (p_device_state->channels[associated_out_channel].notes_playing == max_notes_on_associated_out_channel)
@@ -1497,7 +1528,9 @@ static void handle_note_on(
 
     input_channel_t* p_input_channel = &input_channels[in_channel];
 
-    // reserve a new entry in the note entry table
+    // reserve a new entry in the note entry table, the entry will be there
+    // until the note is turned off even if it so happens that it is not played
+    // on any device (because of routing or capacity exceeded for example)
 
     note_entry_id_t note_entry_id = allocate_note_entry();
     if (!VALID_NOTE_ENTRY_ID(note_entry_id)) {
@@ -1539,11 +1572,16 @@ static void handle_note_on(
     // possibly none, but even in this case, the note will logically be
     // sounding, even though nothing was sent to any device
 
-    for (midi_out_port_t out_port = MIDI_OUT_PORT_1; out_port < MIDI_OUT_PORT_COUNT; ++out_port) {
+    for (midi_out_port_t i = MIDI_OUT_PORT_1; i < MIDI_OUT_PORT_COUNT; ++i) {
+
+        // enumeration of devices happens in the order that takes bonding into account
+
+        midi_out_port_t out_port = device_order[i].out_port;
 
         // is the note routed to this device at all (this is expressed in terms of the original input GM program/note)
-        
+
         if (!route_note_to_device(out_port, in_channel, in_program, in_note)) {
+            // the note is propagated to the next device
             continue;
         }
 
@@ -1555,22 +1593,40 @@ static void handle_note_on(
         midi_channels_bitmap_t out_channels_bitmap;
 
         if (!translate_note_to_device(
-                devices[out_port].p_device,
-                in_program,
-                in_note, 
-                velocity, 
-                &out_program, 
-                &out_note, 
-                &out_velocity,
-                &out_channels_bitmap
+            devices[out_port].p_device,
+            in_program,
+            in_note,
+            velocity,
+            &out_program,
+            &out_note,
+            &out_velocity,
+            &out_channels_bitmap
         )) {
-            continue; // the device does not support such note
+            // the device does not support such note, the note is propagated to the next device
+            continue;
         }
 
-        evar_assert(VALID_PROGRAM(out_program) && VALID_NOTE(out_note) && VALID_DATA_BYTE(out_velocity) && (out_velocity > 0) && (out_channels_bitmap != 0));
+        evar_assert(
+            VALID_PROGRAM(out_program) &&
+            VALID_NOTE(out_note) &&
+            VALID_DATA_BYTE(out_velocity) &&
+            (out_velocity > 0) &&
+            (out_channels_bitmap != 0)
+        );
+
+        // now we know that the device is capable of playing this note,
+        // therefore it may be consumed even if not actually played
+
+        bool consume_note = device_order[i].consume_note;
 
         if ((out_note < MIDI_LOWEST_NOTE) || (out_note > MIDI_HIGHEST_NOTE)) {
-            continue; // the translated note is so low or so high that we can't use it
+            // the translated note is so low or so high that we can't account for it
+            if (consume_note) {
+                break;
+            }
+            else {
+                continue;
+            }
         }
 
         uint8_t out_note_index = out_note - MIDI_LOWEST_NOTE;
@@ -1578,7 +1634,13 @@ static void handle_note_on(
         // check that the device still has capacity to play another note on this program
 
         if (!note_can_be_accepted(p_midiplan_context, out_port, out_program)) {
-            continue; // the device has exceeded its limits and will not be able to play this note without hiccup
+            // the device has exceeded its limits and will not be able to play this note without hiccup
+            if (consume_note) {
+                break;
+            }
+            else {
+                continue;
+            }
         }
 
         // associate the input channel with one of the output channels capable of playing this note
@@ -1593,9 +1655,17 @@ static void handle_note_on(
             out_note
         );
 
-        if (!VALID_CHANNEL(out_channel)) { // could not find an output channel to associate
-            continue;
+        if (!VALID_CHANNEL(out_channel)) {
+            // could not find an output channel to associate
+            if (consume_note) {
+                break;
+            }
+            else {
+                continue;
+            }
         }
+
+        // everything checks out, we are about to send the note to the device
 
         output_channel_t* p_output_channel = &output_channels[out_port][out_channel];
 
@@ -1828,8 +1898,8 @@ static void all_notes_off_callback(
 
 /*
  * This is called in response to "all notes off" channel mode message.
- * Every note currently active on that input channel is turned off as if
- * a "note off" message is received for it. The state of controllers
+ * Every note currently active on that input channel is turned off
+ * as if a "note off" message is received for it. The state of controllers
  * and the programs remain unchanged.
  */
 static void handle_all_notes_off(
@@ -1838,7 +1908,7 @@ static void handle_all_notes_off(
 ) {
 
     all_notes_off_context_t all_notes_off_context = {
-        .p_midiplan_context     = p_midiplan_context,
+        .p_midiplan_context   = p_midiplan_context,
         .in_channel           = in_channel,
         .note_entry_ids       = { INVALID_NOTE_ENTRY_ID },
         .note_entry_ids_count = 0
@@ -1852,23 +1922,39 @@ static void handle_all_notes_off(
     evar_assert(all_notes_off_context.note_entry_ids_count <= MAX_NOTE_ENTRIES);
 
     for (uint8_t i = 0; i < all_notes_off_context.note_entry_ids_count; ++i) {
-
         deallocate_note_entry(all_notes_off_context.note_entry_ids[i]);
     }
 
-    // assuming that between the tracks the client software is sending a stream
+    // assuming that between the tracks the client software is sending a train
     // of "all notes off" messages on all channels, when all notes are turned off
     // that way, it is the moment we reset all the statistics and associations
+    // and send synchronization sequences to bonded devices
 
-    if (no_allocated_note_entries()) {
+    if (no_allocated_note_entries()) { // we have no registered notes, from our perspective there is silence
 
-        reset_channel_associations();
-        reset_program_statistics();
+        reset_channel_associations();  // these two calls are clearing internal structures
+        reset_program_statistics();    // and are safe to be called again and again
+
+        // if a bonded device has played a note since the previous all notes off,
+        // we send a synchronization sequence (some kind of characteristic beep)
 
         for (midi_out_port_t out_port = MIDI_OUT_PORT_1; out_port < MIDI_OUT_PORT_COUNT; ++out_port) {
 
+            if (devices[out_port].bonding.device_count == 1) { // synchronization sequences are sent only to bonded devices
+                continue;
+            }
+
             midiplan_device_state_t* p_device_state = &devices[out_port].state;
-            reset_device_state(p_device_state);
+
+            evar_assert(p_device_state->melodic_notes_playing == 0);
+            evar_assert(p_device_state->percussion_notes_playing == 0);
+
+            // we only want to send synchronization sequence to each device once, because it causes an audible beep
+
+            if (!p_device_state->all_notes_off) {
+                send_synchronization_sequence(p_midiplan_context, out_port);
+                p_device_state->all_notes_off = true;
+            }
         }
     }
 }

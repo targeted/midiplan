@@ -30,14 +30,14 @@ typedef void (*midiplan_callback_send_custom_sequence_t)(
 );
 
 typedef struct {
-    
+
     void* p_callback_context;
-    
+
     struct {
         midiplan_callback_send_midi_message_t send_midi_message;
         midiplan_callback_send_custom_sequence_t send_custom_sequence;
     } callbacks;
-    
+
 } midiplan_context_t;
 
 /*

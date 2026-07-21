@@ -38,7 +38,7 @@ static data_byte_t velocity_curves[6][127] = {
  * because it is overloaded, but that check will be done later.
  * Similarly, the note may be supported by the device, but routing may be
  * configured so that it is not sent to this device, also a separate concern.
- * It is crucial that notes are translated the same for all note messages - 
+ * It is crucial that notes are translated the same for all note messages -
  * on, off, key pressure, and for controllers that are related to notes.
  */
 bool translate_note_to_device(
@@ -49,7 +49,7 @@ bool translate_note_to_device(
     program_t* p_out_program,
     note_t* p_out_note,
     data_byte_t* p_out_velocity,
-    midi_channels_bitmap_t* p_out_channels_bitmap 
+    midi_channels_bitmap_t* p_out_channels_bitmap
 ) {
 
     evar_assert(VALID_PROGRAM(in_program));
@@ -197,8 +197,8 @@ bool translate_note_to_device(
         }
     }
 
-    // also return the set of channels on which this output note could be played   
-    
+    // also return the set of channels on which this output note could be played
+
     if (IS_PERCUSSION_PROGRAM(out_program)) {
         out_channels_bitmap = p_device->percussion_channels_bitmap;
     }
@@ -220,7 +220,7 @@ bool translate_note_to_device(
     *p_out_note = out_note;
     *p_out_velocity = out_velocity;
     *p_out_channels_bitmap = out_channels_bitmap;
-    
+
     return true;
 }
 
@@ -277,6 +277,8 @@ bool device_has_custom_sequence(
             return p_device->note_on_sequence != NULL;
         case NOTE_OFF_SEQUENCE:
             return p_device->note_off_sequence != NULL;
+        case SYNCHRONIZATION_SEQUENCE:
+            return p_device->synchronization_sequence != NULL;
         default:
             evar_assert(false);
             return false;
@@ -302,6 +304,8 @@ const uint8_t* get_device_custom_sequence(
             return p_device->note_on_sequence;
         case NOTE_OFF_SEQUENCE:
             return p_device->note_off_sequence;
+        case SYNCHRONIZATION_SEQUENCE:
+            return p_device->synchronization_sequence;
         default:
             evar_assert(false);
             return NULL;
@@ -328,29 +332,7 @@ void initialize_device_state(
         p_device_state->channels[out_channel].notes_playing = 0;
         p_device_state->channels[out_channel].last_note_entry_id = INVALID_NOTE_ENTRY_ID;
     }
+
+    p_device_state->all_notes_off = false; // no notes are playing but not because of a received "all notes off"
+
 }
-
-/*
- * This is called at initialization and during handling of "all notes off" after a device has become idle.
- * Currently there is nothing but debug checks here, because if everything went well,
- * all the notes have been turned off properly and now the state is empty anyway.
- */
-void reset_device_state(
-    midiplan_device_state_t* p_device_state
-) {
-
-    evar_assert(p_device_state->melodic_programs_playing == 0);
-    evar_assert(p_device_state->melodic_notes_playing == 0);
-
-    for (uint8_t i = 0; i < 128 + 1; ++i) {
-        evar_assert(p_device_state->melodic_notes_per_program[i] == 0);
-    }
-
-    evar_assert(p_device_state->percussion_notes_playing == 0);
-
-    for (midi_channel_t out_channel = MIDI_CHANNEL_1; out_channel < MIDI_CHANNEL_COUNT; ++out_channel) {
-        evar_assert(p_device_state->channels[out_channel].notes_playing == 0);
-        evar_assert(!VALID_NOTE_ENTRY_ID(p_device_state->channels[out_channel].last_note_entry_id));
-    }
-}
-
