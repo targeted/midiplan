@@ -57,7 +57,7 @@ note_entry_id_t allocate_note_entry(void);
 void deallocate_note_entry(note_entry_id_t note_entry_id);
 
 /*
- * Enumerates all the currently active note entries in order 
+ * Enumerates all the currently active note entries in order
  * from the earliest to the most recent.
  */
 void enumerate_note_entries(
@@ -80,12 +80,14 @@ typedef struct {
 extern program_profile_t program_profiles[128 + 1]; // 128 melodic + 1 for percussion
 
 /*
- * Clears the accumulated program statistics. This can be called arbitrarily.
+ * Clears the accumulated program statistics. This can be called arbitrarily,
+ * and is currently called at startup and every time when every input note
+ * has been turned off via "all notes off" command.
  */
 void reset_program_statistics(void);
 
 /*
- * This is called when an input note is officially turned off by the client. 
+ * This is called when an input note is officially turned off by the client.
  * By that time, the corresponding output notes could have been long since turned off,
  * but it is only then that we know how long the input note was supposed to sound.
  */

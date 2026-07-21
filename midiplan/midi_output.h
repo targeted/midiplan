@@ -9,7 +9,7 @@ typedef struct {
     status_byte_t      running_status;   // keeps track of the previous status
 
     /* if a literal MIDI message is being sent */
-    
+
     struct {
         uint8_t        bytes[3];         // up to 3 bytes of a literal data message being sent
         uint8_t        size;             // number of bytes to send
@@ -17,7 +17,7 @@ typedef struct {
     } message_data;
 
     /* if a device-specific sequence is being sent */
-    
+
     struct {
         const uint8_t* p_next_byte;      // points to the raw bytes of the custom sequence being sent
         custom_sequence_parameters_t parameters; // parameters for the custom sequence being sent

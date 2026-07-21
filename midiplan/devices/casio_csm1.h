@@ -47,7 +47,7 @@ extern const midiplan_device_t casio_csm1;
 #define CASIO_CSM1_PERC_NOTE_RAIN            (0x60)
 #define CASIO_CSM1_PERC_NOTE_WAVES           (0x7A)
 #define CASIO_CSM1_PERC_NOTE_SMALL_BIRDS     (0x7B)
-#define CASIO_CSM1_PERC_NOTE_GUNSHOT         (0x7C) // by the same convention this should have been 7F but a melodic program can't be translated into percussion note 7F 
+#define CASIO_CSM1_PERC_NOTE_GUNSHOT         (0x7C) // by the same convention this should have been 7F but a melodic program can't be translated into percussion note 7F
 #define CASIO_CSM1_PERC_NOTE_TRAFFIC         (0x7D)
 #define CASIO_CSM1_PERC_NOTE_APPLAUSE        (0x7E)
 

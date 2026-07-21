@@ -29,8 +29,8 @@ void initialize_controller_values(void);
  * if necessary. The oldest controller value may be discarded, but this call never fails.
  */
 controller_value_t* get_controller_value(
-    midi_channel_t in_channel, 
-    program_t in_program, 
+    midi_channel_t in_channel,
+    program_t in_program,
     control_t control
 );
 
@@ -51,7 +51,7 @@ void enumerate_controller_values(
         void* p_callback_context,
         midi_channel_t in_channel,
         program_t in_program,
-        control_t control, 
+        control_t control,
         controller_value_t* p_controller_value
     )
 );

@@ -94,7 +94,7 @@ typedef data_byte_t midi_program_number_t;
 typedef data_byte_t midi_note_number_t;
 
 typedef enum {
-    MIDI_CONTROL_BANK_SELECT                  = 0x00,    
+    MIDI_CONTROL_BANK_SELECT                  = 0x00,
     MIDI_CONTROL_MODULATION_WHEEL_OR_LEVER    = 0x01,
     MIDI_CONTROL_BREATH_CONTROLLER            = 0x02,
     MIDI_CONTROL_UNDEFINED_03                 = 0x03,
@@ -230,7 +230,7 @@ typedef enum {
 #define GM_MIDDLE_C (0x3C)
 
 /*
- * Returns the number of data bytes a MIDI message with this status byte expects. 
+ * Returns the number of data bytes a MIDI message with this status byte expects.
  * For an undefined message returns EXPECTED_DATA_BYTES_UNKNOWN.
  */
 #define EXPECTED_DATA_BYTES_UNKNOWN (0xFF)

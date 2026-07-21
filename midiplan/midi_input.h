@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include "midi.h"
-    
+
 typedef struct {
     bool          synchronized;        // set to true after a status byte have been received which might start a message
     status_byte_t status_byte;         // the status byte of the message being received
@@ -27,13 +27,13 @@ void reset_midi_input_state(midi_input_state_t* p_midi_input_state);
  * message's status byte, which is permitted. In this case, the implied EOX will be sent, but
  * the status byte will have to be not consumed, false is returned and the caller will retry.
  *
- * System exclusive messages are sent as as a sequence of single-byte wrapper "messages" and are 
+ * System exclusive messages are sent as as a sequence of single-byte wrapper "messages" and are
  * therefore unlimited in size from this code's perspective. Any other message is sent individually
  * in full, running status is translated into explicit status bytes.
  *
  * The only filtering performed at this level is ignoring undefined messages.
  *
- * Returns true if this byte if this byte has resulted in completion and production of a MIDI message 
+ * Returns true if this byte if this byte has resulted in completion and production of a MIDI message
  * into the caller's buffer.
  */
 bool handle_midi_input_byte(

@@ -22,12 +22,12 @@
 void initialize_midi_output_state(
     midi_output_state_t* p_midi_output_state
 ) {
-    
+
     p_midi_output_state->running_status = INVALID_STATUS_BYTE;
-    
+
     p_midi_output_state->message_data.size = 0;
     p_midi_output_state->message_data.offs = 0;
-    
+
     p_midi_output_state->custom_sequence.p_next_byte = NULL;
 }
 
@@ -129,7 +129,7 @@ void load_midi_output_custom_sequence(
 
     p_midi_output_state->custom_sequence.p_next_byte = \
         get_device_custom_sequence(p_device, custom_sequence_id);
-        
+
     evar_assert(p_midi_output_state->custom_sequence.p_next_byte != NULL);
 
     p_midi_output_state->custom_sequence.current_status = INVALID_STATUS_BYTE;

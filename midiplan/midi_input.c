@@ -38,13 +38,13 @@ void reset_midi_input_state(midi_input_state_t* p_midi_input_state) {
  * message's status byte, which is permitted. In this case, the implied EOX will be sent, but
  * the status byte will have to be not consumed, false is returned and the caller will retry.
  *
- * System exclusive messages are sent as as a sequence of single-byte wrapper "messages" and are 
+ * System exclusive messages are sent as as a sequence of single-byte wrapper "messages" and are
  * therefore unlimited in size from this code's perspective. Any other message is sent individually
  * in full, running status is translated into explicit status bytes.
  *
  * The only filtering performed at this level is ignoring undefined messages.
  *
- * Returns true if this byte if this byte has resulted in completion and production of a MIDI message 
+ * Returns true if this byte if this byte has resulted in completion and production of a MIDI message
  * into the caller's buffer.
  */
 bool handle_midi_input_byte(
@@ -56,7 +56,7 @@ bool handle_midi_input_byte(
 
     p_midi_message->data_byte_1 = INVALID_DATA_BYTE;
     p_midi_message->data_byte_2 = INVALID_DATA_BYTE;
-    
+
     *p_consume_input_byte = true;
 
     // real time messages are single bytes which are recognized separately and sent out of band,
@@ -85,7 +85,7 @@ bool handle_midi_input_byte(
     if (p_midi_input_state->status_byte == MIDI_MESSAGE_SYSTEM_EXCLUSIVE) {
 
         if (VALID_DATA_BYTE(input_byte)) { // received another data byte in the system exclusive message being streamed
-            
+
             p_midi_message->status_byte = MIDI_MESSAGE_SYSTEM_EXCLUSIVE;
             p_midi_message->data_byte_1 = input_byte;
         }
@@ -112,7 +112,7 @@ bool handle_midi_input_byte(
     }
 
     // now we are in the territory of a regular MIDI message being received
-    
+
     if (VALID_STATUS_BYTE(input_byte)) {
 
         if (VALID_STATUS_BYTE(p_midi_input_state->status_byte)) { // status byte received in the middle of the previous message
@@ -129,7 +129,7 @@ bool handle_midi_input_byte(
             return true;
         }
 
-        // otherwise we are receiving a regular message, determine 
+        // otherwise we are receiving a regular message, determine
         // the number of data bytes that are expected for its kind
 
         uint8_t expected_data_bytes = get_expected_data_bytes(p_midi_input_state->status_byte);
@@ -140,7 +140,7 @@ bool handle_midi_input_byte(
 
         p_midi_input_state->expected_data_bytes = expected_data_bytes;
         p_midi_input_state->received_data_bytes = 0;
-        
+
     }
     else if (VALID_DATA_BYTE(input_byte)) {
 
@@ -161,7 +161,7 @@ bool handle_midi_input_byte(
         }
 
         // the data byte is buffered
-        
+
         p_midi_input_state->data_bytes[p_midi_input_state->received_data_bytes++] = input_byte;
     }
 
@@ -180,7 +180,7 @@ bool handle_midi_input_byte(
     }
 
     // check to see if a message of this kind can become a running status (only a channel message can)
-    
+
     if (IS_MIDI_CHANNEL_MESSAGE(p_midi_input_state->status_byte)) {
         p_midi_input_state->running_status = p_midi_input_state->status_byte;
     }

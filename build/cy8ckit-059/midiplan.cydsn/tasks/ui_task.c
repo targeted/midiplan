@@ -1,12 +1,12 @@
 /*
  * MIDIplan
  * Copyright (C) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -20,14 +20,14 @@
 #include "midi_router_task.h"
 
 void ui_task__initialize(evar_task_info_t* p_task_info) {
-    
+
     EVAR_UNUSED(p_task_info);
 
     // initialize the message queue for the task
 
     static ui_task_message_store_t message_store;
     evar__initialize_message_store(&message_store);
-    
+
     evar_task__sleep();
 }
 

@@ -31,12 +31,12 @@ void output_uart_task__initialize(evar_task_info_t* p_task_info) {
 
     // turn activity LED off
 
-    p_task_data->LED_Write(0);
+    p_task_data->LED.Write(0);
 
     // start the hardware output UART
-    
-    p_task_data->UART_Start();
-    
+
+    p_task_data->UART.Start();
+
     // initialize task data
 
     initialize_midi_output_state(&p_task_data->midi_output_state);
@@ -99,10 +99,10 @@ static bool receive_next_message(output_uart_task_data_t* p_task_data) {
 
     // depending on its id/type, the received message will be interpreteted as
     // either a single literal MIDI message or a pointer to a parameterized sequence
-    
+
     if (output_uart_task_message.custom_sequence_id == SINGLE_MIDI_MESSAGE) {
         load_midi_output_midi_message(
-            &p_task_data->midi_output_state, 
+            &p_task_data->midi_output_state,
             output_uart_task_message.midi_message
         );
     }
@@ -110,7 +110,7 @@ static bool receive_next_message(output_uart_task_data_t* p_task_data) {
         load_midi_output_custom_sequence(
             &p_task_data->midi_output_state,
             devices[p_task_data->midi_out_port].p_device,
-            output_uart_task_message.custom_sequence_id, 
+            output_uart_task_message.custom_sequence_id,
             output_uart_task_message.custom_sequence_parameters
         );
     }
@@ -136,7 +136,7 @@ void output_uart_task__run(evar_task_info_t* p_task_info) {
 
     while (true) {
 
-        if (p_task_data->UART_FIFO_FULL()) {
+        if (p_task_data->UART.FIFO_FULL()) {
             return evar_task__keep_running(); // busy wait until output FIFO has sending capacity
         }
 
@@ -158,10 +158,10 @@ void output_uart_task__run(evar_task_info_t* p_task_info) {
         }
 
         //DEBUG_PRINT1("> %02X\r\n", next_byte);
-        
-        p_task_data->UART_WriteTxData(next_byte);
 
-        p_task_data->LED_Write(1); // turn activity LED on
+        p_task_data->UART.WriteTxData(next_byte);
+
+        p_task_data->LED.Write(1); // turn activity LED on
     }
 
     return evar_task__keep_running();
@@ -172,7 +172,7 @@ void output_uart_task__run(evar_task_info_t* p_task_info) {
  */
 void output_uart_task__wake_up(evar_task_info_t* p_task_info) {
     output_uart_task_data_t* p_task_data = p_task_info->p_task_data;
-    p_task_data->LED_Write(0);
+    p_task_data->LED.Write(0);
     evar_task__sleep();
 }
 

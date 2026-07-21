@@ -27,11 +27,11 @@
 void input_uart_interrupt_handler(input_uart_task_data_t* p_task_data) {
 
     while (p_task_data->UART.GetRxBufferSize() > 0) {
-        
+
         input_uart_task_message_t input_uart_task_message = {
             .input_uart_byte = p_task_data->UART.ReadRxData()
         };
-        
+
         evar_mq_result_t mq_result = evar__send_async_message(
             p_task_data->input_uart_task,
             &input_uart_task_message,
@@ -62,7 +62,7 @@ void input_uart_task__initialize(evar_task_info_t* p_task_info) {
     p_task_data->LED.Write(0);
 
     // start the hardware input UART
-    
+
     p_task_data->UART.IRQ_StartEx(p_task_data->UART.interrupt_handler);
     p_task_data->UART.Start();
 
@@ -133,7 +133,7 @@ void input_uart_task__receive(evar_task_info_t* p_task_info) {
                 &midi_router_task_message.midi_message,
                 &consume_input_byte
         );
-             
+
         if (consume_input_byte) {
             if (evar__receive_message(NULL) != EVAR_MQ_SUCCESS) { // the processed message is dropped by "receiving" it to NULL
                 evar__crash(CRASH_RECEIVE_MESSAGE_FAILED | (unsigned short)mq_result, "input_uart_task__receive: evar__receive_message failed");

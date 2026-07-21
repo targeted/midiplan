@@ -12,17 +12,17 @@ typedef struct {
     /* initialization parameters */
 
     struct {
-        cyisraddress  interrupt_handler;
-        void          (*Start)           (void);
-        void          (*IRQ_StartEx)     (cyisraddress interrupt_handler);
-        uint8_t       (*GetRxBufferSize) (void);
-        uint8_t       (*ReadRxData)      (void);
+        cyisraddress   interrupt_handler;
+        void           (*Start)           (void);
+        void           (*IRQ_StartEx)     (cyisraddress interrupt_handler);
+        uint8_t        (*GetRxBufferSize) (void);
+        uint8_t        (*ReadRxData)      (void);
     } UART;
-        
+
     struct {
-        void          (*Write)           (uint8_t value);
+        void           (*Write)           (uint8_t value);
     } LED;
-    
+
     evar_task_id_t     midi_router_task;
 
     /* runtime state */

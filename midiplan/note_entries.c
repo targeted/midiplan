@@ -202,7 +202,9 @@ void enumerate_note_entries(
 }
 
 /*
- * Clears the accumulated program statistics. This can be called arbitrarily.
+ * Clears the accumulated program statistics. This can be called arbitrarily,
+ * and is currently called at startup and every time when every input note
+ * has been turned off via "all notes off" command.
  */
 void reset_program_statistics(void) {
 

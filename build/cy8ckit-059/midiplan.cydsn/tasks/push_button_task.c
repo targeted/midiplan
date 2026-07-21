@@ -1,12 +1,12 @@
 /*
  * MIDIplan
  * Copyright (C) 2026 Dmitry Dvoinikov <dmitry@targeted.org>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -22,7 +22,7 @@ void push_button_interrupt_handler(push_button_task_data_t* p_task_data) {
     ui_task_message_t ui_task_message = {
         .button_id = p_task_data->button_id
     };
-    
+
     evar_mq_result_t mq_result = evar__send_async_message(
         p_task_data->ui_task,
         &ui_task_message,
