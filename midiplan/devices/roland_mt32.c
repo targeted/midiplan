@@ -27,7 +27,7 @@ const midiplan_device_t roland_mt32 = {
     .max_melodic_notes       = 9, // 32 partials, average of below 3 partials per patch
     .max_percussion_notes    = 0,
     .max_melodic_programs    = 8,
-    .max_notes_per_program   = 4,
+    .max_notes_per_program   = 6,
     .monotimbral_channels    = 1,
     .max_notes_per_channel   = { 0 },
 
