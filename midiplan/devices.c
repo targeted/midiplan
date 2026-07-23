@@ -40,11 +40,11 @@ static void configure_device_order(void);
 
 void configure_devices(void) {
 
-    devices[MIDI_OUT_PORT_1].p_device = &roland_mt32;
+    devices[MIDI_OUT_PORT_1].p_device = &gm_device;
     devices[MIDI_OUT_PORT_1].routing  = route_all;
 
-    devices[MIDI_OUT_PORT_2].p_device = &roland_mt32;
-    devices[MIDI_OUT_PORT_2].routing  = route_all;
+    devices[MIDI_OUT_PORT_2].p_device = &null_device;
+    devices[MIDI_OUT_PORT_2].routing  = route_none;
 
     devices[MIDI_OUT_PORT_3].p_device = &null_device;
     devices[MIDI_OUT_PORT_3].routing  = route_none;
@@ -236,8 +236,8 @@ bool route_note_to_device(
         uint8_t bonding_key;
 
         if (IS_MELODIC_PROGRAM(in_program)) {
-            bonding_key = bonding_keys[in_channel][in_note >> 1];
-            if (in_note & 0x01) { // each random byte contains two random nibbles
+            bonding_key = bonding_keys[in_channel][in_program >> 1];
+            if (in_program & 0x01) { // each random byte contains two random nibbles
                 bonding_key &= 0x0F;
             }
             else {
@@ -251,6 +251,7 @@ bool route_note_to_device(
         if ((bonding_key % device_count) != device_index) {
             return false;
         }
+
     }
 
     return true;
