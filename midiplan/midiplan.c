@@ -1574,7 +1574,17 @@ static void handle_note_on(
 
     for (midi_out_port_t i = MIDI_OUT_PORT_1; i < MIDI_OUT_PORT_COUNT; ++i) {
 
-        // enumeration of devices happens in the order that takes bonding into account
+#ifdef TRAINING_MODE
+
+        // in training mode, a device on port N will only receive notes
+        // incoming from input *channel* N, so that the user could switch
+        // back and forth between channels to play on different devices
+
+        if ((uint8_t)i != (uint8_t)in_channel) { // comparison valid
+            continue;
+        }
+
+#endif
 
         midi_out_port_t out_port = device_order[i].out_port;
 

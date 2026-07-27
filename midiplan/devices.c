@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include <evar_assert.h>
+#include <evar_task.h>
 #include "devices.h"
 #include <midiplan/devices/alesis_sr16.h>
 #include <midiplan/devices/casio_csm1.h>
@@ -40,17 +40,17 @@ static void configure_device_order(void);
 
 void configure_devices(void) {
 
-    devices[MIDI_OUT_PORT_1].p_device = &gm_device;
+    devices[MIDI_OUT_PORT_1].p_device = &roland_mt32;
     devices[MIDI_OUT_PORT_1].routing  = route_all;
 
-    devices[MIDI_OUT_PORT_2].p_device = &null_device;
-    devices[MIDI_OUT_PORT_2].routing  = route_none;
+    devices[MIDI_OUT_PORT_2].p_device = &roland_cm32p;
+    devices[MIDI_OUT_PORT_2].routing  = route_all;
 
-    devices[MIDI_OUT_PORT_3].p_device = &null_device;
-    devices[MIDI_OUT_PORT_3].routing  = route_none;
+    devices[MIDI_OUT_PORT_3].p_device = &roland_mt32;
+    devices[MIDI_OUT_PORT_3].routing  = route_all;
 
-    devices[MIDI_OUT_PORT_4].p_device = &null_device;
-    devices[MIDI_OUT_PORT_4].routing  = route_none;
+    devices[MIDI_OUT_PORT_4].p_device = &gm_device;
+    devices[MIDI_OUT_PORT_4].routing  = route_all;
 
     configure_device_order();
 }
@@ -74,6 +74,18 @@ static void configure_device_order(void) {
         devices[i].bonding.device_index = 0;
         devices[i].bonding.device_count = 1;
     }
+
+#ifdef TRAINING_MODE
+
+    // in training mode, each device will only receive notes
+    // from a single channel, therefore all bonding is ignored
+
+    for (midi_out_port_t i = MIDI_OUT_PORT_1; i < MIDI_OUT_PORT_COUNT; ++i) {
+        device_order[i].out_port = i;
+        device_order[i].consume_note = true;
+    }
+
+#else
 
     // one edge case is when multiple identical (i.e. bonded) devices have different routing tables,
     // this will result in surprising and unpredictable behavior, when the same note may or may not
@@ -153,6 +165,8 @@ static void configure_device_order(void) {
     }
 
     evar_assert(j == MIDI_OUT_PORT_COUNT);
+
+#endif
 
 }
 
@@ -255,6 +269,7 @@ bool route_note_to_device(
     }
 
     return true;
+
 }
 
 /*

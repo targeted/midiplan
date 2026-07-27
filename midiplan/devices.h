@@ -53,7 +53,7 @@ extern attached_device_t devices[MIDI_OUT_PORT_COUNT];
  * This is the order in which the devices will be considered to play a note on.
  * The logic behind this is as follows:
  * 1. We go "left to right", from port 1 to port 4.
- * 2. Bonded devices are treated as one logical device, therefore if identical
+ * 2. Bonded devices are treated as one logical device, for example if identical
  *    devices are configured on ports 2 and 4, then the order will be 1-2-4-3,
  *    but if 1 and 3 were also identical, then 1-3-2-4.
  * 3. Specific (non-GM-compatible) devices consume the notes they play,

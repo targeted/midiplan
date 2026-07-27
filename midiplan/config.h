@@ -21,5 +21,6 @@ typedef enum {
 #define MIN_REPLACEABLE_NOTE_AGE (7) // in eights of the program's average duration
 
 //#define SYSTEM_EXCLUSIVE_PASSTHROUGH // define to allow passing incoming system exclusive messages
+#define TRAINING_MODE // define to experiment with a new device, in training mode port N will receive notes from input *channel* N
 
 #endif
