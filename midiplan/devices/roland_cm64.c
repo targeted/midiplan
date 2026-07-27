@@ -501,6 +501,8 @@ const midiplan_device_t roland_cm64 = {
         /* over */ 0x00,
         0xF7, /* end of sysex */
 
+        MIDI_MESSAGE_DELAY, 0x00, 0x64, /* 100 ms */
+
         /* MT-32 */
 
         /* extracted from the original MTGM.MID released by Roland */

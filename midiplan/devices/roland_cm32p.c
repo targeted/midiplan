@@ -497,6 +497,8 @@ const midiplan_device_t roland_cm32p = {
         /* over */ 0x00,
         0xF7, /* end of sysex */
 
+        MIDI_MESSAGE_DELAY, 0x00, 0x64, /* 100 ms */
+
         INVALID_STATUS_BYTE,
 
     },
