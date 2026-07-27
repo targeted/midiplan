@@ -13,20 +13,19 @@
  * GNU General Public License for more details.
  */
 
-#include "roland_mt32.h"
+#include "roland_cm64.h"
+#include "roland_cm32p.h"
 #include "gm_device.h"
 
-const midiplan_device_t roland_mt32 = {
+const midiplan_device_t roland_cm64 = {
 
-    .model_name              = "Roland MT-32",
+    .model_name              = "Roland CM-64",
 
     .basic_channel           = MIDI_CHANNEL_1,
 
-    // see https://battleofthebits.com/lyceum/View/Specification%20of%20General%20MIDI%20and%20Roland%20MT-32%20patches
-
-    .max_melodic_notes       = 10, // 32 partials, average of below 3 partials per patch
+    .max_melodic_notes       = 24,
     .max_percussion_notes    = 0,
-    .max_melodic_programs    = 8,
+    .max_melodic_programs    = 16,
     .max_notes_per_program   = 6,
     .monotimbral_channels    = 1,
     .max_notes_per_channel   = { 0 },
@@ -36,153 +35,153 @@ const midiplan_device_t roland_mt32 = {
     .pitch_bend              = 1,
 
     .melodic_programs = {
-        /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = GM_PROGRAM_ACOUSTIC_GRAND_PIANO,   .flags = GM_RANGE_DEFAULT  },
-        /* 0x01   2  GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO */ {  .program = GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO,  .flags = GM_RANGE_DEFAULT  },
-        /* 0x02   3  GM_PROGRAM_ELECTRIC_GRAND_PIANO  */ {  .program = GM_PROGRAM_ELECTRIC_GRAND_PIANO,   .flags = GM_RANGE_DEFAULT  },
-        /* 0x03   4  GM_PROGRAM_HONKY_TONK_PIANO      */ {  .program = GM_PROGRAM_HONKY_TONK_PIANO,       .flags = GM_RANGE_DEFAULT  },
-        /* 0x04   5  GM_PROGRAM_ELECTRIC_PIANO_1      */ {  .program = GM_PROGRAM_ELECTRIC_PIANO_1,       .flags = GM_RANGE_DEFAULT  },
-        /* 0x05   6  GM_PROGRAM_ELECTRIC_PIANO_2      */ {  .program = GM_PROGRAM_ELECTRIC_PIANO_2,       .flags = GM_RANGE_DEFAULT  },
-        /* 0x06   7  GM_PROGRAM_HARPSICHORD           */ {  .program = GM_PROGRAM_HARPSICHORD,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x07   8  GM_PROGRAM_CLAVI                 */ {  .program = GM_PROGRAM_CLAVI,                  .flags = GM_RANGE_DEFAULT  },
-        /* 0x08   9  GM_PROGRAM_CELESTA               */ {  .program = GM_PROGRAM_CELESTA,                .flags = GM_RANGE_DEFAULT  },
-        /* 0x09  10  GM_PROGRAM_GLOCKENSPIEL          */ {  .program = GM_PROGRAM_GLOCKENSPIEL,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x0A  11  GM_PROGRAM_MUSIC_BOX             */ {  .program = GM_PROGRAM_MUSIC_BOX,              .flags = GM_RANGE_DEFAULT  },
-        /* 0x0B  12  GM_PROGRAM_VIBRAPHONE            */ {  .program = GM_PROGRAM_VIBRAPHONE,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x0C  13  GM_PROGRAM_MARIMBA               */ {  .program = GM_PROGRAM_MARIMBA,                .flags = GM_RANGE_DEFAULT  },
-        /* 0x0D  14  GM_PROGRAM_XYLOPHONE             */ {  .program = GM_PROGRAM_XYLOPHONE,              .flags = GM_RANGE_DEFAULT  },
-        /* 0x0E  15  GM_PROGRAM_TUBULAR_BELLS         */ {  .program = GM_PROGRAM_TUBULAR_BELLS,          .flags = GM_RANGE_DEFAULT  },
-        /* 0x0F  16  GM_PROGRAM_DULCIMER              */ {  .program = GM_PROGRAM_DULCIMER,               .flags = GM_RANGE_DEFAULT  },
-        /* 0x10  17  GM_PROGRAM_DRAWBAR_ORGAN         */ {  .program = GM_PROGRAM_DRAWBAR_ORGAN,          .flags = GM_RANGE_DEFAULT  },
-        /* 0x11  18  GM_PROGRAM_PERCUSSIVE_ORGAN      */ {  .program = GM_PROGRAM_PERCUSSIVE_ORGAN,       .flags = GM_RANGE_DEFAULT  },
-        /* 0x12  19  GM_PROGRAM_ROCK_ORGAN            */ {  .program = GM_PROGRAM_ROCK_ORGAN,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x13  20  GM_PROGRAM_CHURCH_ORGAN          */ {  .program = GM_PROGRAM_CHURCH_ORGAN,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x14  21  GM_PROGRAM_REED_ORGAN            */ {  .program = GM_PROGRAM_REED_ORGAN,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x15  22  GM_PROGRAM_ACCORDION             */ {  .program = GM_PROGRAM_ACCORDION,              .flags = GM_RANGE_DEFAULT  },
-        /* 0x16  23  GM_PROGRAM_HARMONICA             */ {  .program = GM_PROGRAM_HARMONICA,              .flags = GM_RANGE_DEFAULT  },
-        /* 0x17  24  GM_PROGRAM_TANGO_ACCORDION       */ {  .program = GM_PROGRAM_TANGO_ACCORDION,        .flags = GM_RANGE_DEFAULT  },
-        /* 0x18  25  GM_PROGRAM_ACOUSTIC_GUITAR_NYLON */ {  .program = GM_PROGRAM_ACOUSTIC_GUITAR_NYLON,  .flags = GM_RANGE_DEFAULT  },
-        /* 0x19  26  GM_PROGRAM_ACOUSTIC_GUITAR_STEEL */ {  .program = GM_PROGRAM_ACOUSTIC_GUITAR_STEEL,  .flags = GM_RANGE_DEFAULT  },
-        /* 0x1A  27  GM_PROGRAM_ELECTRIC_GUITAR_JAZZ  */ {  .program = GM_PROGRAM_ELECTRIC_GUITAR_JAZZ,   .flags = GM_RANGE_DEFAULT  },
-        /* 0x1B  28  GM_PROGRAM_ELECTRIC_GUITAR_CLEAN */ {  .program = GM_PROGRAM_ELECTRIC_GUITAR_CLEAN,  .flags = GM_RANGE_DEFAULT  },
-        /* 0x1C  29  GM_PROGRAM_ELECTRIC_GUITAR_MUTED */ {  .program = GM_PROGRAM_ELECTRIC_GUITAR_MUTED,  .flags = GM_RANGE_DEFAULT  },
-        /* 0x1D  30  GM_PROGRAM_OVERDRIVEN_GUITAR     */ {  .program = GM_PROGRAM_OVERDRIVEN_GUITAR,      .flags = GM_RANGE_DEFAULT  },
-        /* 0x1E  31  GM_PROGRAM_DISTORTION_GUITAR     */ {  .program = GM_PROGRAM_DISTORTION_GUITAR,      .flags = GM_RANGE_DEFAULT  },
-        /* 0x1F  32  GM_PROGRAM_GUITAR_HARMONICS      */ {  .program = GM_PROGRAM_GUITAR_HARMONICS,       .flags = GM_RANGE_DEFAULT  },
-        /* 0x20  33  GM_PROGRAM_ACOUSTIC_BASS         */ {  .program = GM_PROGRAM_ACOUSTIC_BASS,          .flags = GM_RANGE_DEFAULT  },
-        /* 0x21  34  GM_PROGRAM_ELECTRIC_BASS_FINGER  */ {  .program = GM_PROGRAM_ELECTRIC_BASS_FINGER,   .flags = GM_RANGE_DEFAULT  },
-        /* 0x22  35  GM_PROGRAM_ELECTRIC_BASS_PICK    */ {  .program = GM_PROGRAM_ELECTRIC_BASS_PICK,     .flags = GM_RANGE_DEFAULT  },
-        /* 0x23  36  GM_PROGRAM_FRETLESS_BASS         */ {  .program = GM_PROGRAM_FRETLESS_BASS,          .flags = GM_RANGE_DEFAULT  },
-        /* 0x24  37  GM_PROGRAM_SLAP_BASS_1           */ {  .program = GM_PROGRAM_SLAP_BASS_1,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x25  38  GM_PROGRAM_SLAP_BASS_2           */ {  .program = GM_PROGRAM_SLAP_BASS_2,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x26  39  GM_PROGRAM_SYNTH_BASS_1          */ {  .program = GM_PROGRAM_SYNTH_BASS_1,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x27  40  GM_PROGRAM_SYNTH_BASS_2          */ {  .program = GM_PROGRAM_SYNTH_BASS_2,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x28  41  GM_PROGRAM_VIOLIN                */ {  .program = GM_PROGRAM_VIOLIN,                 .flags = GM_RANGE_DEFAULT  },
-        /* 0x29  42  GM_PROGRAM_VIOLA                 */ {  .program = GM_PROGRAM_VIOLA,                  .flags = GM_RANGE_DEFAULT  },
-        /* 0x2A  43  GM_PROGRAM_CELLO                 */ {  .program = GM_PROGRAM_CELLO,                  .flags = GM_RANGE_DEFAULT  },
-        /* 0x2B  44  GM_PROGRAM_CONTRABASS            */ {  .program = GM_PROGRAM_CONTRABASS,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x2C  45  GM_PROGRAM_TREMOLO_STRINGS       */ {  .program = GM_PROGRAM_TREMOLO_STRINGS,        .flags = GM_RANGE_DEFAULT  },
-        /* 0x2D  46  GM_PROGRAM_PIZZICATO_STRINGS     */ {  .program = GM_PROGRAM_PIZZICATO_STRINGS,      .flags = GM_RANGE_DEFAULT  },
-        /* 0x2E  47  GM_PROGRAM_ORCHESTRAL_HARP       */ {  .program = GM_PROGRAM_ORCHESTRAL_HARP,        .flags = GM_RANGE_DEFAULT  },
-        /* 0x2F  48  GM_PROGRAM_TIMPANI               */ {  .program = GM_PROGRAM_TIMPANI,                .flags = GM_RANGE_DEFAULT  },
-        /* 0x30  49  GM_PROGRAM_STRING_ENSEMBLE_1     */ {  .program = GM_PROGRAM_STRING_ENSEMBLE_1,      .flags = GM_RANGE_DEFAULT  },
-        /* 0x31  50  GM_PROGRAM_STRING_ENSEMBLE_2     */ {  .program = GM_PROGRAM_STRING_ENSEMBLE_2,      .flags = GM_RANGE_DEFAULT  },
-        /* 0x32  51  GM_PROGRAM_SYNTHSTRINGS_1        */ {  .program = GM_PROGRAM_SYNTHSTRINGS_1,         .flags = GM_RANGE_DEFAULT  },
-        /* 0x33  52  GM_PROGRAM_SYNTHSTRINGS_2        */ {  .program = GM_PROGRAM_SYNTHSTRINGS_2,         .flags = GM_RANGE_DEFAULT  },
-        /* 0x34  53  GM_PROGRAM_CHOIR_AAHS            */ {  .program = GM_PROGRAM_CHOIR_AAHS,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x35  54  GM_PROGRAM_VOICE_OOHS            */ {  .program = GM_PROGRAM_VOICE_OOHS,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x36  55  GM_PROGRAM_SYNTH_VOICE           */ {  .program = GM_PROGRAM_SYNTH_VOICE,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x37  56  GM_PROGRAM_ORCHESTRA_HIT         */ {  .program = GM_PROGRAM_ORCHESTRA_HIT,          .flags = GM_RANGE_DEFAULT  },
-        /* 0x38  57  GM_PROGRAM_TRUMPET               */ {  .program = GM_PROGRAM_TRUMPET,                .flags = GM_RANGE_DEFAULT  },
-        /* 0x39  58  GM_PROGRAM_TROMBONE              */ {  .program = GM_PROGRAM_TROMBONE,               .flags = GM_RANGE_DEFAULT  },
-        /* 0x3A  59  GM_PROGRAM_TUBA                  */ {  .program = GM_PROGRAM_TUBA,                   .flags = GM_RANGE_DEFAULT  },
-        /* 0x3B  60  GM_PROGRAM_MUTED_TRUMPET         */ {  .program = GM_PROGRAM_MUTED_TRUMPET,          .flags = GM_RANGE_DEFAULT  },
-        /* 0x3C  61  GM_PROGRAM_FRENCH_HORN           */ {  .program = GM_PROGRAM_FRENCH_HORN,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x3D  62  GM_PROGRAM_BRASS_SECTION         */ {  .program = GM_PROGRAM_BRASS_SECTION,          .flags = GM_RANGE_DEFAULT  },
-        /* 0x3E  63  GM_PROGRAM_SYNTHBRASS_1          */ {  .program = GM_PROGRAM_SYNTHBRASS_1,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x3F  64  GM_PROGRAM_SYNTHBRASS_2          */ {  .program = GM_PROGRAM_SYNTHBRASS_2,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x40  65  GM_PROGRAM_SOPRANO_SAX           */ {  .program = GM_PROGRAM_SOPRANO_SAX,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x41  66  GM_PROGRAM_ALTO_SAX              */ {  .program = GM_PROGRAM_ALTO_SAX,               .flags = GM_RANGE_DEFAULT  },
-        /* 0x42  67  GM_PROGRAM_TENOR_SAX             */ {  .program = GM_PROGRAM_TENOR_SAX,              .flags = GM_RANGE_DEFAULT  },
-        /* 0x43  68  GM_PROGRAM_BARITONE_SAX          */ {  .program = GM_PROGRAM_BARITONE_SAX,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x44  69  GM_PROGRAM_OBOE                  */ {  .program = GM_PROGRAM_OBOE,                   .flags = GM_RANGE_DEFAULT  },
-        /* 0x45  70  GM_PROGRAM_ENGLISH_HORN          */ {  .program = GM_PROGRAM_ENGLISH_HORN,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x46  71  GM_PROGRAM_BASSOON               */ {  .program = GM_PROGRAM_BASSOON,                .flags = GM_RANGE_DEFAULT  },
-        /* 0x47  72  GM_PROGRAM_CLARINET              */ {  .program = GM_PROGRAM_CLARINET,               .flags = GM_RANGE_DEFAULT  },
-        /* 0x48  73  GM_PROGRAM_PICCOLO               */ {  .program = GM_PROGRAM_PICCOLO,                .flags = GM_RANGE_DEFAULT  },
-        /* 0x49  74  GM_PROGRAM_FLUTE                 */ {  .program = GM_PROGRAM_FLUTE,                  .flags = GM_RANGE_DEFAULT  },
-        /* 0x4A  75  GM_PROGRAM_RECORDER              */ {  .program = GM_PROGRAM_RECORDER,               .flags = GM_RANGE_DEFAULT  },
-        /* 0x4B  76  GM_PROGRAM_PAN_FLUTE             */ {  .program = GM_PROGRAM_PAN_FLUTE,              .flags = GM_RANGE_DEFAULT  },
-        /* 0x4C  77  GM_PROGRAM_BLOWN_BOTTLE          */ {  .program = GM_PROGRAM_BLOWN_BOTTLE,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x4D  78  GM_PROGRAM_SHAKUHACHI            */ {  .program = GM_PROGRAM_SHAKUHACHI,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x4E  79  GM_PROGRAM_WHISTLE               */ {  .program = GM_PROGRAM_WHISTLE,                .flags = GM_RANGE_DEFAULT  },
-        /* 0x4F  80  GM_PROGRAM_OCARINA               */ {  .program = GM_PROGRAM_OCARINA,                .flags = GM_RANGE_DEFAULT  },
-        /* 0x50  81  GM_PROGRAM_LEAD_1_SQUARE         */ {  .program = GM_PROGRAM_LEAD_1_SQUARE,          .flags = GM_RANGE_DEFAULT  },
-        /* 0x51  82  GM_PROGRAM_LEAD_2_SAWTOOTH       */ {  .program = GM_PROGRAM_LEAD_2_SAWTOOTH,        .flags = GM_RANGE_DEFAULT  },
-        /* 0x52  83  GM_PROGRAM_LEAD_3_CALLIOPE       */ {  .program = GM_PROGRAM_LEAD_3_CALLIOPE,        .flags = GM_RANGE_DEFAULT  },
-        /* 0x53  84  GM_PROGRAM_LEAD_4_CHIFF          */ {  .program = GM_PROGRAM_LEAD_4_CHIFF,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x54  85  GM_PROGRAM_LEAD_5_CHARANG        */ {  .program = GM_PROGRAM_LEAD_5_CHARANG,         .flags = GM_RANGE_DEFAULT  },
-        /* 0x55  86  GM_PROGRAM_LEAD_6_VOICE          */ {  .program = GM_PROGRAM_LEAD_6_VOICE,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x56  87  GM_PROGRAM_LEAD_7_FIFTHS         */ {  .program = GM_PROGRAM_LEAD_7_FIFTHS,          .flags = GM_RANGE_DEFAULT  },
-        /* 0x57  88  GM_PROGRAM_LEAD_8_BASS_LEAD      */ {  .program = GM_PROGRAM_LEAD_8_BASS_LEAD,       .flags = GM_RANGE_DEFAULT  },
-        /* 0x58  89  GM_PROGRAM_PAD_1_NEW_AGE         */ {  .program = GM_PROGRAM_PAD_1_NEW_AGE,          .flags = GM_RANGE_DEFAULT  },
-        /* 0x59  90  GM_PROGRAM_PAD_2_WARM            */ {  .program = GM_PROGRAM_PAD_2_WARM,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x5A  91  GM_PROGRAM_PAD_3_POLYSYNTH       */ {  .program = GM_PROGRAM_PAD_3_POLYSYNTH,        .flags = GM_RANGE_DEFAULT  },
-        /* 0x5B  92  GM_PROGRAM_PAD_4_CHOIR           */ {  .program = GM_PROGRAM_PAD_4_CHOIR,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x5C  93  GM_PROGRAM_PAD_5_BOWED           */ {  .program = GM_PROGRAM_PAD_5_BOWED,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x5D  94  GM_PROGRAM_PAD_6_METALLIC        */ {  .program = GM_PROGRAM_PAD_6_METALLIC,         .flags = GM_RANGE_DEFAULT  },
-        /* 0x5E  95  GM_PROGRAM_PAD_7_HALO            */ {  .program = GM_PROGRAM_PAD_7_HALO,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x5F  96  GM_PROGRAM_PAD_8_SWEEP           */ {  .program = GM_PROGRAM_PAD_8_SWEEP,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x60  97  GM_PROGRAM_FX_1_RAIN             */ {  .program = GM_PROGRAM_FX_1_RAIN,              .flags = GM_RANGE_DEFAULT  },
-        /* 0x61  98  GM_PROGRAM_FX_2_SOUNDTRACK       */ {  .program = GM_PROGRAM_FX_2_SOUNDTRACK,        .flags = GM_RANGE_DEFAULT  },
-        /* 0x62  99  GM_PROGRAM_FX_3_CRYSTAL          */ {  .program = GM_PROGRAM_FX_3_CRYSTAL,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x63 100  GM_PROGRAM_FX_4_ATMOSPHERE       */ {  .program = GM_PROGRAM_FX_4_ATMOSPHERE,        .flags = GM_RANGE_DEFAULT  },
-        /* 0x64 101  GM_PROGRAM_FX_5_BRIGHTNESS       */ {  .program = GM_PROGRAM_FX_5_BRIGHTNESS,        .flags = GM_RANGE_DEFAULT  },
-        /* 0x65 102  GM_PROGRAM_FX_6_GOBLINS          */ {  .program = GM_PROGRAM_FX_6_GOBLINS,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x66 103  GM_PROGRAM_FX_7_ECHOES           */ {  .program = GM_PROGRAM_FX_7_ECHOES,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x67 104  GM_PROGRAM_FX_8_SCI_FI           */ {  .program = GM_PROGRAM_FX_8_SCI_FI,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x68 105  GM_PROGRAM_SITAR                 */ {  .program = GM_PROGRAM_SITAR,                  .flags = GM_RANGE_DEFAULT  },
-        /* 0x69 106  GM_PROGRAM_BANJO                 */ {  .program = GM_PROGRAM_BANJO,                  .flags = GM_RANGE_DEFAULT  },
-        /* 0x6A 107  GM_PROGRAM_SHAMISEN              */ {  .program = GM_PROGRAM_SHAMISEN,               .flags = GM_RANGE_DEFAULT  },
-        /* 0x6B 108  GM_PROGRAM_KOTO                  */ {  .program = GM_PROGRAM_KOTO,                   .flags = GM_RANGE_DEFAULT  },
-        /* 0x6C 109  GM_PROGRAM_KALIMBA               */ {  .program = GM_PROGRAM_KALIMBA,                .flags = GM_RANGE_DEFAULT  },
-        /* 0x6D 110  GM_PROGRAM_BAG_PIPE              */ {  .program = GM_PROGRAM_BAG_PIPE,               .flags = GM_RANGE_DEFAULT  },
-        /* 0x6E 111  GM_PROGRAM_FIDDLE                */ {  .program = GM_PROGRAM_FIDDLE,                 .flags = GM_RANGE_DEFAULT  },
-        /* 0x6F 112  GM_PROGRAM_SHANAI                */ {  .program = GM_PROGRAM_SHANAI,                 .flags = GM_RANGE_DEFAULT  },
-        /* 0x70 113  GM_PROGRAM_TINKLE_BELL           */ {  .program = GM_PROGRAM_TINKLE_BELL,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x71 114  GM_PROGRAM_AGOGO                 */ {  .program = GM_PROGRAM_AGOGO,                  .flags = GM_RANGE_DEFAULT  },
-        /* 0x72 115  GM_PROGRAM_STEEL_DRUMS           */ {  .program = GM_PROGRAM_STEEL_DRUMS,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x73 116  GM_PROGRAM_WOODBLOCK             */ {  .program = GM_PROGRAM_WOODBLOCK,              .flags = GM_RANGE_DEFAULT  },
-        /* 0x74 117  GM_PROGRAM_TAIKO_DRUM            */ {  .program = GM_PROGRAM_TAIKO_DRUM,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x75 118  GM_PROGRAM_MELODIC_TOM           */ {  .program = GM_PROGRAM_MELODIC_TOM,            .flags = GM_RANGE_DEFAULT  },
-        /* 0x76 119  GM_PROGRAM_SYNTH_DRUM            */ {  .program = GM_PROGRAM_SYNTH_DRUM,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x77 120  GM_PROGRAM_REVERSE_CYMBAL        */ {  .program = GM_PROGRAM_REVERSE_CYMBAL,         .flags = GM_RANGE_DEFAULT  },
-        /* 0x78 121  GM_PROGRAM_GUITAR_FRET_NOISE     */ {  .program = GM_PROGRAM_GUITAR_FRET_NOISE,      .flags = GM_RANGE_DEFAULT  },
-        /* 0x79 122  GM_PROGRAM_BREATH_NOISE          */ {  .program = GM_PROGRAM_BREATH_NOISE,           .flags = GM_RANGE_DEFAULT  },
-        /* 0x7A 123  GM_PROGRAM_SEASHORE              */ {  .program = GM_PROGRAM_SEASHORE,               .flags = GM_RANGE_DEFAULT  },
-        /* 0x7B 124  GM_PROGRAM_BIRD_TWEET            */ {  .program = GM_PROGRAM_BIRD_TWEET,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x7C 125  GM_PROGRAM_TELEPHONE_RING        */ {  .program = GM_PROGRAM_TELEPHONE_RING,         .flags = GM_RANGE_DEFAULT  },
-        /* 0x7D 126  GM_PROGRAM_HELICOPTER            */ {  .program = GM_PROGRAM_HELICOPTER,             .flags = GM_RANGE_DEFAULT  },
-        /* 0x7E 127  GM_PROGRAM_APPLAUSE              */ {  .program = GM_PROGRAM_APPLAUSE,               .flags = GM_RANGE_DEFAULT  },
-        /* 0x7F 128  GM_PROGRAM_GUNSHOT               */ {  .program = GM_PROGRAM_GUNSHOT,                .flags = GM_RANGE_DEFAULT  }
+        /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  CM */ {  .program = GM_PROGRAM_ACOUSTIC_GRAND_PIANO,   .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x01   2  GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO CM */ {  .program = GM_PROGRAM_BRIGHT_ACOUSTIC_PIANO,  .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x02   3  GM_PROGRAM_ELECTRIC_GRAND_PIANO  CM */ {  .program = GM_PROGRAM_ELECTRIC_GRAND_PIANO,   .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x03   4  GM_PROGRAM_HONKY_TONK_PIANO      CM */ {  .program = GM_PROGRAM_HONKY_TONK_PIANO,       .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x04   5  GM_PROGRAM_ELECTRIC_PIANO_1      CM */ {  .program = GM_PROGRAM_ELECTRIC_PIANO_1,       .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x05   6  GM_PROGRAM_ELECTRIC_PIANO_2      CM */ {  .program = GM_PROGRAM_ELECTRIC_PIANO_2,       .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x06   7  GM_PROGRAM_HARPSICHORD              */ {  .program = GM_PROGRAM_HARPSICHORD,            .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x07   8  GM_PROGRAM_CLAVI                    */ {  .program = GM_PROGRAM_CLAVI,                  .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x08   9  GM_PROGRAM_CELESTA                  */ {  .program = GM_PROGRAM_CELESTA,                .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x09  10  GM_PROGRAM_GLOCKENSPIEL             */ {  .program = GM_PROGRAM_GLOCKENSPIEL,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x0A  11  GM_PROGRAM_MUSIC_BOX                */ {  .program = GM_PROGRAM_MUSIC_BOX,              .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x0B  12  GM_PROGRAM_VIBRAPHONE               */ {  .program = GM_PROGRAM_VIBRAPHONE,             .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x0C  13  GM_PROGRAM_MARIMBA                  */ {  .program = GM_PROGRAM_MARIMBA,                .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x0D  14  GM_PROGRAM_XYLOPHONE                */ {  .program = GM_PROGRAM_XYLOPHONE,              .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x0E  15  GM_PROGRAM_TUBULAR_BELLS            */ {  .program = GM_PROGRAM_TUBULAR_BELLS,          .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x0F  16  GM_PROGRAM_DULCIMER              CM */ {  .program = GM_PROGRAM_DULCIMER,               .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x10  17  GM_PROGRAM_DRAWBAR_ORGAN         CM */ {  .program = GM_PROGRAM_DRAWBAR_ORGAN,          .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x11  18  GM_PROGRAM_PERCUSSIVE_ORGAN      CM */ {  .program = GM_PROGRAM_PERCUSSIVE_ORGAN,       .flags = ROLAND_CM32P_RANGE_OCTAVE_LOWER  },
+        /* 0x12  19  GM_PROGRAM_ROCK_ORGAN               */ {  .program = GM_PROGRAM_ROCK_ORGAN,             .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x13  20  GM_PROGRAM_CHURCH_ORGAN             */ {  .program = GM_PROGRAM_CHURCH_ORGAN,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x14  21  GM_PROGRAM_REED_ORGAN            CM */ {  .program = GM_PROGRAM_REED_ORGAN,             .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x15  22  GM_PROGRAM_ACCORDION                */ {  .program = GM_PROGRAM_ACCORDION,              .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x16  23  GM_PROGRAM_HARMONICA                */ {  .program = GM_PROGRAM_HARMONICA,              .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x17  24  GM_PROGRAM_TANGO_ACCORDION          */ {  .program = GM_PROGRAM_TANGO_ACCORDION,        .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x18  25  GM_PROGRAM_ACOUSTIC_GUITAR_NYLON CM */ {  .program = GM_PROGRAM_ACOUSTIC_GUITAR_NYLON,  .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x19  26  GM_PROGRAM_ACOUSTIC_GUITAR_STEEL CM */ {  .program = GM_PROGRAM_ACOUSTIC_GUITAR_STEEL,  .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x1A  27  GM_PROGRAM_ELECTRIC_GUITAR_JAZZ     */ {  .program = GM_PROGRAM_ELECTRIC_GUITAR_JAZZ,   .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x1B  28  GM_PROGRAM_ELECTRIC_GUITAR_CLEAN CM */ {  .program = GM_PROGRAM_ELECTRIC_GUITAR_CLEAN,  .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x1C  29  GM_PROGRAM_ELECTRIC_GUITAR_MUTED CM */ {  .program = GM_PROGRAM_ELECTRIC_GUITAR_MUTED,  .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x1D  30  GM_PROGRAM_OVERDRIVEN_GUITAR        */ {  .program = GM_PROGRAM_OVERDRIVEN_GUITAR,      .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x1E  31  GM_PROGRAM_DISTORTION_GUITAR        */ {  .program = GM_PROGRAM_DISTORTION_GUITAR,      .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x1F  32  GM_PROGRAM_GUITAR_HARMONICS         */ {  .program = GM_PROGRAM_GUITAR_HARMONICS,       .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x20  33  GM_PROGRAM_ACOUSTIC_BASS         CM */ {  .program = GM_PROGRAM_ACOUSTIC_BASS,          .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x21  34  GM_PROGRAM_ELECTRIC_BASS_FINGER  CM */ {  .program = GM_PROGRAM_ELECTRIC_BASS_FINGER,   .flags = ROLAND_CM32P_RANGE_PROG_73       },
+        /* 0x22  35  GM_PROGRAM_ELECTRIC_BASS_PICK    CM */ {  .program = GM_PROGRAM_ELECTRIC_BASS_PICK,     .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x23  36  GM_PROGRAM_FRETLESS_BASS         CM */ {  .program = GM_PROGRAM_FRETLESS_BASS,          .flags = ROLAND_CM32P_RANGE_PROG_87       },
+        /* 0x24  37  GM_PROGRAM_SLAP_BASS_1           CM */ {  .program = GM_PROGRAM_SLAP_BASS_1,            .flags = ROLAND_CM32P_RANGE_PROG_66       },
+        /* 0x25  38  GM_PROGRAM_SLAP_BASS_2           CM */ {  .program = GM_PROGRAM_SLAP_BASS_2,            .flags = ROLAND_CM32P_RANGE_PROG_66       },
+        /* 0x26  39  GM_PROGRAM_SYNTH_BASS_1          CM */ {  .program = GM_PROGRAM_SYNTH_BASS_1,           .flags = ROLAND_CM32P_RANGE_PROG_73       },
+        /* 0x27  40  GM_PROGRAM_SYNTH_BASS_2             */ {  .program = GM_PROGRAM_SYNTH_BASS_2,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x28  41  GM_PROGRAM_VIOLIN                   */ {  .program = GM_PROGRAM_VIOLIN,                 .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x29  42  GM_PROGRAM_VIOLA                    */ {  .program = GM_PROGRAM_VIOLA,                  .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x2A  43  GM_PROGRAM_CELLO                    */ {  .program = GM_PROGRAM_CELLO,                  .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x2B  44  GM_PROGRAM_CONTRABASS               */ {  .program = GM_PROGRAM_CONTRABASS,             .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x2C  45  GM_PROGRAM_TREMOLO_STRINGS       CM */ {  .program = GM_PROGRAM_TREMOLO_STRINGS,        .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x2D  46  GM_PROGRAM_PIZZICATO_STRINGS        */ {  .program = GM_PROGRAM_PIZZICATO_STRINGS,      .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x2E  47  GM_PROGRAM_ORCHESTRAL_HARP          */ {  .program = GM_PROGRAM_ORCHESTRAL_HARP,        .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x2F  48  GM_PROGRAM_TIMPANI                  */ {  .program = GM_PROGRAM_TIMPANI,                .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x30  49  GM_PROGRAM_STRING_ENSEMBLE_1     CM */ {  .program = GM_PROGRAM_STRING_ENSEMBLE_1,      .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x31  50  GM_PROGRAM_STRING_ENSEMBLE_2     CM */ {  .program = GM_PROGRAM_STRING_ENSEMBLE_2,      .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x32  51  GM_PROGRAM_SYNTHSTRINGS_1           */ {  .program = GM_PROGRAM_SYNTHSTRINGS_1,         .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x33  52  GM_PROGRAM_SYNTHSTRINGS_2           */ {  .program = GM_PROGRAM_SYNTHSTRINGS_2,         .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x34  53  GM_PROGRAM_CHOIR_AAHS            CM */ {  .program = GM_PROGRAM_CHOIR_AAHS,             .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x35  54  GM_PROGRAM_VOICE_OOHS            CM */ {  .program = GM_PROGRAM_VOICE_OOHS,             .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x36  55  GM_PROGRAM_SYNTH_VOICE              */ {  .program = GM_PROGRAM_SYNTH_VOICE,            .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x37  56  GM_PROGRAM_ORCHESTRA_HIT         CM */ {  .program = GM_PROGRAM_ORCHESTRA_HIT,          .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x38  57  GM_PROGRAM_TRUMPET               CM */ {  .program = GM_PROGRAM_TRUMPET,                .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x39  58  GM_PROGRAM_TROMBONE              CM */ {  .program = GM_PROGRAM_TROMBONE,               .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x3A  59  GM_PROGRAM_TUBA                  CM */ {  .program = GM_PROGRAM_TUBA,                   .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x3B  60  GM_PROGRAM_MUTED_TRUMPET         CM */ {  .program = GM_PROGRAM_MUTED_TRUMPET,          .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x3C  61  GM_PROGRAM_FRENCH_HORN              */ {  .program = GM_PROGRAM_FRENCH_HORN,            .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x3D  62  GM_PROGRAM_BRASS_SECTION         CM */ {  .program = GM_PROGRAM_BRASS_SECTION,          .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x3E  63  GM_PROGRAM_SYNTHBRASS_1             */ {  .program = GM_PROGRAM_SYNTHBRASS_1,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x3F  64  GM_PROGRAM_SYNTHBRASS_2             */ {  .program = GM_PROGRAM_SYNTHBRASS_2,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x40  65  GM_PROGRAM_SOPRANO_SAX           CM */ {  .program = GM_PROGRAM_SOPRANO_SAX,            .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x41  66  GM_PROGRAM_ALTO_SAX              CM */ {  .program = GM_PROGRAM_ALTO_SAX,               .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x42  67  GM_PROGRAM_TENOR_SAX             CM */ {  .program = GM_PROGRAM_TENOR_SAX,              .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x43  68  GM_PROGRAM_BARITONE_SAX          CM */ {  .program = GM_PROGRAM_BARITONE_SAX,           .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x44  69  GM_PROGRAM_OBOE                  CM */ {  .program = GM_PROGRAM_OBOE,                   .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x45  70  GM_PROGRAM_ENGLISH_HORN             */ {  .program = GM_PROGRAM_ENGLISH_HORN,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x46  71  GM_PROGRAM_BASSOON                  */ {  .program = GM_PROGRAM_BASSOON,                .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x47  72  GM_PROGRAM_CLARINET                 */ {  .program = GM_PROGRAM_CLARINET,               .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x48  73  GM_PROGRAM_PICCOLO                  */ {  .program = GM_PROGRAM_PICCOLO,                .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x49  74  GM_PROGRAM_FLUTE                    */ {  .program = GM_PROGRAM_FLUTE,                  .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x4A  75  GM_PROGRAM_RECORDER                 */ {  .program = GM_PROGRAM_RECORDER,               .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x4B  76  GM_PROGRAM_PAN_FLUTE                */ {  .program = GM_PROGRAM_PAN_FLUTE,              .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x4C  77  GM_PROGRAM_BLOWN_BOTTLE             */ {  .program = GM_PROGRAM_BLOWN_BOTTLE,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x4D  78  GM_PROGRAM_SHAKUHACHI               */ {  .program = GM_PROGRAM_SHAKUHACHI,             .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x4E  79  GM_PROGRAM_WHISTLE                  */ {  .program = GM_PROGRAM_WHISTLE,                .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x4F  80  GM_PROGRAM_OCARINA                  */ {  .program = GM_PROGRAM_OCARINA,                .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x50  81  GM_PROGRAM_LEAD_1_SQUARE            */ {  .program = GM_PROGRAM_LEAD_1_SQUARE,          .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x51  82  GM_PROGRAM_LEAD_2_SAWTOOTH          */ {  .program = GM_PROGRAM_LEAD_2_SAWTOOTH,        .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x52  83  GM_PROGRAM_LEAD_3_CALLIOPE          */ {  .program = GM_PROGRAM_LEAD_3_CALLIOPE,        .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x53  84  GM_PROGRAM_LEAD_4_CHIFF             */ {  .program = GM_PROGRAM_LEAD_4_CHIFF,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x54  85  GM_PROGRAM_LEAD_5_CHARANG           */ {  .program = GM_PROGRAM_LEAD_5_CHARANG,         .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x55  86  GM_PROGRAM_LEAD_6_VOICE             */ {  .program = GM_PROGRAM_LEAD_6_VOICE,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x56  87  GM_PROGRAM_LEAD_7_FIFTHS            */ {  .program = GM_PROGRAM_LEAD_7_FIFTHS,          .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x57  88  GM_PROGRAM_LEAD_8_BASS_LEAD         */ {  .program = GM_PROGRAM_LEAD_8_BASS_LEAD,       .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x58  89  GM_PROGRAM_PAD_1_NEW_AGE            */ {  .program = GM_PROGRAM_PAD_1_NEW_AGE,          .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x59  90  GM_PROGRAM_PAD_2_WARM               */ {  .program = GM_PROGRAM_PAD_2_WARM,             .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x5A  91  GM_PROGRAM_PAD_3_POLYSYNTH          */ {  .program = GM_PROGRAM_PAD_3_POLYSYNTH,        .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x5B  92  GM_PROGRAM_PAD_4_CHOIR           CM */ {  .program = GM_PROGRAM_PAD_4_CHOIR,            .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x5C  93  GM_PROGRAM_PAD_5_BOWED              */ {  .program = GM_PROGRAM_PAD_5_BOWED,            .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x5D  94  GM_PROGRAM_PAD_6_METALLIC        CM */ {  .program = GM_PROGRAM_PAD_6_METALLIC,         .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x5E  95  GM_PROGRAM_PAD_7_HALO               */ {  .program = GM_PROGRAM_PAD_7_HALO,             .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x5F  96  GM_PROGRAM_PAD_8_SWEEP              */ {  .program = GM_PROGRAM_PAD_8_SWEEP,            .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x60  97  GM_PROGRAM_FX_1_RAIN             CM */ {  .program = GM_PROGRAM_FX_1_RAIN,              .flags = ROLAND_CM32P_RANGE_DEFAULT       },
+        /* 0x61  98  GM_PROGRAM_FX_2_SOUNDTRACK          */ {  .program = GM_PROGRAM_FX_2_SOUNDTRACK,        .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x62  99  GM_PROGRAM_FX_3_CRYSTAL             */ {  .program = GM_PROGRAM_FX_3_CRYSTAL,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x63 100  GM_PROGRAM_FX_4_ATMOSPHERE          */ {  .program = GM_PROGRAM_FX_4_ATMOSPHERE,        .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x64 101  GM_PROGRAM_FX_5_BRIGHTNESS          */ {  .program = GM_PROGRAM_FX_5_BRIGHTNESS,        .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x65 102  GM_PROGRAM_FX_6_GOBLINS             */ {  .program = GM_PROGRAM_FX_6_GOBLINS,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x66 103  GM_PROGRAM_FX_7_ECHOES              */ {  .program = GM_PROGRAM_FX_7_ECHOES,            .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x67 104  GM_PROGRAM_FX_8_SCI_FI              */ {  .program = GM_PROGRAM_FX_8_SCI_FI,            .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x68 105  GM_PROGRAM_SITAR                    */ {  .program = GM_PROGRAM_SITAR,                  .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x69 106  GM_PROGRAM_BANJO                    */ {  .program = GM_PROGRAM_BANJO,                  .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x6A 107  GM_PROGRAM_SHAMISEN                 */ {  .program = GM_PROGRAM_SHAMISEN,               .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x6B 108  GM_PROGRAM_KOTO                     */ {  .program = GM_PROGRAM_KOTO,                   .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x6C 109  GM_PROGRAM_KALIMBA                  */ {  .program = GM_PROGRAM_KALIMBA,                .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x6D 110  GM_PROGRAM_BAG_PIPE                 */ {  .program = GM_PROGRAM_BAG_PIPE,               .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x6E 111  GM_PROGRAM_FIDDLE                   */ {  .program = GM_PROGRAM_FIDDLE,                 .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x6F 112  GM_PROGRAM_SHANAI                   */ {  .program = GM_PROGRAM_SHANAI,                 .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x70 113  GM_PROGRAM_TINKLE_BELL              */ {  .program = GM_PROGRAM_TINKLE_BELL,            .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x71 114  GM_PROGRAM_AGOGO                    */ {  .program = GM_PROGRAM_AGOGO,                  .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x72 115  GM_PROGRAM_STEEL_DRUMS              */ {  .program = GM_PROGRAM_STEEL_DRUMS,            .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x73 116  GM_PROGRAM_WOODBLOCK                */ {  .program = GM_PROGRAM_WOODBLOCK,              .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x74 117  GM_PROGRAM_TAIKO_DRUM               */ {  .program = GM_PROGRAM_TAIKO_DRUM,             .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x75 118  GM_PROGRAM_MELODIC_TOM              */ {  .program = GM_PROGRAM_MELODIC_TOM,            .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x76 119  GM_PROGRAM_SYNTH_DRUM               */ {  .program = GM_PROGRAM_SYNTH_DRUM,             .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x77 120  GM_PROGRAM_REVERSE_CYMBAL           */ {  .program = GM_PROGRAM_REVERSE_CYMBAL,         .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x78 121  GM_PROGRAM_GUITAR_FRET_NOISE        */ {  .program = GM_PROGRAM_GUITAR_FRET_NOISE,      .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x79 122  GM_PROGRAM_BREATH_NOISE             */ {  .program = GM_PROGRAM_BREATH_NOISE,           .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x7A 123  GM_PROGRAM_SEASHORE                 */ {  .program = GM_PROGRAM_SEASHORE,               .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x7B 124  GM_PROGRAM_BIRD_TWEET               */ {  .program = GM_PROGRAM_BIRD_TWEET,             .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x7C 125  GM_PROGRAM_TELEPHONE_RING           */ {  .program = GM_PROGRAM_TELEPHONE_RING,         .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x7D 126  GM_PROGRAM_HELICOPTER               */ {  .program = GM_PROGRAM_HELICOPTER,             .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x7E 127  GM_PROGRAM_APPLAUSE                 */ {  .program = GM_PROGRAM_APPLAUSE,               .flags = ROLAND_CM64_RANGE_DEFAULT        },
+        /* 0x7F 128  GM_PROGRAM_GUNSHOT                  */ {  .program = GM_PROGRAM_GUNSHOT,                .flags = ROLAND_CM64_RANGE_DEFAULT        }
     },
 
     .melodic_note_ranges = {
-        /* 0x00 GM_RANGE_INVALID */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x01                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x02                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x03                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x04                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x05                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x06                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x07                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x08                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x09                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x0A                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x0B                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x0C                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x0D                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x0E                  */ {  .lowest_note = INVALID_NOTE,      .middle_c = INVALID_NOTE,  .highest_note = INVALID_NOTE       },
-        /* 0x0F GM_RANGE_DEFAULT */ {  .lowest_note = MIDI_LOWEST_NOTE,  .middle_c = GM_MIDDLE_C,   .highest_note = MIDI_HIGHEST_NOTE  }
+        /* 0x00 ROLAND_CM32P_RANGE_INVALID       */ {  .lowest_note = INVALID_NOTE,              .middle_c = INVALID_NOTE,                .highest_note = INVALID_NOTE               },
+        /* 0x01 ROLAND_CM32P_RANGE_PROG_66       */ {  .lowest_note = ROLAND_CM32P_LOWEST_NOTE,  .middle_c = ROLAND_CM32P_MIDDLE_C,       .highest_note = 65                         },
+        /* 0x02 ROLAND_CM32P_RANGE_HARM_66       */ {  .lowest_note = 66,                        .middle_c = ROLAND_CM32P_MIDDLE_C,       .highest_note = ROLAND_CM32P_HIGHEST_NOTE  },
+        /* 0x03 ROLAND_CM32P_RANGE_PROG_61       */ {  .lowest_note = ROLAND_CM32P_LOWEST_NOTE,  .middle_c = ROLAND_CM32P_MIDDLE_C,       .highest_note = 60                         },
+        /* 0x04 ROLAND_CM32P_RANGE_HARM_61       */ {  .lowest_note = 61,                        .middle_c = ROLAND_CM32P_MIDDLE_C,       .highest_note = ROLAND_CM32P_HIGHEST_NOTE  },
+        /* 0x05 ROLAND_CM32P_RANGE_PROG_73       */ {  .lowest_note = ROLAND_CM32P_LOWEST_NOTE,  .middle_c = ROLAND_CM32P_MIDDLE_C,       .highest_note = 72                         },
+        /* 0x06 ROLAND_CM32P_RANGE_HARM_73       */ {  .lowest_note = 73,                        .middle_c = ROLAND_CM32P_MIDDLE_C,       .highest_note = ROLAND_CM32P_HIGHEST_NOTE  },
+        /* 0x07 ROLAND_CM32P_RANGE_PROG_87       */ {  .lowest_note = ROLAND_CM32P_LOWEST_NOTE,  .middle_c = ROLAND_CM32P_MIDDLE_C,       .highest_note = 86                         },
+        /* 0x08 ROLAND_CM32P_RANGE_HARM_87       */ {  .lowest_note = 87,                        .middle_c = ROLAND_CM32P_MIDDLE_C,       .highest_note = ROLAND_CM32P_HIGHEST_NOTE  },
+        /* 0x09 ROLAND_CM32P_RANGE_OCTAVE_HIGHER */ {  .lowest_note = ROLAND_CM32P_LOWEST_NOTE,  .middle_c = ROLAND_CM32P_MIDDLE_C + 12,  .highest_note = ROLAND_CM32P_HIGHEST_NOTE  },
+        /* 0x0A ROLAND_CM32P_RANGE_OCTAVE_LOWER  */ {  .lowest_note = ROLAND_CM32P_LOWEST_NOTE,  .middle_c = ROLAND_CM32P_MIDDLE_C - 12,  .highest_note = ROLAND_CM32P_HIGHEST_NOTE  },
+        /* 0x0B                                  */ {  .lowest_note = INVALID_NOTE,              .middle_c = INVALID_NOTE,                .highest_note = INVALID_NOTE               },
+        /* 0x0C                                  */ {  .lowest_note = INVALID_NOTE,              .middle_c = INVALID_NOTE,                .highest_note = INVALID_NOTE               },
+        /* 0x0D                                  */ {  .lowest_note = INVALID_NOTE,              .middle_c = INVALID_NOTE,                .highest_note = INVALID_NOTE               },
+        /* 0x0E ROLAND_CM64_RANGE_DEFAULT        */ {  .lowest_note = ROLAND_CM64_LOWEST_NOTE,   .middle_c = ROLAND_CM64_MIDDLE_C,        .highest_note = ROLAND_CM64_HIGHEST_NOTE   },
+        /* 0x0F ROLAND_CM32P_RANGE_DEFAULT       */ {  .lowest_note = ROLAND_CM32P_LOWEST_NOTE,  .middle_c = ROLAND_CM32P_MIDDLE_C,       .highest_note = ROLAND_CM32P_HIGHEST_NOTE  }
     },
 
     .percussion_notes = {
@@ -320,21 +319,21 @@ const midiplan_device_t roland_mt32 = {
 
     .melodic_channels_bitmaps_refs = {
         //--||--||--||--||--||--||--||--||
-        0b11111111111111111111111111111111, //  15/0Fh -   0/00h
-        0b11111111111111111111111111111111, //  31/1Fh -  16/10h
-        0b11111111111111111111111111111111, //  47/2Fh -  32/20h
-        0b11111111111111111111111111111111, //  63/3Fh -  48/30h
-        0b11111111111111111111111111111111, //  79/4Fh -  64/40h
-        0b11111111111111111111111111111111, //  95/5Fh -  80/50h
-        0b11111111111111111111111111111111, // 111/6Fh -  96/60h
-        0b11111111111111111111111111111111  // 127/7Fh - 112/70h
+        0b11000000000000000000111111111111, //  15/0Fh -   0/00h
+        0b00000011110011110000001100001111, //  31/1Fh -  16/10h
+        0b00000011000000000011111111111111, //  47/2Fh -  32/20h
+        0b00001100111111111100111100001111, //  63/3Fh -  48/30h
+        0b00000000000000000000001111111111, //  79/4Fh -  64/40h
+        0b00000000000000000000000000000000, //  95/5Fh -  80/50h
+        0b00000000000000000000000000000000, // 111/6Fh -  96/60h
+        0b00000000000000000000000000000000  // 127/7Fh - 112/70h
     },
 
     .melodic_channels_bitmaps = {
-        0b0000000000000000, // 00
+        0b0000000011111111, // 00 MT-32 channels
         0b0000000000000000, // 01
         0b0000000000000000, // 10
-        0b0000000011111111  // 11
+        0b1111110000000000  // 11 CM-32P channels
     },
 
     .percussion_channels_bitmap = 0b0000001000000000,
@@ -486,6 +485,23 @@ const midiplan_device_t roland_mt32 = {
     /* initialization, p[0] = basic channel */
 
     .initialization_sequence = (const uint8_t[]) {
+
+        /* CM-32P */
+
+        /* system reset */
+
+        0xF0, 0x41, 0x10, 0x16, 0x12, /* "set data" sysex */
+        /* 7F 00 00 = "system area" */
+        0b11000000, /* reset Roland checksum */
+        /* over */ 0x7F,
+        0x00,
+        0x00,
+        0x00, /* any data byte */
+        0b11000001, /* insert Roland checksum */
+        /* over */ 0x00,
+        0xF7, /* end of sysex */
+
+        /* MT-32 */
 
         /* extracted from the original MTGM.MID released by Roland */
 
@@ -2366,9 +2382,78 @@ const midiplan_device_t roland_mt32 = {
 
     },
 
+    /* program change, p[0] = channel, p[1] = program */
+
+    .program_change_sequence = (uint8_t[]) {
+
+        /* CM-32P */
+
+        // Notice that the offsets tables are different from CM-32P, even though they serve the same purpose
+        // to turn off reverb just in time when a program is being selected. The difference appears because
+        // with CM-32P the program numbers are expressed in device's terms, ROLAND_CM32P_..., whereas here
+        // program numbers are in GM_PROGRAM_... terms, and will be translated by the third table below.
+        // Therefore, the first two offset lookup tables below contain the result of double translation -
+        // GM -> CM32P -> offset
+
+        0xF0, 0x41, 0x10, 0x16, 0x12, /* "set data" sysex */
+        /* 51 XX XX+08 = "patch memory, reverb switch" */
+        0b11000000, /* reset Roland checksum */
+        /* over */ 0x51,
+        0b10011100, /* 8-bit lookup in the following 128-byte table using p[1] as the index                       */
+        /*                             program to high offset byte mapping                                        */
+        /*         _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F   */
+        /* 0_ */  0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x01, 0x01, 0x00, 0x01, 0x01, 0x00, 0x00, 0x02, 0x00,
+        /* 1_ */  0x05, 0x06, 0x02, 0x00, 0x08, 0x00, 0x00, 0x03, 0x01, 0x01, 0x03, 0x02, 0x02, 0x04, 0x04, 0x04,
+        /* 2_ */  0x04, 0x03, 0x03, 0x04, 0x02, 0x02, 0x03, 0x00, 0x06, 0x00, 0x00, 0x00, 0x05, 0x00, 0x06, 0x00,
+        /* 3_ */  0x05, 0x04, 0x00, 0x00, 0x04, 0x04, 0x08, 0x09, 0x06, 0x07, 0x06, 0x07, 0x00, 0x09, 0x00, 0x09,
+        /* 4_ */  0x08, 0x08, 0x08, 0x08, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* 5_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x02, 0x00, 0x00,
+        /* 6_ */  0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* 7_ */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        /* over */ 0x00,
+        0b10011100, /* 8-bit lookup in the following 128-byte table using p[1] as the index                       */
+        /*                              program to low offset byte mapping                                        */
+        /*         _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F   */
+        /* 0_ */  0x08, 0x2E, 0x67, 0x41, 0x20, 0x0D, 0x08, 0x0D, 0x20, 0x08, 0x46, 0x59, 0x08, 0x08, 0x12, 0x67,
+        /* 1_ */  0x47, 0x00, 0x5E, 0x08, 0x1D, 0x08, 0x08, 0x3D, 0x59, 0x46, 0x76, 0x12, 0x12, 0x2F, 0x42, 0x55,
+        /* 2_ */  0x1C, 0x3D, 0x76, 0x09, 0x38, 0x25, 0x50, 0x08, 0x00, 0x08, 0x08, 0x08, 0x0E, 0x08, 0x72, 0x08,
+        /* 3_ */  0x0E, 0x7B, 0x08, 0x08, 0x42, 0x2F, 0x0A, 0x35, 0x72, 0x2B, 0x72, 0x18, 0x08, 0x0F, 0x08, 0x35,
+        /* 4_ */  0x1D, 0x0A, 0x30, 0x43, 0x1D, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
+        /* 5_ */  0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x55, 0x08, 0x5E, 0x08, 0x08,
+        /* 6_ */  0x09, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
+        /* 7_ */  0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
+        /* over */ 0x00,
+        0x00, /* data byte 0 = reverb off */
+        0b11000001, /* insert Roland checksum */
+        /* over */ 0x00,
+        0xF7, /* end of sysex */
+
+        /* MT-32 and CM-32P combined */
+
+        0b00000000, /* low 4 bits of p[0] */
+        /* over */ 0xC0,
+        0b10011100, /* 8-bit lookup in the following 128-byte table using p[1] as the index                       */
+        /*                               program to submodule-specific program mapping                            */
+        /*         _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F   */
+        /* 0_ */  0x00, 0x02, 0x05, 0x03, 0x08, 0x07, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x05,
+        /* 1_ */  0x25, 0x28, 0x12, 0x13, 0x37, 0x15, 0x16, 0x17, 0x0B, 0x0A, 0x1A, 0x0E, 0x0E, 0x1D, 0x1E, 0x1F,
+        /* 2_ */  0x1C, 0x17, 0x1A, 0x1B, 0x10, 0x0F, 0x18, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x22, 0x2D, 0x2E, 0x2F,
+        /* 3_ */  0x22, 0x21, 0x32, 0x33, 0x1E, 0x1D, 0x36, 0x3F, 0x2E, 0x31, 0x2E, 0x30, 0x3C, 0x3D, 0x3E, 0x3F,
+        /* 4_ */  0x37, 0x36, 0x38, 0x39, 0x37, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F,
+        /* 5_ */  0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x1F, 0x5C, 0x12, 0x5E, 0x5F,
+        /* 6_ */  0x1B, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F,
+        /* 7_ */  0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F,
+        /* over */ 0x00,
+
+        MIDI_MESSAGE_DELAY, 0x00, 0x14, /* 20 ms */
+
+        INVALID_STATUS_BYTE,
+
+    },
+
     .synchronization_sequence = (uint8_t[]) {
 
-        MIDI_MESSAGE_DELAY, 0x07, 0x68, /* 1000 ms */
+        MIDI_MESSAGE_DELAY, 0x0B, 0x5C, /* 1500 ms */
 
         0xC0, 0x50, /* square lead */
 

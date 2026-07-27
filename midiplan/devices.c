@@ -23,6 +23,7 @@
 #include <midiplan/devices/korg_pss60.h>
 #include <midiplan/devices/null_device.h>
 #include <midiplan/devices/roland_cm32p.h>
+#include <midiplan/devices/roland_cm64.h>
 #include <midiplan/devices/roland_gr09.h>
 #include <midiplan/devices/roland_mt32.h>
 #include <midiplan/devices/yamaha_dom30.h>
@@ -40,17 +41,17 @@ static void configure_device_order(void);
 
 void configure_devices(void) {
 
-    devices[MIDI_OUT_PORT_1].p_device = &roland_mt32;
+    devices[MIDI_OUT_PORT_1].p_device = &gm_device;
     devices[MIDI_OUT_PORT_1].routing  = route_all;
 
-    devices[MIDI_OUT_PORT_2].p_device = &roland_cm32p;
-    devices[MIDI_OUT_PORT_2].routing  = route_all;
+    devices[MIDI_OUT_PORT_2].p_device = &null_device;
+    devices[MIDI_OUT_PORT_2].routing  = route_none;
 
-    devices[MIDI_OUT_PORT_3].p_device = &roland_mt32;
-    devices[MIDI_OUT_PORT_3].routing  = route_all;
+    devices[MIDI_OUT_PORT_3].p_device = &null_device;
+    devices[MIDI_OUT_PORT_3].routing  = route_none;
 
-    devices[MIDI_OUT_PORT_4].p_device = &gm_device;
-    devices[MIDI_OUT_PORT_4].routing  = route_all;
+    devices[MIDI_OUT_PORT_4].p_device = &null_device;
+    devices[MIDI_OUT_PORT_4].routing  = route_none;
 
     configure_device_order();
 }
