@@ -36,14 +36,15 @@ time to connect to any of the supported devices.
 4. Kawai XS-1
 5. Korg PSS60
 6. Roland CM-32P
-7. Roland GR-09
-8. Roland MT-32
-9. Yamaha DOM-30
-10. Yamaha EMR-1 (drum)
-11. Yamaha EMT-1
-12. Yamaha FB-01
-13. Zoom RT-234 (drum + bass)
+7. Roland CM-64
+8. Roland GR-09
+9. Roland MT-32
+10. Yamaha DOM-30
+11. Yamaha EMR-1 (drum)
+12. Yamaha EMT-1
+13. Yamaha FB-01
+14. Zoom RT-234 (drum + bass)
 
 ### Demo recordings: 
 
-https://youtube.com/@MIDIplan
+https://www.youtube.com/@MIDIplan/playlists
