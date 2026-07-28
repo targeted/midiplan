@@ -19,8 +19,6 @@ const midiplan_device_t yamaha_dom30 = {
 
     .model_name              = "Yamaha DOM-30",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 16,
     .max_percussion_notes    = 8,
     .max_melodic_programs    = 16,

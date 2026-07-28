@@ -20,14 +20,12 @@ const midiplan_device_t roland_mt32 = {
 
     .model_name              = "Roland MT-32",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     // see https://battleofthebits.com/lyceum/View/Specification%20of%20General%20MIDI%20and%20Roland%20MT-32%20patches
 
-    .max_melodic_notes       = 10, // 32 partials, average of below 3 partials per patch
+    .max_melodic_notes       = 9, // 32 partials, average of below 3 partials per patch
     .max_percussion_notes    = 0,
     .max_melodic_programs    = 8,
-    .max_notes_per_program   = 6,
+    .max_notes_per_program   = 4,
     .monotimbral_channels    = 1,
     .max_notes_per_channel   = { 0 },
 
@@ -483,7 +481,7 @@ const midiplan_device_t roland_mt32 = {
 
     },
 
-    /* initialization, p[0] = basic channel */
+    /* initialization, no parameters */
 
     .initialization_sequence = (const uint8_t[]) {
 

@@ -19,8 +19,6 @@ const midiplan_device_t kawai_phm = {
 
     .model_name              = "Kawai PHm",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 16,
     .max_percussion_notes    = 8,
     .max_melodic_programs    = 4,

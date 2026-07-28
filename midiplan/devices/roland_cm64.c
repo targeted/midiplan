@@ -21,8 +21,6 @@ const midiplan_device_t roland_cm64 = {
 
     .model_name              = "Roland CM-64",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 24,
     .max_percussion_notes    = 0,
     .max_melodic_programs    = 16,
@@ -482,7 +480,7 @@ const midiplan_device_t roland_cm64 = {
 
     },
 
-    /* initialization, p[0] = basic channel */
+    /* initialization, no parameters */
 
     .initialization_sequence = (const uint8_t[]) {
 

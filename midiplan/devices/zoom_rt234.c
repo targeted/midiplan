@@ -20,8 +20,6 @@ const midiplan_device_t zoom_rt234 = {
 
     .model_name              = "Zoom RT-234",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 32,
     .max_percussion_notes    = 32,
     .max_melodic_programs    = 8,

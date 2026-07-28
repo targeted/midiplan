@@ -20,8 +20,6 @@ const midiplan_device_t alesis_sr16 = {
 
     .model_name              = "Alesis SR-16",
 
-    .basic_channel           = MIDI_CHANNEL_10,
-
     .max_melodic_notes       = 0,
     .max_percussion_notes    = 12,
     .max_melodic_programs    = 0,
@@ -481,7 +479,7 @@ const midiplan_device_t alesis_sr16 = {
 
     },
 
-    /* initialization, p[0] = basic channel */
+    /* initialization, no parameters */
 
     .initialization_sequence = (const uint8_t[]) {
 

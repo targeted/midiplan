@@ -19,8 +19,6 @@ const midiplan_device_t korg_pss60 = {
 
     .model_name              = "Korg PSS60",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 8,
     .max_percussion_notes    = 8,
     .max_melodic_programs    = 2,

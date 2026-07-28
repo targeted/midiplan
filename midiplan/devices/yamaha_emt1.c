@@ -19,8 +19,6 @@ const midiplan_device_t yamaha_emt1 = {
 
     .model_name              = "Yamaha EMT-1",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 8,
     .max_percussion_notes    = 0,
     .max_melodic_programs    = 4,
@@ -480,7 +478,7 @@ const midiplan_device_t yamaha_emt1 = {
 
     },
 
-    /* initialization, p[0] = basic channel */
+    /* initialization, no parameters */
 
     .initialization_sequence = (const uint8_t[]) {
 

@@ -19,8 +19,6 @@ const midiplan_device_t yamaha_emr1 = {
 
     .model_name              = "Yamaha EMR-1",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 0,
     .max_percussion_notes    = 16,
     .max_melodic_programs    = 0,

@@ -111,7 +111,7 @@ static void send_initialization_sequence(
     if (device_has_custom_sequence(p_device, INITIALIZATION_SEQUENCE)) {
 
         custom_sequence_parameters_t initialization_sequence_parameters = {
-            .p = { p_device->basic_channel, 0, 0 }
+            .p = { 0, 0, 0 }
         };
 
         send_custom_sequence(

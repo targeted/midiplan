@@ -19,8 +19,6 @@ const midiplan_device_t yamaha_rx21 = {
 
     .model_name              = "Yamaha RX21",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 0,
     .max_percussion_notes    = 9,
     .max_melodic_programs    = 0,

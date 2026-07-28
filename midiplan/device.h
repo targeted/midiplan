@@ -13,8 +13,6 @@ typedef struct {
 
     char* model_name;              // NULL-terminated printable ASCII "Manufacturer Model"
 
-    midi_channel_t basic_channel;  // channel, to which initialization messages may be sent
-
     /* the following affect the viability of a note being played */
 
     uint8_t max_melodic_notes;     // how many notes can be playing on all melodic programs at the same time, including percussion if max_percussion_notes = 0

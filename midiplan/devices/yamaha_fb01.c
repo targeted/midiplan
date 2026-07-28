@@ -20,8 +20,6 @@ const midiplan_device_t yamaha_fb01 = {
 
     .model_name              = "Yamaha FB-01",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 8,
     .max_percussion_notes    = 0,
     .max_melodic_programs    = 8,
@@ -481,7 +479,7 @@ const midiplan_device_t yamaha_fb01 = {
 
     },
 
-    /* initialization, p[0] = basic channel */
+    /* initialization, no parameters */
 
     .initialization_sequence = (const uint8_t[]) {
 

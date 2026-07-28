@@ -19,8 +19,6 @@ const midiplan_device_t roland_cm32p = {
 
     .model_name              = "Roland CM-32P",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 16,
     .max_percussion_notes    = 0,
     .max_melodic_programs    = 6,
@@ -480,7 +478,7 @@ const midiplan_device_t roland_cm32p = {
 
     },
 
-    /* initialization, p[0] = basic channel */
+    /* initialization, no parameters */
 
     .initialization_sequence = (const uint8_t[]) {
 

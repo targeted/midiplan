@@ -19,8 +19,6 @@ const midiplan_device_t kawai_xs1 = {
 
     .model_name              = "Kawai XS-1",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 10,
     .max_percussion_notes    = 4,
     .max_melodic_programs    = 4,

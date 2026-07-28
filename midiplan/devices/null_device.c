@@ -19,8 +19,6 @@ const midiplan_device_t null_device = {
 
     .model_name              = "None",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 0,
     .max_percussion_notes    = 0,
     .max_melodic_programs    = 0,

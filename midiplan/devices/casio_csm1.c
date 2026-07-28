@@ -19,8 +19,6 @@ const midiplan_device_t casio_csm1 = {
 
     .model_name              = "Casio CSM-1",
 
-    .basic_channel           = MIDI_CHANNEL_1,
-
     .max_melodic_notes       = 12,
     .max_percussion_notes    = 0,
     .max_melodic_programs    = 4,
