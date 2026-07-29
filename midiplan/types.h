@@ -6,12 +6,39 @@
 #include "config.h"
 
 /*
+ * Here we have data types that may have their MIDI counterparts,
+ * e.g. channel_t here vs. midi_channel_t. The difference is that
+ * MIDI types are exact values, they can't be invalid and have no
+ * sentinel "undefined/invalid" values for that.
+ */
+
+/*
  * MIDI channel plus special values.
  */
 typedef uint8_t channel_t; // midi_channel_t plus the following special value
-#define INVALID_CHANNEL    (0xFF)
+#define INVALID_CHANNEL (0xFF)
 #define VALID_CHANNEL(CHANNEL) ((CHANNEL) < MIDI_CHANNEL_COUNT)
 EVAR_ASSERT(!VALID_CHANNEL(INVALID_CHANNEL), invalid_channel);
+
+/*
+ * Index of one of the four groups of *melodic* channels, as specified in device config
+ * under channel groups. Potentially there could be as many as 16, one channel per group,
+ * but currently the most is 2, therefore 4 is fine.
+ */
+typedef uint8_t channel_group_t;
+#define CHANNEL_GROUP_COUNT (4)
+#define INVALID_CHANNEL_GROUP (0xFF)
+#define VALID_CHANNEL_GROUP(CHANNEL_GROUP) ((CHANNEL_GROUP) < CHANNEL_GROUP_COUNT)
+EVAR_ASSERT(!VALID_CHANNEL_GROUP(INVALID_CHANNEL_GROUP), invalid_channel_group);
+
+/*
+ * Percussion notes are typically allocated on a separate channel,
+ * and do not belong to any melodic channel group, but for accounting
+ * purposes percussion notes may be configured to borrow polyphony
+ * from melodic notes, then this is the group from which they borrow.
+ */
+#define PERCUSSION_CHANNEL_GROUP (3) // group 3 out of 4 has bit representation of 11, chosen for visibility in device config
+EVAR_ASSERT(VALID_CHANNEL_GROUP(PERCUSSION_CHANNEL_GROUP), percussion_channel_group);
 
 /*
  * MIDI control plus special values.

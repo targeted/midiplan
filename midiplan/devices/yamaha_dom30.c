@@ -17,18 +17,18 @@
 
 const midiplan_device_t yamaha_dom30 = {
 
-    .model_name              = "Yamaha DOM-30",
+    .model_name = "Yamaha DOM-30",
 
-    .max_melodic_notes       = 16,
-    .max_percussion_notes    = 8,
-    .max_melodic_programs    = 16,
-    .max_notes_per_program   = 8,
-    .monotimbral_channels    = 0,
-    .max_notes_per_channel   = { 0 },
+    .max_notes_per_channel_group = { 0, 0, 0, 16 },
+    .max_percussion_notes        = 8,
+    .max_melodic_programs        = 10,
+    .max_notes_per_program       = 16,
+    .monotimbral_channels        = 1,
+    .max_notes_per_channel       = { 0 },
 
-    .key_pressure            = 1,
-    .channel_pressure        = 1,
-    .pitch_bend              = 1,
+    .key_pressure     = 1,
+    .channel_pressure = 1,
+    .pitch_bend       = 1,
 
     .melodic_programs = {
         /* 0x00   0  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = YAMAHA_DOM30_PROGRAM_PIANO_1,             .flags = YAMAHA_DOM30_RANGE_DEFAULT        },
@@ -313,26 +313,26 @@ const midiplan_device_t yamaha_dom30 = {
 
     /* the following is expressed in device's terms */
 
-    .melodic_channels_bitmaps_refs = {
-        //--||--||--||--||--||--||--||--||
-        0b11111111111111111111111111111111, //  15/0Fh -   0/00h
-        0b11111111111111111111111111111111, //  31/1Fh -  16/10h
-        0b11111111111111111111111111111111, //  47/2Fh -  32/20h
-        0b11111111111111111111111111111111, //  63/3Fh -  48/30h
-        0b11111111111111111111111111111111, //  79/4Fh -  64/40h
-        0b11111111111111111111111111111111, //  95/5Fh -  80/50h
-        0b00000000000000000000000011111111, // 111/6Fh -  96/60h
-        0b00000000000000000000000000000000  // 127/7Fh - 112/70h
+    .melodic_channel_groups = {
+        //_F_E_D_C_B_A_9_8_7_6_5_4_3_2_1_0
+        0b11111111111111111111111111111111, // 0_
+        0b11111111111111111111111111111111, // 1_
+        0b11111111111111111111111111111111, // 2_
+        0b11111111111111111111111111111111, // 3_
+        0b11111111111111111111111111111111, // 4_
+        0b11111111111111111111111111111111, // 5_
+        0b00000000000000000000000011111111, // 6_
+        0b00000000000000000000000000000000  // 7_
     },
 
-    .melodic_channels_bitmaps = {
+    .melodic_channel_bitmaps = {
         0b0000000000000000, // 00
         0b0000000000000000, // 01
         0b0000000000000000, // 10
-        0b0000011111111111, // 11
+        0b0000001111111111, // 11
     },
 
-    .percussion_channels_bitmap = 0b0100000000000000,
+    .percussion_channel_bitmap = 0b0100000000000000,
 
     .controllers_bitmap = {
 

@@ -51,8 +51,13 @@ typedef enum {
 
 #define MIDI_MESSAGE_CHANNEL(STATUS_BYTE) ((midi_channel_t)((STATUS_BYTE) & 0x0F))
 
-typedef uint16_t midi_channels_bitmap_t;
-EVAR_ASSERT((sizeof(midi_channels_bitmap_t) * 8) >= MIDI_CHANNEL_COUNT, sizeof_midi_channels_bitmap_t);
+/*
+ * Bitmap of 16 MIDI channels, one bit per channel, channel 0 at LSB.
+ * This is used with channel groups in device config, and for internal
+ * channel tracking as well.
+ */
+typedef uint16_t midi_channel_bitmap_t;
+EVAR_ASSERT((sizeof(midi_channel_bitmap_t) * 8) >= MIDI_CHANNEL_COUNT, sizeof_midi_channel_bitmap_t);
 
 typedef enum {
 

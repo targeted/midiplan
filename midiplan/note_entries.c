@@ -92,12 +92,20 @@ static void insert_note_entry(note_entry_id_t* p_head, note_entry_id_t note_entr
 }
 
 /*
- * Clears a note route.
+ * Clears note routes.
  */
-static void clear_note_route(note_route_t* p_note_route) {
-    p_note_route->channel = INVALID_CHANNEL;
-    p_note_route->program = INVALID_PROGRAM;
-    p_note_route->note    = INVALID_NOTE;
+static void clear_note_routes(note_entry_t* p_note_entry) {
+
+    p_note_entry->in.channel = INVALID_CHANNEL;
+    p_note_entry->in.program = INVALID_PROGRAM;
+    p_note_entry->in.note    = INVALID_NOTE;
+
+    for (midi_out_port_t out_port = MIDI_OUT_PORT_1; out_port < MIDI_OUT_PORT_COUNT; ++out_port) {
+        p_note_entry->out[out_port].channel_group = INVALID_CHANNEL_GROUP;
+        p_note_entry->out[out_port].channel       = INVALID_CHANNEL;
+        p_note_entry->out[out_port].program       = INVALID_PROGRAM;
+        p_note_entry->out[out_port].note          = INVALID_NOTE;
+    }
 }
 
 /*
@@ -109,11 +117,7 @@ static note_entry_t* clear_note_entry(note_entry_id_t note_entry_id) {
 
     note_entry_t* p_note_entry = &note_entries[note_entry_id];
 
-    clear_note_route(&p_note_entry->in);
-
-    for (midi_out_port_t out_port = MIDI_OUT_PORT_1; out_port < MIDI_OUT_PORT_COUNT; ++out_port) {
-        clear_note_route(&p_note_entry->out[out_port]);
-    }
+    clear_note_routes(p_note_entry);
 
     p_note_entry->prev = INVALID_NOTE_ENTRY_ID;
     p_note_entry->next = INVALID_NOTE_ENTRY_ID;

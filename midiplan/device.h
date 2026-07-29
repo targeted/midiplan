@@ -5,6 +5,8 @@
 #include "config.h"
 #include "note_entries.h"
 
+EVAR_ASSERT(CHANNEL_GROUP_COUNT == 4, channel_group_count); // for melodic_channel_groups, assuming we have 4 channel groups, each index needs 2 bits, 128 programs need 256 bits = 8 32-bit words
+
 /*
  * This is an immutable read-only configuration structure
  * that contains all kinds of maps describing the device.
@@ -13,12 +15,12 @@ typedef struct {
 
     char* model_name;              // NULL-terminated printable ASCII "Manufacturer Model"
 
-    /* the following affect the viability of a note being played */
+    /* the following describe the capabilities of the device */
 
-    uint8_t max_melodic_notes;     // how many notes can be playing on all melodic programs at the same time, including percussion if max_percussion_notes = 0
-    uint8_t max_percussion_notes;  // how many notes can be playing on the percussion program at the same time, if 0 then percussion notes are accounted as melodic
-    uint8_t max_melodic_programs;  // how many melodic programs can be playing at the same time, including percussion program if max_percussion_notes = 0
-    uint8_t max_notes_per_program; // how many notes can be played at the same time for any given melodic program, including percussion if max_percussion_notes = 0
+    uint8_t max_notes_per_channel_group[CHANNEL_GROUP_COUNT]; // how many notes can be playing on all melodic programs at each channel group at the same time
+    uint8_t max_percussion_notes;                             // how many notes can be playing on the percussion program at the same time, if 0 then percussion notes are accounted as melodic on channel group 3
+    uint8_t max_melodic_programs;                             // how many melodic programs can be playing at the same time, including percussion program if max_percussion_notes = 0
+    uint8_t max_notes_per_program;                            // how many notes can be played at the same time for any given melodic program, including percussion if max_percussion_notes = 0
 
     /* the following affect the channel association process */
 
@@ -71,14 +73,14 @@ typedef struct {
 
     /* after a GM program/note has been translated into a device-specific program/note, the following are expressed in device terms */
 
-    uint32_t melodic_channels_bitmaps_refs[128 / 16];    // two bits per device program, as 0-3 index into the following array
-    midi_channels_bitmap_t melodic_channels_bitmaps[4];  // of bitmaps of channels on which such program can be accepted
+    uint32_t melodic_channel_groups[8];                                 // assuming CHANNEL_GROUP_COUNT == 4, two bits per device program, as 0-3 index into the following array
+    midi_channel_bitmap_t melodic_channel_bitmaps[CHANNEL_GROUP_COUNT]; // of bitmaps of channels on which such program can be accepted
 
-    midi_channels_bitmap_t percussion_channels_bitmap;   // the bitmap of channels on which percussion notes can be accepted
+    midi_channel_bitmap_t percussion_channel_bitmap; // the single bitmap of channels on which percussion notes can be accepted
 
     /* controllers mapping */
 
-    uint32_t controllers_bitmap[128 / 32];               // one bit per controller number, set to 1 if supported by the device
+    uint32_t controllers_bitmap[128 / 32]; // one bit per controller number, set to 1 if supported by the device
 
     /* pointers to optional variable-sized arrays of messages, used instead of the standard MIDI sequences */
 
@@ -134,7 +136,8 @@ bool translate_note_to_device(
     program_t* p_out_program,
     note_t* p_out_note,
     data_byte_t* p_out_velocity,
-    midi_channels_bitmap_t* p_out_channels_bitmap
+    channel_group_t* p_out_channel_group,
+    midi_channel_bitmap_t* p_out_channel_bitmap
 );
 
 /*
@@ -191,10 +194,10 @@ const uint8_t* get_device_custom_sequence(
  */
 typedef struct {
 
-    uint8_t melodic_programs_playing;           // how many different *output* programs are currently playing on all channels
-    uint8_t melodic_notes_per_program[128 + 1]; // how many notes are playing on that *output* program (128 melodic plus 1 for percussion *when it uses a melodic timbre*)
-    uint8_t melodic_notes_playing;              // how many notes are currently playing on all *output* melodic programs together (sum of melodic_notes_per_program)
-    uint8_t percussion_notes_playing;           // how many notes are currently playing on the percussion program *when it uses a percussion timbre*
+    uint8_t melodic_programs_playing;                     // how many different *output* programs are currently playing on all channels
+    uint8_t notes_per_program[128 + 1];                   // how many notes are playing on that *output* program (128 melodic plus 1 for percussion *when it uses a melodic timbre*)
+    uint8_t notes_per_channel_group[CHANNEL_GROUP_COUNT]; // how many notes are currently playing on all channels from each group (sum of melodic_notes_per_program == sum of melodic_notes_per_channel_group)
+    uint8_t percussion_notes_playing;                     // how many notes are currently playing on the percussion program *when it uses a percussion timbre*
 
     struct {
         uint8_t notes_playing;                  // how many notes (on any program) are playing on this channel, including percussion

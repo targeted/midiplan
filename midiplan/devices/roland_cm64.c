@@ -19,18 +19,18 @@
 
 const midiplan_device_t roland_cm64 = {
 
-    .model_name              = "Roland CM-64",
+    .model_name = "Roland CM-64",
 
-    .max_melodic_notes       = 24,
-    .max_percussion_notes    = 0,
-    .max_melodic_programs    = 16,
-    .max_notes_per_program   = 6,
-    .monotimbral_channels    = 1,
-    .max_notes_per_channel   = { 0 },
+    .max_notes_per_channel_group = { 16, 0, 0, 10 },
+    .max_percussion_notes        = 0,
+    .max_melodic_programs        = 16,
+    .max_notes_per_program       = 6,
+    .monotimbral_channels        = 1,
+    .max_notes_per_channel       = { 0 },
 
-    .key_pressure            = 0,
-    .channel_pressure        = 0,
-    .pitch_bend              = 1,
+    .key_pressure     = 0,
+    .channel_pressure = 0,
+    .pitch_bend       = 1,
 
     .melodic_programs = {
         /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  CM */ {  .program = GM_PROGRAM_ACOUSTIC_GRAND_PIANO,   .flags = ROLAND_CM32P_RANGE_DEFAULT       },
@@ -315,26 +315,26 @@ const midiplan_device_t roland_cm64 = {
 
     /* the following is expressed in device's terms */
 
-    .melodic_channels_bitmaps_refs = {
-        //--||--||--||--||--||--||--||--||
-        0b11000000000000000000111111111111, //  15/0Fh -   0/00h
-        0b00000011110011110000001100001111, //  31/1Fh -  16/10h
-        0b00000011000000000011111111111111, //  47/2Fh -  32/20h
-        0b00001100111111111100111100001111, //  63/3Fh -  48/30h
-        0b00000000000000000000001111111111, //  79/4Fh -  64/40h
-        0b00000000000000000000000000000000, //  95/5Fh -  80/50h
-        0b00000000000000000000000000000000, // 111/6Fh -  96/60h
-        0b00000000000000000000000000000000  // 127/7Fh - 112/70h
+    .melodic_channel_groups = {
+        //_F_E_D_C_B_A_9_8_7_6_5_4_3_2_1_0
+        0b00111111111111111111000000000000, // 0_
+        0b11111100001100001111110011110000, // 1_
+        0b11111100111111111100000000000000, // 2_
+        0b11110011000000000011000011110000, // 3_
+        0b11111111111111111111110000000000, // 4_
+        0b11111111111111111111111111111111, // 5_
+        0b11111111111111111111111111111111, // 6_
+        0b11111111111111111111111111111111  // 7_
     },
 
-    .melodic_channels_bitmaps = {
-        0b0000000011111111, // 00 MT-32 channels
+    .melodic_channel_bitmaps = {
+        0b1111110000000000, // 00 CM-32P channels
         0b0000000000000000, // 01
         0b0000000000000000, // 10
-        0b1111110000000000  // 11 CM-32P channels
+        0b0000000011111111  // 11 MT-32 channels
     },
 
-    .percussion_channels_bitmap = 0b0000001000000000,
+    .percussion_channel_bitmap = 0b0000001000000000,
 
     .controllers_bitmap = {
 

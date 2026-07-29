@@ -17,18 +17,18 @@
 
 const midiplan_device_t korg_pss60 = {
 
-    .model_name              = "Korg PSS60",
+    .model_name = "Korg PSS60",
 
-    .max_melodic_notes       = 8,
-    .max_percussion_notes    = 8,
-    .max_melodic_programs    = 2,
-    .max_notes_per_program   = 4,
-    .monotimbral_channels    = 1,
-    .max_notes_per_channel   = { 0 },
+    .max_notes_per_channel_group = { 0, 8, 8, 0 },
+    .max_percussion_notes        = 8,
+    .max_melodic_programs        = 2,
+    .max_notes_per_program       = 4,
+    .monotimbral_channels        = 1,
+    .max_notes_per_channel       = { 0 },
 
-    .key_pressure            = 1,
-    .channel_pressure        = 1,
-    .pitch_bend              = 1,
+    .key_pressure     = 1,
+    .channel_pressure = 1,
+    .pitch_bend       = 1,
 
     .melodic_programs = {
         /* 0x00   1  GM_PROGRAM_ACOUSTIC_GRAND_PIANO  */ {  .program = KORG_PSS60_PROGRAM_PIANO1,    .flags = KORG_PSS60_RANGE_DEFAULT               },
@@ -313,26 +313,26 @@ const midiplan_device_t korg_pss60 = {
 
     /* the following is expressed in device's terms */
 
-    .melodic_channels_bitmaps_refs = {
-        //--||--||--||--||--||--||--||--||
-        0b01010101010101010101010101010101, //  15/0Fh -   0/00h
-        0b01010101010101010101010101010101, //  31/1Fh -  16/10h
-        0b01010101010101010101010101010101, //  47/2Fh -  32/20h
-        0b01010101010101010101010101010101, //  63/3Fh -  48/30h
-        0b10101010101010101010101010101010, //  79/4Fh -  64/40h
-        0b10101010101010101010101010101010, //  95/5Fh -  80/50h
-        0b10101010101010101010101010101010, // 111/6Fh -  96/60h
-        0b10101010101010101010101010101010  // 127/7Fh - 112/70h
+    .melodic_channel_groups = {
+        //_F_E_D_C_B_A_9_8_7_6_5_4_3_2_1_0
+        0b01010101010101010101010101010101, // 0_
+        0b01010101010101010101010101010101, // 1_
+        0b01010101010101010101010101010101, // 2_
+        0b01010101010101010101010101010101, // 3_
+        0b10101010101010101010101010101010, // 4_
+        0b10101010101010101010101010101010, // 5_
+        0b10101010101010101010101010101010, // 6_
+        0b10101010101010101010101010101010  // 7_
     },
 
-    .melodic_channels_bitmaps = {
+    .melodic_channel_bitmaps = {
         0b0000000000000000, // 00
         0b0000000000000001, // 01 // bass channel
         0b0000000000000010, // 10 // accompaniment channel
         0b0000000000000000  // 11
     },
 
-    .percussion_channels_bitmap = 0b0000001000000000,
+    .percussion_channel_bitmap = 0b0000001000000000,
 
     .controllers_bitmap = {
 

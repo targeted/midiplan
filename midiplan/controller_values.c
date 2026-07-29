@@ -42,7 +42,7 @@ typedef struct {
 static cv_list_element_t cv_table[MAX_CONTROLLER_VALUES];
 
 /*
- * These arrays contain the indexes of the first and the last elements of per-channel lists.
+ * These arrays contain the indexes of the first and the last elements of per channel lists.
  */
 static cv_index_t cv_heads[MIDI_CHANNEL_COUNT];
 static cv_index_t cv_tails[MIDI_CHANNEL_COUNT];

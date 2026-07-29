@@ -16,14 +16,21 @@ EVAR_ASSERT(INVALID_NOTE_ENTRY_ID >= MAX_NOTE_ENTRIES, invalid_note_entry_id_1);
 EVAR_ASSERT(!VALID_NOTE_ENTRY_ID(INVALID_NOTE_ENTRY_ID), invalid_note_entry_id_2);
 
 typedef struct {
-    channel_t channel;
-    program_t program;
-    note_t    note;
-} note_route_t;
+    channel_t        channel;
+    program_t        program;
+    note_t           note;
+} note_in_route_t;
 
 typedef struct {
-    note_route_t     in;
-    note_route_t     out[MIDI_OUT_PORT_COUNT];
+    channel_group_t  channel_group;
+    channel_t        channel;
+    program_t        program;
+    note_t           note;
+} note_out_route_t;
+
+typedef struct {
+    note_in_route_t  in;
+    note_out_route_t out[MIDI_OUT_PORT_COUNT];
     evar_timestamp_t timestamp;
     note_entry_id_t  prev;
     note_entry_id_t  next;

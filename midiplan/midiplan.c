@@ -440,7 +440,7 @@ static void account_note_off(
 ) {
 
     evar_assert(VALID_NOTE_ENTRY_ID(note_entry_id));
-    note_route_t* p_out_route = &note_entries[note_entry_id].out[out_port];
+    note_out_route_t* p_out_route = &note_entries[note_entry_id].out[out_port];
 
     channel_t out_channel = p_out_route->channel;
     evar_assert(VALID_CHANNEL(out_channel));
@@ -451,24 +451,28 @@ static void account_note_off(
     note_t out_note = p_out_route->note;
     evar_assert((out_note >= MIDI_LOWEST_NOTE) && (out_note <= MIDI_HIGHEST_NOTE));
 
+    channel_t out_channel_group = p_out_route->channel_group;
+
     const midiplan_device_t* p_device = devices[out_port].p_device;
     midiplan_device_state_t* p_device_state = &devices[out_port].state;
 
-    // percussion notes are accounted as melodic if max_percussion_notes == 0
-    // and we are still having a percussion output program here
+    // if max_percussion_notes == 0, percussion notes are accounted as melodic
+    // on channel group 3 and we are still having a percussion output program here
 
     if (USES_MELODIC_TIMBRE(p_device, out_program)) {
 
-        // total note counter is decremented
+        evar_assert(VALID_CHANNEL_GROUP(out_channel_group));
 
-        evar_assert(p_device_state->melodic_notes_playing > 0);
-        p_device_state->melodic_notes_playing -= 1;
+        // per channel group note counter is decremented
+
+        evar_assert(p_device_state->notes_per_channel_group[out_channel_group] > 0);
+        p_device_state->notes_per_channel_group[out_channel_group] -= 1;
 
         // per program note counter is decremented
 
-        uint8_t program_note_count = p_device_state->melodic_notes_per_program[out_program];
+        uint8_t program_note_count = p_device_state->notes_per_program[out_program];
         evar_assert(program_note_count > 0);
-        p_device_state->melodic_notes_per_program[out_program] = --program_note_count;
+        p_device_state->notes_per_program[out_program] = --program_note_count;
 
         if (program_note_count == 0) {
             evar_assert(p_device_state->melodic_programs_playing > 0);
@@ -478,14 +482,15 @@ static void account_note_off(
     else {
 
         evar_assert(USES_PERCUSSION_TIMBRE(p_device, out_program));
+        evar_assert(!VALID_CHANNEL_GROUP(out_channel_group));
 
-        // total note counter is decremented
+        // percussion note counter is decremented
 
         evar_assert(p_device_state->percussion_notes_playing > 0);
         p_device_state->percussion_notes_playing -= 1;
     }
 
-    // per-channel statistics is updated
+    // per channel statistics is updated
 
     evar_assert(p_device_state->channels[out_channel].notes_playing > 0);
     p_device_state->channels[out_channel].notes_playing -= 1;
@@ -509,7 +514,7 @@ static void account_note_on(
 ) {
 
     evar_assert(VALID_NOTE_ENTRY_ID(note_entry_id));
-    note_route_t* p_out_route = &note_entries[note_entry_id].out[out_port];
+    note_out_route_t* p_out_route = &note_entries[note_entry_id].out[out_port];
 
     channel_t out_channel = p_out_route->channel;
     evar_assert(VALID_CHANNEL(out_channel));
@@ -520,24 +525,28 @@ static void account_note_on(
     note_t out_note = p_out_route->note;
     evar_assert((out_note >= MIDI_LOWEST_NOTE) && (out_note <= MIDI_HIGHEST_NOTE));
 
+    channel_t out_channel_group = p_out_route->channel_group;
+
     const midiplan_device_t* p_device = devices[out_port].p_device;
     midiplan_device_state_t* p_device_state = &devices[out_port].state;
 
-    // percussion notes are accounted as melodic if max_percussion_notes == 0
-    // and we are still having a percussion output program here
+    // if max_percussion_notes == 0, percussion notes are accounted as melodic
+    // on channel group 3 and we are still having a percussion output program here
 
     if (USES_MELODIC_TIMBRE(p_device, out_program)) {
 
-        // total note counter is incremented
+        // per channel group note counter is incremented
 
-        evar_assert(p_device_state->melodic_notes_playing < p_device->max_melodic_notes);
-        p_device_state->melodic_notes_playing += 1;
+        evar_assert(VALID_CHANNEL_GROUP(out_channel_group));
+
+        evar_assert(p_device_state->notes_per_channel_group[out_channel_group] < p_device->max_notes_per_channel_group[out_channel_group]);
+        p_device_state->notes_per_channel_group[out_channel_group] += 1;
 
         // per program note counter is incremented
 
-        uint8_t program_note_count = p_device_state->melodic_notes_per_program[out_program];
+        uint8_t program_note_count = p_device_state->notes_per_program[out_program];
         evar_assert(program_note_count < p_device->max_notes_per_program);
-        p_device_state->melodic_notes_per_program[out_program] = ++program_note_count;
+        p_device_state->notes_per_program[out_program] = ++program_note_count;
 
         // if this is the first note on that program, the program counter is incremented,
         // except when it is a percussion note and percussion is a separate resource
@@ -550,8 +559,9 @@ static void account_note_on(
     else {
 
         evar_assert(USES_PERCUSSION_TIMBRE(p_device, out_program));
+        evar_assert(!VALID_CHANNEL_GROUP(out_channel_group));
 
-        // total note counter is incremented
+        // percussion note counter is incremented
 
         evar_assert(p_device_state->percussion_notes_playing < p_device->max_percussion_notes);
         p_device_state->percussion_notes_playing += 1;
@@ -561,11 +571,10 @@ static void account_note_on(
 
     p_device_state->all_notes_off = false;
 
-    // per-channel statistics is updated
+    // per channel statistics is updated
 
     p_device_state->channels[out_channel].notes_playing += 1;
     p_device_state->channels[out_channel].last_note_entry_id = note_entry_id;
-
 }
 
 /*
@@ -588,7 +597,7 @@ static void out_note_off(
 
     // erase the note reference from the output side of the entry
 
-    note_route_t* p_out_route = &p_note_entry->out[out_port];
+    note_out_route_t* p_out_route = &p_note_entry->out[out_port];
 
     channel_t out_channel = p_out_route->channel;
     evar_assert(VALID_CHANNEL(out_channel));
@@ -602,6 +611,8 @@ static void out_note_off(
     evar_assert((out_note >= MIDI_LOWEST_NOTE) && (out_note <= MIDI_HIGHEST_NOTE));
     uint8_t out_note_index = out_note - MIDI_LOWEST_NOTE;
     p_out_route->note = INVALID_NOTE;
+
+    p_out_route->channel_group = INVALID_CHANNEL_GROUP;
 
     output_channel_t* p_output_channel = &output_channels[out_port][out_channel];
     evar_assert(p_output_channel->note_entry_lookup[out_note_index] == note_entry_id);
@@ -625,6 +636,7 @@ static void out_note_off(
 typedef struct {
     midiplan_context_t* p_midiplan_context;
     midi_out_port_t     out_port;
+    channel_group_t     out_channel_group;
     program_t           out_program;
     bool                polyphony_exceeded;
     bool                notes_per_program_exceeded;
@@ -649,7 +661,7 @@ static void evict_note_callback(
     // we only consider notes that are playing on this device at all
 
     midi_out_port_t out_port = p_evict_note_context->out_port;
-    note_route_t* p_out_route = &p_note_entry->out[out_port];
+    note_out_route_t* p_out_route = &p_note_entry->out[out_port];
 
     if (!VALID_CHANNEL(p_out_route->channel)) {
         return; // iteration continues, this note is not even playing on this device
@@ -657,6 +669,8 @@ static void evict_note_callback(
 
     program_t out_program = p_out_route->program; // this is the *current* program on which a note is playing
     evar_assert(VALID_PROGRAM(out_program));
+
+    channel_group_t out_channel_group = p_out_route->channel_group; // this is the *current* channel group to which the channel belongs
 
     // for the next node to be considered as a candidate for replacement,
     // it must be old enough and also older than the current best candidate
@@ -688,7 +702,7 @@ static void evict_note_callback(
         evar_assert(USES_MELODIC_TIMBRE(p_device, p_evict_note_context->out_program));
 
         if (USES_MELODIC_TIMBRE(p_device, out_program)) {
-            if (p_device_state->melodic_notes_per_program[out_program] == 1) {
+            if (p_device_state->notes_per_program[out_program] == 1) {
                 p_evict_note_context->candidate_note_entry_id = note_entry_id;
                 p_evict_note_context->candidate_note_age = candidate_note_age;
             }
@@ -707,11 +721,19 @@ static void evict_note_callback(
     }
     else if (p_evict_note_context->polyphony_exceeded) {
 
-        // this could be remedied by evicting any compatible note
+        // this could be remedied by evicting any compatible note, percussions against percussions,
+        // and melodic/percussions when playing at the same channel group
 
         if (
-            (USES_MELODIC_TIMBRE(p_device, p_evict_note_context->out_program) && USES_MELODIC_TIMBRE(p_device, out_program)) ||
-            (USES_PERCUSSION_TIMBRE(p_device, p_evict_note_context->out_program) && USES_PERCUSSION_TIMBRE(p_device, out_program))
+            (
+                USES_MELODIC_TIMBRE(p_device, p_evict_note_context->out_program) &&
+                USES_MELODIC_TIMBRE(p_device, out_program) &&
+                (p_evict_note_context->out_channel_group == out_channel_group)
+            ) ||
+            (
+                USES_PERCUSSION_TIMBRE(p_device, p_evict_note_context->out_program) &&
+                USES_PERCUSSION_TIMBRE(p_device, out_program)
+            )
         ) {
             p_evict_note_context->candidate_note_entry_id = note_entry_id;
             p_evict_note_context->candidate_note_age = candidate_note_age;
@@ -731,6 +753,7 @@ static void evict_note_callback(
 static bool note_can_be_accepted(
     midiplan_context_t* p_midiplan_context,
     midi_out_port_t out_port,
+    channel_group_t out_channel_group,
     program_t out_program
 ) {
 
@@ -745,14 +768,17 @@ static bool note_can_be_accepted(
 
     if (USES_MELODIC_TIMBRE(p_device, out_program)) {
 
-        polyphony_exceeded         = (p_device_state->melodic_notes_playing == p_device->max_melodic_notes);
-        uint8_t program_note_count = p_device_state->melodic_notes_per_program[out_program];
+        evar_assert(VALID_CHANNEL_GROUP(out_channel_group));
+
+        polyphony_exceeded = (p_device_state->notes_per_channel_group[out_channel_group] == p_device->max_notes_per_channel_group[out_channel_group]);
+        uint8_t program_note_count = p_device_state->notes_per_program[out_program];
         notes_per_program_exceeded = (program_note_count == p_device->max_notes_per_program);
         multitimbrality_exceeded   = (program_note_count == 0) && (p_device_state->melodic_programs_playing == p_device->max_melodic_programs);
     }
     else {
 
         evar_assert(USES_PERCUSSION_TIMBRE(p_device, out_program));
+        evar_assert(!VALID_CHANNEL_GROUP(out_channel_group));
 
         polyphony_exceeded         = (p_device_state->percussion_notes_playing == p_device->max_percussion_notes);
         notes_per_program_exceeded = (p_device_state->percussion_notes_playing == p_device->max_percussion_notes);
@@ -767,6 +793,7 @@ static bool note_can_be_accepted(
         evict_note_context_t evict_note_context = {
             .p_midiplan_context         = p_midiplan_context,
             .out_port                   = out_port,
+            .out_channel_group          = out_channel_group,
             .out_program                = out_program,
             .polyphony_exceeded         = polyphony_exceeded,
             .notes_per_program_exceeded = notes_per_program_exceeded,
@@ -793,6 +820,14 @@ static bool note_can_be_accepted(
             (USES_MELODIC_TIMBRE(p_device, evicted_program) && USES_MELODIC_TIMBRE(p_device, out_program)) ||
             (USES_PERCUSSION_TIMBRE(p_device, evicted_program) && USES_PERCUSSION_TIMBRE(p_device, out_program))
         );
+
+        channel_group_t evicted_channel_group = note_entries[evicted_note_entry_id].out[out_port].channel_group;
+        if (USES_MELODIC_TIMBRE(p_device, out_program)) {
+            evar_assert(out_channel_group == evicted_channel_group);
+        }
+        else {
+            evar_assert(!VALID_CHANNEL_GROUP(evicted_channel_group));
+        }
 
         // this is the output note we decided to evict, we turn it off, but the note entry still remains
 
@@ -1185,14 +1220,14 @@ static void associate_channels(
  * Selects one channel from the set. The choice does not have to be truly random,
  * important is only that it changes every time. Returns the selected channel.
  */
-static midi_channel_t select_random_channel(midi_channels_bitmap_t channels_bitmap) {
+static midi_channel_t select_random_channel(midi_channel_bitmap_t channel_bitmap) {
 
-    static midi_channel_t last_channel = MIDI_CHANNEL_1;
+    static midi_channel_t last_channel = MIDI_CHANNEL_1; // this static will keep the round-robin bit index
     midi_channel_t selected_channel = INVALID_CHANNEL;
 
     for (uint8_t i = 0; i < MIDI_CHANNEL_COUNT; ++i) {
 
-        if ((channels_bitmap & (1 << last_channel)) != 0) {
+        if ((channel_bitmap & (1 << last_channel)) != 0) {
             selected_channel = last_channel;
         }
 
@@ -1221,13 +1256,13 @@ static channel_t associate_out_channel(
     midi_channel_t in_channel,
     program_t in_program,
     midi_out_port_t out_port,
-    midi_channels_bitmap_t out_channels_bitmap,
+    midi_channel_bitmap_t out_channel_bitmap,
     program_t out_program,
     note_t out_note
 ) {
 
     evar_assert(VALID_PROGRAM(in_program));
-    evar_assert(out_channels_bitmap != 0);
+    evar_assert(out_channel_bitmap != 0);
     evar_assert(VALID_PROGRAM(out_program));
 
     evar_assert((out_note >= MIDI_LOWEST_NOTE) && (out_note <= MIDI_HIGHEST_NOTE));
@@ -1276,15 +1311,15 @@ static channel_t associate_out_channel(
     // cycle through all and pick one output channel
 
     channel_t exclusive_out_channel         = INVALID_CHANNEL;    // an output channel that was only ever associated with this input channel
-    midi_channels_bitmap_t in_channel_mask  = (1 << in_channel);
+    midi_channel_bitmap_t in_channel_mask  = (1 << in_channel);
 
     channel_t pristine_out_channel          = INVALID_CHANNEL;    // an output channel which was never associated with any input channel
 
-    midi_channels_bitmap_t same_program_without_note = 0;         // multiple channels on which the required program is currently selected and the required note is not playing
+    midi_channel_bitmap_t same_program_without_note = 0;         // multiple channels on which the required program is currently selected and the required note is not playing
     channel_t same_program_with_note        = INVALID_CHANNEL;    // an output channel on which the required program is currently selected and the required note is playing
     uint8_t same_program_note_age           = 0;                  // if the same note is playing, then how old it is
 
-    midi_channels_bitmap_t diff_program_without_note = 0;         // multiple channels on which a different program is currently selected and the required note is not playing
+    midi_channel_bitmap_t diff_program_without_note = 0;         // multiple channels on which a different program is currently selected and the required note is not playing
     channel_t diff_program_with_note        = INVALID_CHANNEL;    // an output channel on which a different program is currently selected and the required note is playing
     uint8_t diff_program_note_age           = 0;                  // if the same note is playing, then how old it is
 
@@ -1293,9 +1328,9 @@ static channel_t associate_out_channel(
     for (uint8_t i = 0; i < MIDI_CHANNEL_COUNT; ++i) {            // this loop will go through all the channels looking for the best match, starting from
                                                                   // the same channel as the input, this helps keeping channel numbers the same if possible
         channel_t out_channel = (in_channel + i) % MIDI_CHANNEL_COUNT;
-        midi_channels_bitmap_t out_channel_mask = (1 << out_channel);
+        midi_channel_bitmap_t out_channel_mask = (1 << out_channel);
 
-        if ((out_channels_bitmap & out_channel_mask) == 0) { // choose only from the allowed channels
+        if ((out_channel_bitmap & out_channel_mask) == 0) { // choose only from the allowed channels
             continue;
         }
 
@@ -1600,7 +1635,8 @@ static void handle_note_on(
         program_t out_program;
         note_t out_note;
         data_byte_t out_velocity;
-        midi_channels_bitmap_t out_channels_bitmap;
+        channel_group_t out_channel_group;
+        midi_channel_bitmap_t out_channel_bitmap;
 
         if (!translate_note_to_device(
             devices[out_port].p_device,
@@ -1610,7 +1646,8 @@ static void handle_note_on(
             &out_program,
             &out_note,
             &out_velocity,
-            &out_channels_bitmap
+            &out_channel_group,
+            &out_channel_bitmap
         )) {
             // the device does not support such note, the note is propagated to the next device
             continue;
@@ -1621,7 +1658,7 @@ static void handle_note_on(
             VALID_NOTE(out_note) &&
             VALID_DATA_BYTE(out_velocity) &&
             (out_velocity > 0) &&
-            (out_channels_bitmap != 0)
+            (out_channel_bitmap != 0)
         );
 
         // now we know that the device is capable of playing this note,
@@ -1643,7 +1680,7 @@ static void handle_note_on(
 
         // check that the device still has capacity to play another note on this program
 
-        if (!note_can_be_accepted(p_midiplan_context, out_port, out_program)) {
+        if (!note_can_be_accepted(p_midiplan_context, out_port, out_channel_group, out_program)) {
             // the device has exceeded its limits and will not be able to play this note without hiccup
             if (consume_note) {
                 break;
@@ -1660,7 +1697,7 @@ static void handle_note_on(
             in_channel,
             in_program,
             out_port,
-            out_channels_bitmap,
+            out_channel_bitmap,
             out_program,
             out_note
         );
@@ -1691,11 +1728,12 @@ static void handle_note_on(
 
         // the translated output route will be kept to avoid having to translate it again
 
-        note_route_t* p_out_route = &p_note_entry->out[out_port];
+        note_out_route_t* p_out_route = &p_note_entry->out[out_port];
 
-        p_out_route->channel = out_channel;
-        p_out_route->program = out_program;
-        p_out_route->note    = out_note;
+        p_out_route->channel_group = out_channel_group;
+        p_out_route->channel       = out_channel;
+        p_out_route->program       = out_program;
+        p_out_route->note          = out_note;
 
         // put the new note reference to the lookup index for the output channel
 
@@ -1790,7 +1828,7 @@ static void handle_all_sound_off(
     midi_channel_t in_channel
 ) {
 
-    midi_channels_bitmap_t in_channel_mask = (1 << in_channel);
+    midi_channel_bitmap_t in_channel_mask = (1 << in_channel);
 
     // iterate over every channel on every output port
 
@@ -1831,7 +1869,7 @@ static void handle_reset_all_controllers(
     midi_channel_t in_channel
 ) {
 
-    midi_channels_bitmap_t in_channel_mask = (1 << in_channel);
+    midi_channel_bitmap_t in_channel_mask = (1 << in_channel);
 
     // iterate over every channel on every output port
 
@@ -1956,7 +1994,9 @@ static void handle_all_notes_off(
 
             midiplan_device_state_t* p_device_state = &devices[out_port].state;
 
-            evar_assert(p_device_state->melodic_notes_playing == 0);
+            for (channel_group_t channel_group = 0; channel_group < CHANNEL_GROUP_COUNT; ++channel_group) {
+                evar_assert(p_device_state->notes_per_channel_group[channel_group] == 0);
+            }
             evar_assert(p_device_state->percussion_notes_playing == 0);
 
             // we only want to send synchronization sequence to each device once, because it causes an audible beep
@@ -2124,7 +2164,7 @@ static void handle_channel_pressure(
     data_byte_t pressure
 ) {
 
-    // update the current state of per-program controllers
+    // update the current state of per program controllers
 
     input_channel_t* p_input_channel = &input_channels[in_channel];
 
@@ -2156,7 +2196,7 @@ static void handle_pitch_bend(
     data_byte_t pitch_bend_msb
 ) {
 
-    // update the current state of per-program controllers
+    // update the current state of per program controllers
 
     input_channel_t* p_input_channel = &input_channels[in_channel];
 

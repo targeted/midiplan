@@ -49,7 +49,8 @@ bool translate_note_to_device(
     program_t* p_out_program,
     note_t* p_out_note,
     data_byte_t* p_out_velocity,
-    midi_channels_bitmap_t* p_out_channels_bitmap
+    channel_group_t* p_out_channel_group,
+    midi_channel_bitmap_t* p_out_channel_bitmap
 ) {
 
     evar_assert(VALID_PROGRAM(in_program));
@@ -59,7 +60,6 @@ bool translate_note_to_device(
     program_t out_program = INVALID_PROGRAM;
     note_t out_note = INVALID_NOTE;
     data_byte_t out_velocity = INVALID_DATA_BYTE;
-    midi_channels_bitmap_t out_channels_bitmap = 0;
 
     if (IS_MELODIC_PROGRAM(in_program)) {
 
@@ -199,27 +199,32 @@ bool translate_note_to_device(
 
     // also return the set of channels on which this output note could be played
 
+    channel_group_t out_channel_group;
+    midi_channel_bitmap_t out_channel_bitmap;
+
     if (IS_PERCUSSION_PROGRAM(out_program)) {
-        out_channels_bitmap = p_device->percussion_channels_bitmap;
+        out_channel_group = USES_MELODIC_TIMBRE(p_device, out_program) ? PERCUSSION_CHANNEL_GROUP : INVALID_CHANNEL_GROUP;
+        out_channel_bitmap = p_device->percussion_channel_bitmap;
     }
     else {
-        uint8_t melodic_channels_bitmap_index = (p_device->melodic_channels_bitmaps_refs[out_program >> 4] >> ((out_program & 0x0f) << 1)) & 0x03;
-        out_channels_bitmap = p_device->melodic_channels_bitmaps[melodic_channels_bitmap_index];
+        out_channel_group = (p_device->melodic_channel_groups[out_program >> 4] >> ((out_program & 0x0f) << 1)) & 0x03;
+        out_channel_bitmap = p_device->melodic_channel_bitmaps[out_channel_group];
     }
 
-    if (out_channels_bitmap == 0) {
+    if (out_channel_bitmap == 0) {
         return false;
     }
 
     evar_assert(VALID_PROGRAM(out_program));
     evar_assert(VALID_NOTE(out_note));
     evar_assert(VALID_DATA_BYTE(out_velocity) && (out_velocity > 0));
-    evar_assert(out_channels_bitmap != 0);
+    evar_assert(out_channel_bitmap != 0);
 
     *p_out_program = out_program;
     *p_out_note = out_note;
     *p_out_velocity = out_velocity;
-    *p_out_channels_bitmap = out_channels_bitmap;
+    *p_out_channel_group = out_channel_group;
+    *p_out_channel_bitmap = out_channel_bitmap;
 
     return true;
 }
@@ -320,10 +325,12 @@ void initialize_device_state(
 ) {
 
     p_device_state->melodic_programs_playing = 0;
-    p_device_state->melodic_notes_playing = 0;
+    for (channel_group_t channel_group = 0; channel_group < CHANNEL_GROUP_COUNT; ++channel_group) {
+        p_device_state->notes_per_channel_group[channel_group] = 0;
+    }
 
     for (uint8_t i = 0; i < 128 + 1; ++i) {
-        p_device_state->melodic_notes_per_program[i] = 0;
+        p_device_state->notes_per_program[i] = 0;
     }
 
     p_device_state->percussion_notes_playing = 0;
@@ -334,5 +341,4 @@ void initialize_device_state(
     }
 
     p_device_state->all_notes_off = false; // no notes are playing but not because of a received "all notes off"
-
 }
