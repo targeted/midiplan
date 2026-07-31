@@ -690,8 +690,28 @@ static void evict_note_callback(
     const midiplan_device_t* p_device = devices[out_port].p_device;
     midiplan_device_state_t* p_device_state = &devices[out_port].state;
 
-    // notice that if we evict any note, exceeded polyphony, even it was happening, would also be solved
+    // the note to evict must belong to the same channel group
 
+    if (
+        USES_MELODIC_TIMBRE(p_device, p_evict_note_context->out_program) &&
+        USES_MELODIC_TIMBRE(p_device, out_program) &&
+        (p_evict_note_context->out_channel_group != out_channel_group)
+    ) {
+        return; // iteration continues, this note is not on the same channel group
+    }
+    
+    // notice that "notes per program exceeded" and "multitimbrality exceeded" are mutually exclusive,
+    // but "polyphony exceeded" can appear by itself, but also alongside any of the first two, and then
+    // if we evict a note to fix the "notes per program exceeded" or "multitimbrality exceeded", the 
+    // "polyphony exceeded" will also be fixed automatically
+
+    if (p_evict_note_context->multitimbrality_exceeded) {
+        evar_assert(!p_evict_note_context->notes_per_program_exceeded);
+    }
+    else if (p_evict_note_context->notes_per_program_exceeded) {
+        evar_assert(!p_evict_note_context->multitimbrality_exceeded);
+    }
+    
     if (p_evict_note_context->multitimbrality_exceeded) {
 
         // this could be remedied if the evicted note is the only one playing on some other program
