@@ -2453,7 +2453,7 @@ const midiplan_device_t roland_cm64 = {
 
     .synchronization_sequence = (uint8_t[]) {
 
-        MIDI_MESSAGE_DELAY, 0x0B, 0x5C, /* 1500 ms */
+        MIDI_MESSAGE_DELAY, 0x07, 0x68, /* 1000 ms */
 
         0xC0, 0x50, /* square lead */
 

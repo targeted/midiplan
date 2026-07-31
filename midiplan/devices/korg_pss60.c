@@ -489,6 +489,32 @@ const midiplan_device_t korg_pss60 = {
 
         INVALID_STATUS_BYTE,
 
+    },
+
+    .synchronization_sequence = (uint8_t[]) {
+
+        MIDI_MESSAGE_DELAY, 0x07, 0x68, /* 1000 ms */
+
+        0xC0, KORG_PSS60_PROGRAM_SYNTH9, /* square lead */
+
+        0x90, 0x3C, 0x7F,
+        MIDI_MESSAGE_DELAY, 0x00, 0x7D, /* 125 ms */
+        0x80, 0x3C, 0x00,
+
+        MIDI_MESSAGE_DELAY, 0x00, 0x28, /* 40 ms */
+
+        0x90, 0x3C, 0x7F,
+        MIDI_MESSAGE_DELAY, 0x00, 0x7D, /* 125 ms */
+        0x80, 0x3C, 0x00,
+
+        MIDI_MESSAGE_DELAY, 0x00, 0x28, /* 40 ms */
+
+        0x90, 0x3C, 0x7F,
+        MIDI_MESSAGE_DELAY, 0x00, 0x7D, /* 125 ms */
+        0x80, 0x3C, 0x00,
+
+        INVALID_STATUS_BYTE,
+
     }
 
 };
